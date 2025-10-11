@@ -121,20 +121,6 @@ const generateMockMenus = () => {
       createTime: "2023-01-01T00:00:00.000Z",
       updateTime: new Date().toISOString(),
     },
-    {
-      id: "7",
-      name: "Iframe查看器",
-      i18nKey: "menu.iframeViewer",
-      type: "page" as const,
-      path: "/iframe-demo",
-      component: "IframeDemo",
-      icon: "LinkOutlined",
-      sortOrder: 4,
-      status: "active" as const,
-      children: [],
-      createTime: "2023-01-01T00:00:00.000Z",
-      updateTime: new Date().toISOString(),
-    },
   ];
 };
 

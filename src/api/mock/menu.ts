@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { delay, createSuccessResponse, createErrorResponse } from "./utils";
+import i18n from "@/i18n";
 
 // 生成模拟菜单数据
 const generateMockMenus = () => {

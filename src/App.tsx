@@ -80,7 +80,9 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  const [mockServiceReady, setMockServiceReady] = useState(!import.meta.env.DEV);
+  // 如果不启用 Mock，则默认 ready；启用时等待初始化完成
+  const shouldUseMock = import.meta.env.VITE_USE_MOCK === 'true';
+  const [mockServiceReady, setMockServiceReady] = useState(!shouldUseMock);
   const [settingsInitialized, setSettingsInitialized] = useState(false);
 
   useEffect(() => {
@@ -91,15 +93,19 @@ const App: React.FC = () => {
     // 在开发环境下将store添加到window对象，便于调试和测试
     if (import.meta.env.DEV) {
       (window as any).__REDUX_STORE__ = store;
+    }
 
-      // 启动Mock服务并等待完成
-      startMockService().then(() => {
-        console.log('✅ Mock service initialized successfully');
-        setMockServiceReady(true);
-      }).catch((error) => {
-        console.error('❌ Failed to initialize mock service:', error);
-        setMockServiceReady(true); // 即使失败也继续，避免无限加载
-      });
+    // 根据环境变量决定是否启动 Mock
+    if (shouldUseMock) {
+      startMockService()
+        .then(() => {
+          console.log('✅ Mock service initialized successfully');
+          setMockServiceReady(true);
+        })
+        .catch((error) => {
+          console.error('❌ Failed to initialize mock service:', error);
+          setMockServiceReady(true); // 即使失败也继续，避免无限加载
+        });
     }
   }, []);
 

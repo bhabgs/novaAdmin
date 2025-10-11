@@ -20,12 +20,14 @@ export const worker = setupWorker(...handlers);
 // 启动 Mock 服务
 export const startMockService = async () => {
   const useMock = import.meta.env.VITE_USE_MOCK;
-  if (import.meta.env.DEV && useMock === 'true') {
+  // 仅由环境变量控制是否启用 Mock（支持生产演示）
+  if (useMock === 'true') {
     try {
       await worker.start({
         onUnhandledRequest: 'bypass',
         serviceWorker: {
-          url: '/mockServiceWorker.js',
+          // 使用 BASE_URL 作为前缀，兼容子目录部署（vite.config.ts base: './'）
+          url: `${import.meta.env.BASE_URL}mockServiceWorker.js`,
         },
       });
       console.log('🚀 Mock Service Worker started');

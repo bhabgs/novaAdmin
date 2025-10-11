@@ -29,6 +29,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      github-markdown-css:
+        specifier: ^5.8.1
+        version: 5.8.1
       highlight.js:
         specifier: ^11.11.1
         version: 11.11.1
@@ -1785,6 +1788,10 @@ packages:
   get-proto@1.0.1:
     resolution: {integrity: sha512-sTSfBjoXBp89JvIKIefqw7U2CCebsc74kiY6awiGogKtoSGbgjYE/G/+l9sF3MWFPNc9IcoOC4ODfKHfxFmp0g==}
     engines: {node: '>= 0.4'}
+
+  github-markdown-css@5.8.1:
+    resolution: {integrity: sha512-8G+PFvqigBQSWLQjyzgpa2ThD9bo7+kDsriUIidGcRhXgmcaAWUIpCZf8DavJgc+xifjbCG+GvMyWr0XMXmc7g==}
+    engines: {node: '>=10'}
 
   gl-matrix@3.4.4:
     resolution: {integrity: sha512-latSnyDNt/8zYUB6VIJ6PCh2jBjJX6gnDsoCZ7LyW7GkqrD51EWwa9qCoGixj8YqBtETQK/xY7OmpTF8xz1DdQ==}
@@ -5247,6 +5254,8 @@ snapshots:
     dependencies:
       dunder-proto: 1.0.1
       es-object-atoms: 1.1.1
+
+  github-markdown-css@5.8.1: {}
 
   gl-matrix@3.4.4: {}
 

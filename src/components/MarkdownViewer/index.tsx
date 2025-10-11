@@ -5,6 +5,8 @@ import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
 import { Spin, message } from 'antd';
 import 'highlight.js/styles/github.css';
+// 引入 GitHub Markdown 的基础排版样式，使渲染效果更接近 GitHub
+import 'github-markdown-css/github-markdown.css';
 import './index.module.less';
 
 interface MarkdownViewerProps {
@@ -50,7 +52,8 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ url, content, className
   }
 
   return (
-    <div className={`markdown-viewer ${className || ''}`}>
+    // 新增 markdown-body 类以启用 github-markdown-css 的样式
+    <div className={`markdown-viewer markdown-body ${className || ''}`}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight, rehypeRaw]}

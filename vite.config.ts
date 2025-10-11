@@ -4,8 +4,10 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: "./",
   build: {
     sourcemap: "hidden",
+    outDir: "nova-admin",
   },
   plugins: [
     react({
@@ -26,8 +28,8 @@ export default defineConfig({
     },
     modules: {
       // CSS模块配置
-      localsConvention: 'camelCase',
-      generateScopedName: '[name]__[local]___[hash:base64:5]',
+      localsConvention: "camelCase",
+      generateScopedName: "[name]__[local]___[hash:base64:5]",
     },
   },
 });

@@ -1,0 +1,178 @@
+/* RTL (Right-to-Left) 样式支持 */
+
+/* 当文档方向为 RTL 时应用这些样式 */
+[dir='rtl'] {
+  /* 文本对齐 */
+  text-align: right;
+}
+
+/* 修复 Tailwind 的一些 RTL 问题 */
+[dir='rtl'] .space-x-2 > :not([hidden]) ~ :not([hidden]),
+[dir='rtl'] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  margin-left: 0;
+  margin-right: var(--tw-space-x-reverse);
+}
+
+/* 修复 flex 布局在 RTL 下的问题 */
+[dir='rtl'] .flex-row {
+  flex-direction: row-reverse;
+}
+
+/* 修复图标和文本间距 */
+[dir='rtl'] .anticon + span,
+[dir='rtl'] span + .anticon {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+/* 修复按钮图标间距 */
+[dir='rtl'] .ant-btn .anticon {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+[dir='rtl'] .ant-btn .anticon + span {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+/* 修复面包屑分隔符 */
+[dir='rtl'] .ant-breadcrumb-separator {
+  transform: scaleX(-1);
+}
+
+/* 修复下拉菜单箭头 */
+[dir='rtl'] .ant-dropdown-menu-submenu-arrow {
+  transform: scaleX(-1);
+}
+
+/* 修复侧边栏折叠按钮 */
+[dir='rtl'] .ant-layout-sider-trigger {
+  left: 0;
+  right: auto;
+}
+
+/* 修复表格排序图标 */
+[dir='rtl'] .ant-table-column-sorter {
+  margin-left: 0;
+  margin-right: 4px;
+}
+
+/* 修复输入框清除按钮 */
+[dir='rtl'] .ant-input-clear-icon {
+  left: 11px;
+  right: auto;
+}
+
+/* 修复选择器清除按钮 */
+[dir='rtl'] .ant-select-clear {
+  left: 11px;
+  right: auto;
+}
+
+/* 修复日期选择器图标 */
+[dir='rtl'] .ant-picker-suffix {
+  margin-left: 0;
+  margin-right: 4px;
+}
+
+/* 修复表单标签对齐 */
+[dir='rtl'] .ant-form-item-label {
+  text-align: right;
+}
+
+/* 修复抽屉关闭按钮位置 */
+[dir='rtl'] .ant-drawer-close {
+  left: 0;
+  right: auto;
+}
+
+/* 修复模态框关闭按钮位置 */
+[dir='rtl'] .ant-modal-close {
+  left: 0;
+  right: auto;
+}
+
+/* 修复通知位置 */
+[dir='rtl'] .ant-notification-topRight {
+  left: 24px;
+  right: auto;
+}
+
+[dir='rtl'] .ant-notification-bottomRight {
+  left: 24px;
+  right: auto;
+}
+
+/* 修复消息位置 */
+[dir='rtl'] .ant-message {
+  left: 0;
+  right: auto;
+}
+
+/* 修复分页器 */
+[dir='rtl'] .ant-pagination-item,
+[dir='rtl'] .ant-pagination-prev,
+[dir='rtl'] .ant-pagination-next {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+/* 修复卡片标题和操作按钮 */
+[dir='rtl'] .ant-card-extra {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* 修复标签页 */
+[dir='rtl'] .ant-tabs-tab + .ant-tabs-tab {
+  margin-left: 0;
+  margin-right: 32px;
+}
+
+/* 修复步骤条 */
+[dir='rtl'] .ant-steps-item-icon {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+/* 修复时间轴 */
+[dir='rtl'] .ant-timeline-item-left .ant-timeline-item-content {
+  margin-right: 18px;
+  margin-left: 0;
+}
+
+/* 修复徽章 */
+[dir='rtl'] .ant-badge-count {
+  left: auto;
+  right: 0;
+  transform: translate(50%, -50%);
+}
+
+/* 修复头像组 */
+[dir='rtl'] .ant-avatar-group .ant-avatar {
+  margin-left: 0;
+  margin-right: -8px;
+}
+
+/* 修复描述列表 */
+[dir='rtl'] .ant-descriptions-item-label {
+  text-align: right;
+}
+
+/* 修复统计卡片 */
+[dir='rtl'] .ant-statistic-title {
+  text-align: right;
+}
+
+/* 修复树形控件缩进 */
+[dir='rtl'] .ant-tree-indent-unit {
+  margin-left: 0;
+  margin-right: 24px;
+}
+
+/* 修复树形控件展开图标 */
+[dir='rtl'] .ant-tree-switcher {
+  margin-left: 0;
+  margin-right: 8px;
+}

@@ -39,6 +39,7 @@
   },
   "menu": {
     "dashboard": "仪表盘",
+    "templateIntroduction": "模板介绍",
     "userManagement": "用户管理",
     "roleManagement": "角色管理",
     "menuManagement": "菜单管理",

@@ -39,6 +39,7 @@
   },
   "menu": {
     "dashboard": "Dashboard",
+    "templateIntroduction": "Template Introduction",
     "userManagement": "User Management",
     "roleManagement": "Role Management",
     "menuManagement": "Menu Management",

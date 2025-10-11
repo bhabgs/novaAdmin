@@ -6,6 +6,21 @@ import i18n from "@/i18n";
 const generateMockMenus = () => {
   return [
     {
+      id: "0",
+      name: "模板介绍",
+      i18nKey: "menu.templateIntroduction",
+      type: "page" as const,
+      path: "/template-introduction",
+      component: "TemplateIntroduction",
+      icon: "DashboardOutlined",
+      sortOrder: 1,
+      status: "active" as const,
+      parentId: undefined,
+      children: [],
+      createTime: "2023-01-01T00:00:00.000Z",
+      updateTime: new Date().toISOString(),
+    },
+    {
       id: "1",
       name: "Dashboard",
       i18nKey: "menu.dashboard",

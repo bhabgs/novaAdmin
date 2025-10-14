@@ -1,242 +1,163 @@
 import React from 'react';
-import { Button, Tooltip, Divider, Space } from 'antd';
 import {
-  MousePointer,
   Square,
   Circle,
   Minus,
   Type,
-  Image,
+  MousePointer,
   Move,
+  Undo,
+  Redo,
   ZoomIn,
   ZoomOut,
-  RotateCcw,
-  RotateCw,
-  Copy,
-  Trash2,
+  Maximize,
+  Save,
   Download,
-  Upload,
-  Eye,
-  EyeOff
+  Play,
+  Pause,
 } from 'lucide-react';
-import { ToolType } from '../types';
-import styles from './Toolbar.module.less';
+import type { ToolType } from '../types';
+import styles from '../index.module.less';
 
-interface ToolbarProps {
+export interface ToolbarProps {
   currentTool: ToolType;
   onToolChange: (tool: ToolType) => void;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onResetZoom: () => void;
-  onCopy: () => void;
-  onDelete: () => void;
-  onExport: () => void;
-  onImport: () => void;
-  onToggleGrid: () => void;
-  gridVisible: boolean;
-  zoom: number;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onFitScreen: () => void;
+  onSave?: () => void;
+  onExport?: () => void;
+  isPlaying: boolean;
+  onTogglePlay: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
   currentTool,
   onToolChange,
-  onZoomIn,
-  onZoomOut,
-  onResetZoom,
-  onCopy,
-  onDelete,
-  onExport,
-  onImport,
-  onToggleGrid,
-  gridVisible,
-  zoom,
   canUndo,
   canRedo,
   onUndo,
-  onRedo
+  onRedo,
+  onZoomIn,
+  onZoomOut,
+  onFitScreen,
+  onSave,
+  onExport,
+  isPlaying,
+  onTogglePlay,
 }) => {
   const tools = [
-    {
-      type: ToolType.SELECT,
-      icon: <MousePointer size={16} />,
-      label: '选择',
-      shortcut: 'V'
-    },
-    {
-      type: ToolType.RECTANGLE,
-      icon: <Square size={16} />,
-      label: '矩形',
-      shortcut: 'R'
-    },
-    {
-      type: ToolType.CIRCLE,
-      icon: <Circle size={16} />,
-      label: '圆形',
-      shortcut: 'C'
-    },
-    {
-      type: ToolType.LINE,
-      icon: <Minus size={16} />,
-      label: '直线',
-      shortcut: 'L'
-    },
-    {
-      type: ToolType.TEXT,
-      icon: <Type size={16} />,
-      label: '文本',
-      shortcut: 'T'
-    },
-    {
-      type: ToolType.IMAGE,
-      icon: <Image size={16} />,
-      label: '图片',
-      shortcut: 'I'
-    },
-    {
-      type: ToolType.PAN,
-      icon: <Move size={16} />,
-      label: '平移',
-      shortcut: 'H'
-    }
+    { type: 'select' as ToolType, icon: MousePointer, tooltip: '选择工具' },
+    { type: 'move' as ToolType, icon: Move, tooltip: '移动工具' },
+    { type: 'rectangle' as ToolType, icon: Square, tooltip: '矩形工具' },
+    { type: 'circle' as ToolType, icon: Circle, tooltip: '圆形工具' },
+    { type: 'line' as ToolType, icon: Minus, tooltip: '线条工具' },
+    { type: 'text' as ToolType, icon: Type, tooltip: '文本工具' },
   ];
 
   return (
-    <div className={styles.toolbar}>
+    <div className={styles['pixi-editor-toolbar']}>
       {/* 工具组 */}
-      <div className={styles.toolGroup}>
-        <div className={styles.groupTitle}>工具</div>
-        <Space wrap>
-          {tools.map(tool => (
-            <Tooltip 
-              key={tool.type} 
-              title={`${tool.label} (${tool.shortcut})`}
-              placement="bottom"
+      <div className={styles['pixi-editor-toolbar-group']}>
+        {tools.map(tool => {
+          const Icon = tool.icon;
+          return (
+            <button
+              key={tool.type}
+              className={`${styles['pixi-editor-toolbar-button']} ${
+                currentTool === tool.type ? styles.active : ''
+              }`}
+              onClick={() => onToolChange(tool.type)}
+              title={tool.tooltip}
             >
-              <Button
-                type={currentTool === tool.type ? 'primary' : 'default'}
-                icon={tool.icon}
-                size="small"
-                onClick={() => onToolChange(tool.type)}
-                className={styles.toolButton}
-              />
-            </Tooltip>
-          ))}
-        </Space>
+              <Icon size={16} />
+            </button>
+          );
+        })}
       </div>
 
-      <Divider type="vertical" />
-
-      {/* 编辑操作组 */}
-      <div className={styles.toolGroup}>
-        <div className={styles.groupTitle}>编辑</div>
-        <Space>
-          <Tooltip title="撤销 (Ctrl+Z)">
-            <Button
-              icon={<RotateCcw size={16} />}
-              size="small"
-              disabled={!canUndo}
-              onClick={onUndo}
-              className={styles.toolButton}
-            />
-          </Tooltip>
-          <Tooltip title="重做 (Ctrl+Y)">
-            <Button
-              icon={<RotateCw size={16} />}
-              size="small"
-              disabled={!canRedo}
-              onClick={onRedo}
-              className={styles.toolButton}
-            />
-          </Tooltip>
-          <Tooltip title="复制 (Ctrl+C)">
-            <Button
-              icon={<Copy size={16} />}
-              size="small"
-              onClick={onCopy}
-              className={styles.toolButton}
-            />
-          </Tooltip>
-          <Tooltip title="删除 (Delete)">
-            <Button
-              icon={<Trash2 size={16} />}
-              size="small"
-              onClick={onDelete}
-              className={styles.toolButton}
-            />
-          </Tooltip>
-        </Space>
+      {/* 操作组 */}
+      <div className={styles['pixi-editor-toolbar-group']}>
+        <button
+          className={styles['pixi-editor-toolbar-button']}
+          onClick={onUndo}
+          disabled={!canUndo}
+          title="撤销 (Ctrl+Z)"
+        >
+          <Undo size={16} />
+        </button>
+        <button
+          className={styles['pixi-editor-toolbar-button']}
+          onClick={onRedo}
+          disabled={!canRedo}
+          title="重做 (Ctrl+Y)"
+        >
+          <Redo size={16} />
+        </button>
       </div>
 
-      <Divider type="vertical" />
-
-      {/* 视图操作组 */}
-      <div className={styles.toolGroup}>
-        <div className={styles.groupTitle}>视图</div>
-        <Space>
-          <Tooltip title="放大 (+)">
-            <Button
-              icon={<ZoomIn size={16} />}
-              size="small"
-              onClick={onZoomIn}
-              className={styles.toolButton}
-            />
-          </Tooltip>
-          <Tooltip title="缩小 (-)">
-            <Button
-              icon={<ZoomOut size={16} />}
-              size="small"
-              onClick={onZoomOut}
-              className={styles.toolButton}
-            />
-          </Tooltip>
-          <Tooltip title="重置缩放 (Ctrl+0)">
-            <Button
-              size="small"
-              onClick={onResetZoom}
-              className={styles.zoomDisplay}
-            >
-              {Math.round(zoom * 100)}%
-            </Button>
-          </Tooltip>
-          <Tooltip title="切换网格 (Ctrl+G)">
-            <Button
-              type={gridVisible ? 'primary' : 'default'}
-              icon={gridVisible ? <Eye size={16} /> : <EyeOff size={16} />}
-              size="small"
-              onClick={onToggleGrid}
-              className={styles.toolButton}
-            />
-          </Tooltip>
-        </Space>
+      {/* 视图组 */}
+      <div className={styles['pixi-editor-toolbar-group']}>
+        <button
+          className={styles['pixi-editor-toolbar-button']}
+          onClick={onZoomIn}
+          title="放大"
+        >
+          <ZoomIn size={16} />
+        </button>
+        <button
+          className={styles['pixi-editor-toolbar-button']}
+          onClick={onZoomOut}
+          title="缩小"
+        >
+          <ZoomOut size={16} />
+        </button>
+        <button
+          className={styles['pixi-editor-toolbar-button']}
+          onClick={onFitScreen}
+          title="适应窗口"
+        >
+          <Maximize size={16} />
+        </button>
       </div>
 
-      <Divider type="vertical" />
+      {/* 动画组 */}
+      <div className={styles['pixi-editor-toolbar-group']}>
+        <button
+          className={styles['pixi-editor-toolbar-button']}
+          onClick={onTogglePlay}
+          title={isPlaying ? '暂停动画' : '播放动画'}
+        >
+          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+        </button>
+      </div>
+
+      <div style={{ flex: 1 }} />
 
       {/* 文件操作组 */}
-      <div className={styles.toolGroup}>
-        <div className={styles.groupTitle}>文件</div>
-        <Space>
-          <Tooltip title="导入">
-            <Button
-              icon={<Upload size={16} />}
-              size="small"
-              onClick={onImport}
-              className={styles.toolButton}
-            />
-          </Tooltip>
-          <Tooltip title="导出">
-            <Button
-              icon={<Download size={16} />}
-              size="small"
-              onClick={onExport}
-              className={styles.toolButton}
-            />
-          </Tooltip>
-        </Space>
+      <div className={styles['pixi-editor-toolbar-group']}>
+        {onSave && (
+          <button
+            className={styles['pixi-editor-toolbar-button']}
+            onClick={onSave}
+            title="保存"
+          >
+            <Save size={16} />
+          </button>
+        )}
+        {onExport && (
+          <button
+            className={styles['pixi-editor-toolbar-button']}
+            onClick={onExport}
+            title="导出"
+          >
+            <Download size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,64 +1,62 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { message } from 'antd';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { PixiEngine } from './core/PixiEngine';
+import { createGraphicObject } from './core/shapes';
 import Toolbar from './components/Toolbar';
 import LayerPanel from './components/LayerPanel';
 import PropertyPanel from './components/PropertyPanel';
-import { ToolType, ShapeObject, EditorState } from './types';
+import type {
+  ToolType,
+  IGraphicObject,
+  ObjectType,
+  RectangleProperties,
+  CircleProperties,
+  TextProperties,
+  ObjectProperties,
+} from './types';
 import styles from './index.module.less';
 
 const PixiEditor: React.FC = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<PixiEngine | null>(null);
-  
-  // 编辑器状态
-  const [editorState, setEditorState] = useState<EditorState>({
-    currentTool: ToolType.SELECT,
-    selectedObjects: [],
-    layers: [],
-    activeLayerId: '',
-    zoom: 1,
-    panX: 0,
-    panY: 0,
-    canvasWidth: 800,
-    canvasHeight: 600,
-    gridVisible: false,
-    snapToGrid: false,
-    gridSize: 20
-  });
 
-  const [selectedObjects, setSelectedObjects] = useState<ShapeObject[]>([]);
-  const [canUndo] = useState(false);
-  const [canRedo] = useState(false);
+  const [currentTool, setCurrentTool] = useState<ToolType>('select');
+  const [objects, setObjects] = useState<IGraphicObject[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  // 初始化编辑器
+  // 初始化引擎
   useEffect(() => {
-    const initEditor = async () => {
-      if (canvasRef.current && !engineRef.current) {
-        try {
-          const engine = new PixiEngine();
-          await engine.init(canvasRef.current);
-          engineRef.current = engine;
+    if (!canvasRef.current || engineRef.current) return;
 
-          // 创建默认图层
-          const defaultLayer = engine.addLayer('图层 1', 'group');
-          setEditorState(prev => ({
-            ...prev,
-            layers: [defaultLayer],
-            activeLayerId: defaultLayer.id
-          }));
+    const engine = new PixiEngine();
+    engineRef.current = engine;
 
-          message.success('PixiJS 编辑器初始化成功');
-        } catch (error) {
-          console.error('编辑器初始化失败:', error);
-          message.error('编辑器初始化失败');
-        }
-      }
-    };
+    engine.initialize(canvasRef.current, {
+      backgroundColor: 0x1e1e1e,
+    }).then(() => {
+      console.log('PixiEngine initialized');
 
-    initEditor();
+      // 监听事件
+      engine.on('*', event => {
+        console.log('Engine event:', event.type);
+      });
 
-    // 清理函数
+      engine.on('history:changed', event => {
+        setCanUndo(event.data.canUndo);
+        setCanRedo(event.data.canRedo);
+      });
+
+      engine.on('view:zoom', event => {
+        setZoom(event.data.zoom);
+      });
+
+      // 添加示例对象
+      addSampleObjects(engine);
+    });
+
     return () => {
       if (engineRef.current) {
         engineRef.current.destroy();
@@ -67,289 +65,320 @@ const PixiEditor: React.FC = () => {
     };
   }, []);
 
-  // 工具切换
-  const handleToolChange = useCallback((tool: ToolType) => {
-    if (engineRef.current) {
-      engineRef.current.setTool(tool);
-      setEditorState(prev => ({ ...prev, currentTool: tool }));
+  // 添加示例对象
+  const addSampleObjects = (engine: PixiEngine) => {
+    // 添加矩形
+    const rect: RectangleProperties = {
+      id: 'rect-1',
+      type: 'rectangle' as ObjectType,
+      name: '矩形 1',
+      position: { x: 200, y: 200 },
+      rotation: 0,
+      scale: { x: 1, y: 1 },
+      alpha: 1,
+      visible: true,
+      locked: false,
+      size: { width: 120, height: 80 },
+      fill: 0x4a90e2,
+      stroke: { color: 0x2c5aa0, width: 2, style: 'solid' as const },
+      cornerRadius: 8,
+      zIndex: 1,
+    };
+    const rectObj = createGraphicObject('rectangle', rect);
+    engine.addObject(rectObj);
+
+    // 添加圆形
+    const circle: CircleProperties = {
+      id: 'circle-1',
+      type: 'circle' as ObjectType,
+      name: '圆形 1',
+      position: { x: 400, y: 200 },
+      rotation: 0,
+      scale: { x: 1, y: 1 },
+      alpha: 1,
+      visible: true,
+      locked: false,
+      size: { width: 100, height: 100 },
+      fill: 0x50c878,
+      stroke: { color: 0x2d8659, width: 2, style: 'solid' as const },
+      radius: 50,
+      zIndex: 1,
+    };
+    const circleObj = createGraphicObject('circle', circle);
+    engine.addObject(circleObj);
+
+    // 添加文本
+    const text: TextProperties = {
+      id: 'text-1',
+      type: 'text' as ObjectType,
+      name: '文本 1',
+      position: { x: 300, y: 350 },
+      rotation: 0,
+      scale: { x: 1, y: 1 },
+      alpha: 1,
+      visible: true,
+      locked: false,
+      size: { width: 200, height: 50 },
+      fill: 0xffffff,
+      content: 'Hello PixiJS!',
+      fontSize: 24,
+      fontFamily: 'Arial',
+      fontWeight: 'bold',
+      textAlign: 'center',
+      zIndex: 2,
+    };
+    const textObj = createGraphicObject('text', text);
+    engine.addObject(textObj);
+
+    // 更新对象列表
+    setObjects([rectObj, circleObj, textObj]);
+  };
+
+  // 创建新对象
+  const createObject = useCallback((type: ObjectType) => {
+    if (!engineRef.current) return;
+
+    const id = `${type}-${Date.now()}`;
+    const baseProps = {
+      id,
+      type,
+      name: `${type} ${id.slice(-4)}`,
+      position: { x: 300, y: 300 },
+      rotation: 0,
+      scale: { x: 1, y: 1 },
+      alpha: 1,
+      visible: true,
+      locked: false,
+      zIndex: 1,
+    };
+
+    let obj: IGraphicObject;
+
+    switch (type) {
+      case 'rectangle': {
+        const props: RectangleProperties = {
+          ...baseProps,
+          type: 'rectangle',
+          size: { width: 100, height: 100 },
+          fill: 0x4a90e2,
+          stroke: { color: 0x2c5aa0, width: 2, style: 'solid' },
+          cornerRadius: 0,
+        };
+        obj = createGraphicObject('rectangle', props);
+        break;
+      }
+      case 'circle': {
+        const props: CircleProperties = {
+          ...baseProps,
+          type: 'circle',
+          size: { width: 80, height: 80 },
+          fill: 0x50c878,
+          stroke: { color: 0x2d8659, width: 2, style: 'solid' },
+          radius: 40,
+        };
+        obj = createGraphicObject('circle', props);
+        break;
+      }
+      case 'text': {
+        const props: TextProperties = {
+          ...baseProps,
+          type: 'text',
+          size: { width: 200, height: 50 },
+          fill: 0xffffff,
+          content: 'New Text',
+          fontSize: 16,
+          fontFamily: 'Arial',
+          fontWeight: 'normal',
+          textAlign: 'center',
+        };
+        obj = createGraphicObject('text', props);
+        break;
+      }
+      default:
+        return;
     }
+
+    engineRef.current.addObject(obj);
+    setObjects(prev => [...prev, obj]);
+    setSelectedIds(new Set([id]));
+  }, []);
+
+  // 处理工具切换
+  const handleToolChange = useCallback((tool: ToolType) => {
+    setCurrentTool(tool);
+
+    // 如果切换到绘图工具，创建对应的对象
+    switch (tool) {
+      case 'rectangle':
+        createObject('rectangle');
+        setCurrentTool('select');
+        break;
+      case 'circle':
+        createObject('circle');
+        setCurrentTool('select');
+        break;
+      case 'text':
+        createObject('text');
+        setCurrentTool('select');
+        break;
+    }
+  }, [createObject]);
+
+  // 选择对象
+  const handleSelect = useCallback((id: string, multi: boolean) => {
+    setSelectedIds(prev => {
+      if (multi) {
+        const newSet = new Set(prev);
+        if (newSet.has(id)) {
+          newSet.delete(id);
+        } else {
+          newSet.add(id);
+        }
+        return newSet;
+      }
+      return new Set([id]);
+    });
+  }, []);
+
+  // 切换可见性
+  const handleToggleVisible = useCallback((id: string) => {
+    if (!engineRef.current) return;
+    const obj = engineRef.current.getObject(id);
+    if (obj) {
+      obj.updateProperties({ visible: !obj.properties.visible });
+      setObjects(prev => [...prev]);
+    }
+  }, []);
+
+  // 切换锁定
+  const handleToggleLock = useCallback((id: string) => {
+    if (!engineRef.current) return;
+    const obj = engineRef.current.getObject(id);
+    if (obj) {
+      obj.updateProperties({ locked: !obj.properties.locked });
+      setObjects(prev => [...prev]);
+    }
+  }, []);
+
+  // 删除对象
+  const handleDelete = useCallback((id: string) => {
+    if (!engineRef.current) return;
+    engineRef.current.removeObject(id);
+    setObjects(prev => prev.filter(obj => obj.id !== id));
+    setSelectedIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(id);
+      return newSet;
+    });
+  }, []);
+
+  // 更新属性
+  const handleUpdateProperties = useCallback(
+    (id: string, props: Partial<ObjectProperties>) => {
+      if (!engineRef.current) return;
+      const obj = engineRef.current.getObject(id);
+      if (obj) {
+        obj.updateProperties(props);
+        setObjects(prev => [...prev]);
+      }
+    },
+    []
+  );
+
+  // 撤销/重做
+  const handleUndo = useCallback(() => {
+    engineRef.current?.undo();
+  }, []);
+
+  const handleRedo = useCallback(() => {
+    engineRef.current?.redo();
   }, []);
 
   // 缩放控制
   const handleZoomIn = useCallback(() => {
-    if (engineRef.current) {
-      const newZoom = Math.min(editorState.zoom * 1.2, 5);
-      engineRef.current.setZoom(newZoom);
-      setEditorState(prev => ({ ...prev, zoom: newZoom }));
-    }
-  }, [editorState.zoom]);
+    if (!engineRef.current) return;
+    const viewState = engineRef.current.getViewState();
+    engineRef.current.setZoom(viewState.zoom * 1.2);
+  }, []);
 
   const handleZoomOut = useCallback(() => {
-    if (engineRef.current) {
-      const newZoom = Math.max(editorState.zoom / 1.2, 0.1);
-      engineRef.current.setZoom(newZoom);
-      setEditorState(prev => ({ ...prev, zoom: newZoom }));
-    }
-  }, [editorState.zoom]);
-
-  const handleResetZoom = useCallback(() => {
-    if (engineRef.current) {
-      engineRef.current.setZoom(1);
-      setEditorState(prev => ({ ...prev, zoom: 1 }));
-    }
-  }, []);
-
-  // 图层管理
-  const handleLayerAdd = useCallback(() => {
-    if (engineRef.current) {
-      const newLayer = engineRef.current.addLayer(`图层 ${editorState.layers.length + 1}`, 'group');
-      setEditorState(prev => ({
-        ...prev,
-        layers: [...prev.layers, newLayer],
-        activeLayerId: newLayer.id
-      }));
-    }
-  }, [editorState.layers.length]);
-
-  const handleLayerSelect = useCallback((layerId: string) => {
-    setEditorState(prev => ({ ...prev, activeLayerId: layerId }));
-  }, []);
-
-  const handleLayerToggleVisible = useCallback((layerId: string) => {
-    if (engineRef.current) {
-      const layer = editorState.layers.find(l => l.id === layerId);
-      if (layer) {
-        const updatedLayer = { ...layer, visible: !layer.visible };
-        engineRef.current.updateLayer(layerId, { visible: updatedLayer.visible });
-        setEditorState(prev => ({
-          ...prev,
-          layers: prev.layers.map(l => l.id === layerId ? updatedLayer : l)
-        }));
-      }
-    }
-  }, [editorState.layers]);
-
-  const handleLayerToggleLocked = useCallback((layerId: string) => {
-    if (engineRef.current) {
-      const layer = editorState.layers.find(l => l.id === layerId);
-      if (layer) {
-        const updatedLayer = { ...layer, locked: !layer.locked };
-        engineRef.current.updateLayer(layerId, { locked: updatedLayer.locked });
-        setEditorState(prev => ({
-          ...prev,
-          layers: prev.layers.map(l => l.id === layerId ? updatedLayer : l)
-        }));
-      }
-    }
-  }, [editorState.layers]);
-
-  const handleLayerDelete = useCallback((layerId: string) => {
-    if (engineRef.current && editorState.layers.length > 1) {
-      engineRef.current.deleteLayer(layerId);
-      const remainingLayers = editorState.layers.filter(l => l.id !== layerId);
-      setEditorState(prev => ({
-        ...prev,
-        layers: remainingLayers,
-        activeLayerId: remainingLayers[0]?.id || ''
-      }));
-    }
-  }, [editorState.layers]);
-
-  const handleLayerMoveUp = useCallback((layerId: string) => {
-    const currentIndex = editorState.layers.findIndex(l => l.id === layerId);
-    if (currentIndex > 0) {
-      const newLayers = [...editorState.layers];
-      [newLayers[currentIndex], newLayers[currentIndex - 1]] = [newLayers[currentIndex - 1], newLayers[currentIndex]];
-      setEditorState(prev => ({ ...prev, layers: newLayers }));
-    }
-  }, [editorState.layers]);
-
-  const handleLayerMoveDown = useCallback((layerId: string) => {
-    const currentIndex = editorState.layers.findIndex(l => l.id === layerId);
-    if (currentIndex < editorState.layers.length - 1) {
-      const newLayers = [...editorState.layers];
-      [newLayers[currentIndex], newLayers[currentIndex + 1]] = [newLayers[currentIndex + 1], newLayers[currentIndex]];
-      setEditorState(prev => ({ ...prev, layers: newLayers }));
-    }
-  }, [editorState.layers]);
-
-  const handleLayerRename = useCallback((layerId: string, newName: string) => {
-    if (engineRef.current) {
-      engineRef.current.updateLayer(layerId, { name: newName });
-      setEditorState(prev => ({
-        ...prev,
-        layers: prev.layers.map(l => l.id === layerId ? { ...l, name: newName } : l)
-      }));
-    }
-  }, []);
-
-  const getLayerObjectCount = useCallback((layerId: string) => {
-    if (engineRef.current) {
-      // 从引擎中获取该图层的对象数量
-      const objects = Array.from(engineRef.current.objects.values());
-      return objects.filter(obj => obj.layerId === layerId).length;
-    }
-    return 0;
-  }, []);
-
-  // 画布点击事件处理
-  const handleCanvasClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     if (!engineRef.current) return;
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    // 只有在绘制工具时才创建对象
-    if ([ToolType.RECTANGLE, ToolType.CIRCLE, ToolType.LINE, ToolType.TEXT].includes(editorState.currentTool)) {
-      const newObject = engineRef.current.createObject(editorState.currentTool, x, y);
-      if (newObject) {
-        message.success(`已创建${getToolName(editorState.currentTool)}`);
-        // 自动切换到选择工具
-        handleToolChange(ToolType.SELECT);
-      }
-    }
-  }, [editorState.currentTool]);
-
-  // 获取工具名称
-  const getToolName = (tool: ToolType): string => {
-    switch (tool) {
-      case ToolType.RECTANGLE: return '矩形';
-      case ToolType.CIRCLE: return '圆形';
-      case ToolType.LINE: return '线条';
-      case ToolType.TEXT: return '文本';
-      default: return '对象';
-    }
-  };
-
-  // 获取画布样式类名
-  const getCanvasClassName = (): string => {
-    switch (editorState.currentTool) {
-      case ToolType.SELECT: return styles.selectTool;
-      case ToolType.PAN: return styles.panTool;
-      case ToolType.ZOOM: return styles.zoomTool;
-      case ToolType.RECTANGLE:
-      case ToolType.CIRCLE:
-      case ToolType.LINE:
-      case ToolType.TEXT:
-        return styles.drawTool;
-      default: return '';
-    }
-  };
-
-  // 属性面板
-  const handlePropertyChange = useCallback((objectId: string, property: string, value: string | number | boolean) => {
-    if (engineRef.current) {
-      engineRef.current.updateObject(objectId, { [property]: value });
-      // 更新选中对象状态
-      setSelectedObjects(prev => 
-        prev.map(obj => 
-          obj.id === objectId 
-            ? { ...obj, properties: { ...obj.properties, [property]: value } }
-            : obj
-        )
-      );
-    }
+    const viewState = engineRef.current.getViewState();
+    engineRef.current.setZoom(viewState.zoom / 1.2);
   }, []);
 
-  // 其他操作
-  const handleCopy = useCallback(() => {
-    message.info('复制功能开发中...');
+  const handleFitScreen = useCallback(() => {
+    engineRef.current?.fitToScreen();
   }, []);
 
-  const handleDelete = useCallback(() => {
-    if (engineRef.current && editorState.selectedObjects.length > 0) {
-      engineRef.current.deleteObjects(editorState.selectedObjects);
-      setEditorState(prev => ({ ...prev, selectedObjects: [] }));
-      setSelectedObjects([]);
-    }
-  }, [editorState.selectedObjects]);
-
-  const handleExport = useCallback(() => {
-    if (engineRef.current) {
-      try {
-        const dataUrl = engineRef.current.exportCanvas('png');
-        const link = document.createElement('a');
-        link.download = 'pixi-editor-export.png';
-        link.href = dataUrl;
-        link.click();
-        message.success('导出成功');
-      } catch (error) {
-        console.error('导出失败:', error);
-        message.error('导出失败');
-      }
-    }
+  // 动画控制
+  const handleTogglePlay = useCallback(() => {
+    setIsPlaying(prev => !prev);
   }, []);
 
-  const handleImport = useCallback(() => {
-    message.info('导入功能开发中...');
-  }, []);
-
-  const handleToggleGrid = useCallback(() => {
-    setEditorState(prev => ({ ...prev, gridVisible: !prev.gridVisible }));
-  }, []);
-
-  const handleUndo = useCallback(() => {
-    message.info('撤销功能开发中...');
-  }, []);
-
-  const handleRedo = useCallback(() => {
-    message.info('重做功能开发中...');
-  }, []);
+  // 获取选中的对象
+  const selectedObjects = objects.filter(obj => selectedIds.has(obj.id));
 
   return (
-    <div className={styles.pixiEditor}>
+    <div className={styles['pixi-editor']}>
       {/* 工具栏 */}
       <Toolbar
-        currentTool={editorState.currentTool}
+        currentTool={currentTool}
         onToolChange={handleToolChange}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onResetZoom={handleResetZoom}
-        onCopy={handleCopy}
-        onDelete={handleDelete}
-        onExport={handleExport}
-        onImport={handleImport}
-        onToggleGrid={handleToggleGrid}
-        gridVisible={editorState.gridVisible}
-        zoom={editorState.zoom}
         canUndo={canUndo}
         canRedo={canRedo}
         onUndo={handleUndo}
         onRedo={handleRedo}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onFitScreen={handleFitScreen}
+        isPlaying={isPlaying}
+        onTogglePlay={handleTogglePlay}
       />
 
-      {/* 主要内容区域 */}
-      <div className={styles.editorContent}>
-        {/* 画布区域 */}
-          <div className={styles.canvasArea}>
-            <div 
-              ref={canvasRef} 
-              className={`${styles.canvas} ${getCanvasClassName()}`} 
-              onClick={handleCanvasClick} 
-            />
-          </div>
-
+      {/* 内容区域 */}
+      <div className={styles['pixi-editor-content']}>
         {/* 图层面板 */}
         <LayerPanel
-          layers={editorState.layers}
-          selectedLayerId={editorState.activeLayerId}
-          onLayerSelect={handleLayerSelect}
-          onLayerToggleVisible={handleLayerToggleVisible}
-          onLayerToggleLocked={handleLayerToggleLocked}
-          onLayerAdd={handleLayerAdd}
-          onLayerDelete={handleLayerDelete}
-          onLayerMoveUp={handleLayerMoveUp}
-          onLayerMoveDown={handleLayerMoveDown}
-          onLayerRename={handleLayerRename}
-          getLayerObjectCount={getLayerObjectCount}
+          objects={objects}
+          selectedIds={selectedIds}
+          onSelect={handleSelect}
+          onToggleVisible={handleToggleVisible}
+          onToggleLock={handleToggleLock}
+          onDelete={handleDelete}
         />
+
+        {/* 画布 */}
+        <div className={styles['pixi-editor-canvas']} ref={canvasRef} />
 
         {/* 属性面板 */}
         <PropertyPanel
           selectedObjects={selectedObjects}
-          onPropertyChange={handlePropertyChange}
+          onUpdateProperties={handleUpdateProperties}
         />
+      </div>
+
+      {/* 状态栏 */}
+      <div className={styles['pixi-editor-status']}>
+        <div className={styles['pixi-editor-status-item']}>
+          <span className={styles['pixi-editor-status-item-label']}>缩放:</span>
+          <span className={styles['pixi-editor-status-item-value']}>
+            {Math.round(zoom * 100)}%
+          </span>
+        </div>
+        <div className={styles['pixi-editor-status-item']}>
+          <span className={styles['pixi-editor-status-item-label']}>对象:</span>
+          <span className={styles['pixi-editor-status-item-value']}>{objects.length}</span>
+        </div>
+        <div className={styles['pixi-editor-status-item']}>
+          <span className={styles['pixi-editor-status-item-label']}>选中:</span>
+          <span className={styles['pixi-editor-status-item-value']}>{selectedIds.size}</span>
+        </div>
+        <div className={styles['pixi-editor-status-spacer']} />
+        <div className={styles['pixi-editor-status-item']}>
+          <span className={styles['pixi-editor-status-item-label']}>工具:</span>
+          <span className={styles['pixi-editor-status-item-value']}>{currentTool}</span>
+        </div>
       </div>
     </div>
   );

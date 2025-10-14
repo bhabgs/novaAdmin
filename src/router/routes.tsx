@@ -35,6 +35,7 @@ import IframeView from "../pages/IframeView";
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
 import TemplateIntroduction from "@/pages/TemplateIntroduction";
+import { PixiEditor, RichTextEditor } from "@/pages/Utils";
 
 // 定义路由配置
 export const routes: RouteObject[] = [
@@ -108,10 +109,27 @@ export const routes: RouteObject[] = [
         path: "settings",
         element: <SystemSettings />,
       },
-      // Markdown 查看器路由
+
+      // 工具路由
       {
-        path: "markdown-viewer",
-        element: <MarkdownViewerPage />,
+        path: "util",
+        children: [
+          // 富文本编辑器路由
+          {
+            path: "richtext-editor",
+            element: <RichTextEditor />,
+          },
+          // pixi编辑器路由
+          {
+            path: "pixi-editor",
+            element: <PixiEditor />,
+          },
+          // Markdown 查看器路由
+          {
+            path: "markdown-viewer",
+            element: <MarkdownViewerPage />,
+          },
+        ],
       },
       // Iframe 查看器路由
       {

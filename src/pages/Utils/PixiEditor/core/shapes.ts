@@ -70,6 +70,33 @@ export class RectangleObject extends GraphicObject {
     if (stroke) {
       this.applyStroke(this.graphics);
     }
+
+    // 更新选中边框
+    this.updateSelectionBorder();
+  }
+
+  protected updateSelectionBorder(): void {
+    if (!this.selectionBorder) return;
+
+    this.selectionBorder.clear();
+
+    if (this.isSelected()) {
+      const { size, cornerRadius } = this.properties;
+      const halfWidth = size.width / 2;
+      const halfHeight = size.height / 2;
+      const padding = 4;
+
+      this.selectionBorder.rect(
+        -halfWidth - padding,
+        -halfHeight - padding,
+        size.width + padding * 2,
+        size.height + padding * 2
+      );
+      this.selectionBorder.stroke({ color: 0x007acc, width: 2 });
+      this.selectionBorder.visible = true;
+    } else {
+      this.selectionBorder.visible = false;
+    }
   }
 }
 
@@ -118,6 +145,26 @@ export class CircleObject extends GraphicObject {
     // 应用描边
     if (stroke) {
       this.applyStroke(this.graphics);
+    }
+
+    // 更新选中边框
+    this.updateSelectionBorder();
+  }
+
+  protected updateSelectionBorder(): void {
+    if (!this.selectionBorder) return;
+
+    this.selectionBorder.clear();
+
+    if (this.isSelected()) {
+      const { radius } = this.properties;
+      const padding = 4;
+
+      this.selectionBorder.circle(0, 0, radius + padding);
+      this.selectionBorder.stroke({ color: 0x007acc, width: 2 });
+      this.selectionBorder.visible = true;
+    } else {
+      this.selectionBorder.visible = false;
     }
   }
 }
@@ -176,6 +223,31 @@ export class TextObject extends GraphicObject {
     this.textObject.anchor.set(0.5);
 
     this.pixiObject.addChild(this.textObject);
+
+    // 更新选中边框
+    this.updateSelectionBorder();
+  }
+
+  protected updateSelectionBorder(): void {
+    if (!this.selectionBorder || !this.textObject) return;
+
+    this.selectionBorder.clear();
+
+    if (this.isSelected()) {
+      const bounds = this.textObject.getLocalBounds();
+      const padding = 4;
+
+      this.selectionBorder.rect(
+        bounds.x - padding,
+        bounds.y - padding,
+        bounds.width + padding * 2,
+        bounds.height + padding * 2
+      );
+      this.selectionBorder.stroke({ color: 0x007acc, width: 2 });
+      this.selectionBorder.visible = true;
+    } else {
+      this.selectionBorder.visible = false;
+    }
   }
 
   destroy(): void {
@@ -216,6 +288,30 @@ export class LineObject extends GraphicObject {
       this.applyStroke(this.graphics);
     } else {
       this.graphics.stroke({ color: 0x000000, width: 2 });
+    }
+
+    // 更新选中边框
+    this.updateSelectionBorder();
+  }
+
+  protected updateSelectionBorder(): void {
+    if (!this.selectionBorder) return;
+
+    this.selectionBorder.clear();
+
+    if (this.isSelected()) {
+      const padding = 4;
+
+      this.selectionBorder.moveTo(0, -padding);
+      this.selectionBorder.lineTo(this.endPoint.x, this.endPoint.y - padding);
+      this.selectionBorder.lineTo(this.endPoint.x, this.endPoint.y + padding);
+      this.selectionBorder.lineTo(0, padding);
+      this.selectionBorder.lineTo(0, -padding);
+
+      this.selectionBorder.stroke({ color: 0x007acc, width: 2 });
+      this.selectionBorder.visible = true;
+    } else {
+      this.selectionBorder.visible = false;
     }
   }
 }

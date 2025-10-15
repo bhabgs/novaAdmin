@@ -1,5 +1,6 @@
 import * as PIXI from 'pixi.js';
 import { HistoryActionType } from '../types';
+import { TransformControls } from './TransformControls';
 import type {
   EngineConfig,
   IGraphicObject,
@@ -27,6 +28,10 @@ export class PixiEngine {
   private objects: Map<string, IGraphicObject> = new Map();
   private pipes: Map<string, IPipe> = new Map();
   private connectionPoints: Map<string, IConnectionPoint> = new Map();
+
+  // 变换控制器
+  private transformControls: TransformControls | null = null;
+  private selectedObjects: Set<string> = new Set();
 
   // 视图状态
   private viewState: ViewState = {
@@ -121,6 +126,9 @@ export class PixiEngine {
     // 覆盖图层（用于选择框、控制点等）
     this.overlayLayer = new PIXI.Container();
     this.mainContainer.addChild(this.overlayLayer);
+
+    // 创建变换控制器
+    this.transformControls = new TransformControls(this.overlayLayer);
   }
 
   /**
@@ -218,6 +226,11 @@ export class PixiEngine {
    * 更新循环（每帧调用）
    */
   private update(): void {
+    // 更新变换控制器
+    if (this.transformControls) {
+      this.transformControls.update();
+    }
+
     // 这里可以添加动画更新逻辑
     // 例如：管道流动动画、粒子效果等
   }
@@ -316,6 +329,32 @@ export class PixiEngine {
    */
   getAllObjects(): IGraphicObject[] {
     return Array.from(this.objects.values());
+  }
+
+  /**
+   * 设置选中对象
+   */
+  setSelectedObjects(ids: Set<string>): void {
+    this.selectedObjects = ids;
+
+    // 更新变换控制器
+    if (this.transformControls) {
+      if (ids.size === 1) {
+        const id = Array.from(ids)[0];
+        const obj = this.objects.get(id);
+        this.transformControls.setTarget(obj || null);
+      } else {
+        // 多选或无选中时隐藏控制器
+        this.transformControls.setTarget(null);
+      }
+    }
+  }
+
+  /**
+   * 获取变换控制器
+   */
+  getTransformControls(): TransformControls | null {
+    return this.transformControls;
   }
 
   /**
@@ -599,6 +638,12 @@ export class PixiEngine {
 
     // 清空所有对象
     this.clear();
+
+    // 销毁变换控制器
+    if (this.transformControls) {
+      this.transformControls.destroy();
+      this.transformControls = null;
+    }
 
     // 销毁 PixiJS 应用
     if (this.app) {

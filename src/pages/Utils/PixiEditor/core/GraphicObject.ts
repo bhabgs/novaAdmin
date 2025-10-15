@@ -91,6 +91,8 @@ export abstract class GraphicObject implements IGraphicObject {
   connectionPoints: IConnectionPoint[] = [];
 
   protected graphics: PIXI.Graphics;
+  protected selectionBorder: PIXI.Graphics | null = null;
+  private _selected: boolean = false;
 
   constructor(properties: ObjectProperties) {
     this.id = properties.id;
@@ -108,6 +110,11 @@ export abstract class GraphicObject implements IGraphicObject {
     // 创建图形对象
     this.graphics = new PIXI.Graphics();
     this.pixiObject.addChild(this.graphics);
+
+    // 创建选中边框
+    this.selectionBorder = new PIXI.Graphics();
+    this.selectionBorder.visible = false;
+    this.pixiObject.addChild(this.selectionBorder);
 
     // 设置交互
     this.pixiObject.eventMode = 'static';
@@ -141,6 +148,26 @@ export abstract class GraphicObject implements IGraphicObject {
 
   abstract render(): void;
 
+  /**
+   * 设置选中状态
+   */
+  setSelected(selected: boolean): void {
+    this._selected = selected;
+    this.updateSelectionBorder();
+  }
+
+  /**
+   * 获取选中状态
+   */
+  isSelected(): boolean {
+    return this._selected;
+  }
+
+  /**
+   * 更新选中边框
+   */
+  protected abstract updateSelectionBorder(): void;
+
   addConnectionPoint(point: IConnectionPoint): void {
     this.connectionPoints.push(point);
   }
@@ -153,6 +180,9 @@ export abstract class GraphicObject implements IGraphicObject {
   }
 
   destroy(): void {
+    if (this.selectionBorder) {
+      this.selectionBorder.destroy();
+    }
     this.graphics.destroy();
     this.pixiObject.destroy({ children: true });
   }

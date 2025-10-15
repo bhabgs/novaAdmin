@@ -55,6 +55,9 @@ const PixiEditor: React.FC = () => {
 
       // 添加示例对象
       addSampleObjects(engine);
+
+      // 设置画布交互
+      setupCanvasInteraction(engine);
     });
 
     return () => {
@@ -134,6 +137,34 @@ const PixiEditor: React.FC = () => {
     setObjects([rectObj, circleObj, textObj]);
   };
 
+  // 设置画布交互
+  const setupCanvasInteraction = (engine: PixiEngine) => {
+    const allObjects = engine.getAllObjects();
+
+    allObjects.forEach(obj => {
+      // 点击对象选中
+      obj.pixiObject.on('pointerdown', (event: any) => {
+        event.stopPropagation();
+        const isMultiSelect = event.data.originalEvent.ctrlKey || event.data.originalEvent.metaKey;
+        handleSelect(obj.id, isMultiSelect);
+      });
+    });
+
+    // 点击画布取消选中
+    const app = engine.getApp();
+    if (app) {
+      app.stage.on('pointerdown', () => {
+        setSelectedIds(new Set());
+        // 更新所有对象的选中状态
+        allObjects.forEach(obj => {
+          obj.setSelected(false);
+        });
+        // 清除变换控制器
+        engine.setSelectedObjects(new Set());
+      });
+    }
+  };
+
   // 创建新对象
   const createObject = useCallback((type: ObjectType) => {
     if (!engineRef.current) return;
@@ -200,7 +231,25 @@ const PixiEditor: React.FC = () => {
 
     engineRef.current.addObject(obj);
     setObjects(prev => [...prev, obj]);
-    setSelectedIds(new Set([id]));
+
+    // 选中新创建的对象
+    const newSelectedIds = new Set([id]);
+    setSelectedIds(newSelectedIds);
+
+    // 更新所有对象的选中状态
+    engineRef.current.getAllObjects().forEach(o => {
+      o.setSelected(o.id === id);
+    });
+
+    // 更新变换控制器
+    engineRef.current.setSelectedObjects(newSelectedIds);
+
+    // 为新对象添加交互
+    obj.pixiObject.on('pointerdown', (event: any) => {
+      event.stopPropagation();
+      const isMultiSelect = event.data.originalEvent.ctrlKey || event.data.originalEvent.metaKey;
+      handleSelect(obj.id, isMultiSelect);
+    });
   }, []);
 
   // 处理工具切换
@@ -226,17 +275,31 @@ const PixiEditor: React.FC = () => {
 
   // 选择对象
   const handleSelect = useCallback((id: string, multi: boolean) => {
+    if (!engineRef.current) return;
+
     setSelectedIds(prev => {
+      let newSet: Set<string>;
       if (multi) {
-        const newSet = new Set(prev);
+        newSet = new Set(prev);
         if (newSet.has(id)) {
           newSet.delete(id);
         } else {
           newSet.add(id);
         }
-        return newSet;
+      } else {
+        newSet = new Set([id]);
       }
-      return new Set([id]);
+
+      // 更新所有对象的选中状态
+      const allObjects = engineRef.current!.getAllObjects();
+      allObjects.forEach(obj => {
+        obj.setSelected(newSet.has(obj.id));
+      });
+
+      // 更新变换控制器
+      engineRef.current!.setSelectedObjects(newSet);
+
+      return newSet;
     });
   }, []);
 
@@ -280,6 +343,12 @@ const PixiEditor: React.FC = () => {
       if (obj) {
         obj.updateProperties(props);
         setObjects(prev => [...prev]);
+
+        // 更新变换控制器
+        const transformControls = engineRef.current.getTransformControls();
+        if (transformControls) {
+          transformControls.update();
+        }
       }
     },
     []

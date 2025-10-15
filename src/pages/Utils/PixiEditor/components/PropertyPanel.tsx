@@ -1,11 +1,11 @@
-import React from 'react';
-import type { IGraphicObject, ObjectProperties, RectangleProperties } from '../types';
-import styles from '../index.module.less';
+/**
+ * 属性面板组件
+ */
 
-export interface PropertyPanelProps {
-  selectedObjects: IGraphicObject[];
-  onUpdateProperties: (id: string, props: Partial<ObjectProperties>) => void;
-}
+import React from 'react';
+import { Form, InputNumber, Select, ColorPicker, Slider, Switch, Divider } from 'antd';
+import { PropertyPanelProps, ObjectProperties } from '../types';
+import styles from './PropertyPanel.module.less';
 
 const PropertyPanel: React.FC<PropertyPanelProps> = ({
   selectedObjects,
@@ -13,242 +13,206 @@ const PropertyPanel: React.FC<PropertyPanelProps> = ({
 }) => {
   if (selectedObjects.length === 0) {
     return (
-      <div className={`${styles['pixi-editor-sidebar']} ${styles.right}`}>
-        <div className={styles['pixi-editor-sidebar-header']}>属性</div>
-        <div className={styles['pixi-editor-sidebar-content']}>
-          <div style={{ color: '#999', fontSize: 12, textAlign: 'center', padding: 16 }}>
-            未选择对象
-          </div>
-        </div>
+      <div className={styles.propertyPanel}>
+        <div className={styles.empty}>请选择一个对象</div>
       </div>
     );
   }
 
-  const obj = selectedObjects[0];
-  const props = obj.properties;
+  // 如果选择了多个对象
+  if (selectedObjects.length > 1) {
+    return (
+      <div className={styles.propertyPanel}>
+        <div className={styles.empty}>已选择 {selectedObjects.length} 个对象</div>
+      </div>
+    );
+  }
 
-  const handleChange = (key: string, value: any) => {
-    onUpdateProperties(obj.id, { [key]: value });
+  const object = selectedObjects[0];
+
+  const handleChange = (field: string, value: any) => {
+    onUpdateProperties(object.id, { [field]: value });
   };
 
-  const handlePositionChange = (axis: 'x' | 'y', value: number) => {
-    onUpdateProperties(obj.id, {
-      position: { ...props.position, [axis]: value },
-    });
-  };
-
-  const handleSizeChange = (dimension: 'width' | 'height', value: number) => {
-    onUpdateProperties(obj.id, {
-      size: { ...props.size, [dimension]: value },
+  const handleTransformChange = (field: string, value: any) => {
+    onUpdateProperties(object.id, {
+      transform: { ...object.transform, [field]: value },
     });
   };
 
   return (
-    <div className={`${styles['pixi-editor-sidebar']} ${styles.right}`}>
-      <div className={styles['pixi-editor-sidebar-header']}>属性</div>
-      <div className={styles['pixi-editor-sidebar-content']}>
-        {/* 基础信息 */}
-        <div className={styles['property-panel-section']}>
-          <div className={styles['property-panel-section-title']}>基础</div>
-          <div className={styles['property-panel-section-content']}>
-            <div className={styles['property-panel-field']}>
-              <label className={styles['property-panel-field-label']}>名称</label>
-              <input
-                type="text"
-                className={styles['property-panel-field-input']}
-                value={props.name || ''}
-                onChange={e => handleChange('name', e.target.value)}
-              />
-            </div>
-            <div className={styles['property-panel-field']}>
-              <label className={styles['property-panel-field-label']}>类型</label>
-              <input
-                type="text"
-                className={styles['property-panel-field-input']}
-                value={props.type}
-                disabled
-              />
-            </div>
-          </div>
-        </div>
+    <div className={styles.propertyPanel}>
+      <div className={styles.header}>
+        <h3>属性</h3>
+      </div>
 
-        {/* 位置 */}
-        <div className={styles['property-panel-section']}>
-          <div className={styles['property-panel-section-title']}>位置</div>
-          <div className={styles['property-panel-section-content']}>
-            <div className={styles['property-panel-field-row']}>
-              <div className={styles['property-panel-field']}>
-                <label className={styles['property-panel-field-label']}>X</label>
-                <input
-                  type="number"
-                  className={styles['property-panel-field-input']}
-                  value={Math.round(props.position.x)}
-                  onChange={e => handlePositionChange('x', parseFloat(e.target.value) || 0)}
-                />
-              </div>
-              <div className={styles['property-panel-field']}>
-                <label className={styles['property-panel-field-label']}>Y</label>
-                <input
-                  type="number"
-                  className={styles['property-panel-field-input']}
-                  value={Math.round(props.position.y)}
-                  onChange={e => handlePositionChange('y', parseFloat(e.target.value) || 0)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className={styles.content}>
+        <Form layout="vertical" size="small">
+          {/* 基础属性 */}
+          <Divider orientation="left">基础属性</Divider>
 
-        {/* 尺寸 */}
-        {props.size && (
-          <div className={styles['property-panel-section']}>
-            <div className={styles['property-panel-section-title']}>尺寸</div>
-            <div className={styles['property-panel-section-content']}>
-              <div className={styles['property-panel-field-row']}>
-                <div className={styles['property-panel-field']}>
-                  <label className={styles['property-panel-field-label']}>宽度</label>
-                  <input
-                    type="number"
-                    className={styles['property-panel-field-input']}
-                    value={Math.round(props.size.width)}
-                    onChange={e => handleSizeChange('width', parseFloat(e.target.value) || 0)}
-                  />
-                </div>
-                <div className={styles['property-panel-field']}>
-                  <label className={styles['property-panel-field-label']}>高度</label>
-                  <input
-                    type="number"
-                    className={styles['property-panel-field-input']}
-                    value={Math.round(props.size.height)}
-                    onChange={e => handleSizeChange('height', parseFloat(e.target.value) || 0)}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+          <Form.Item label="名称">
+            <input
+              value={object.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              className={styles.input}
+            />
+          </Form.Item>
 
-        {/* 旋转和缩放 */}
-        <div className={styles['property-panel-section']}>
-          <div className={styles['property-panel-section-title']}>变换</div>
-          <div className={styles['property-panel-section-content']}>
-            <div className={styles['property-panel-field']}>
-              <label className={styles['property-panel-field-label']}>
-                旋转 ({Math.round((props.rotation * 180) / Math.PI)}°)
-              </label>
-              <input
-                type="range"
-                min="0"
-                max={Math.PI * 2}
-                step="0.01"
-                value={props.rotation}
-                onChange={e => handleChange('rotation', parseFloat(e.target.value))}
+          {/* 位置和尺寸 */}
+          <Divider orientation="left">位置和尺寸</Divider>
+
+          <div className={styles.row}>
+            <Form.Item label="X">
+              <InputNumber
+                value={object.transform.x}
+                onChange={(val) => handleTransformChange('x', val)}
                 style={{ width: '100%' }}
               />
-            </div>
-            <div className={styles['property-panel-field']}>
-              <label className={styles['property-panel-field-label']}>
-                透明度 ({Math.round(props.alpha * 100)}%)
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={props.alpha}
-                onChange={e => handleChange('alpha', parseFloat(e.target.value))}
+            </Form.Item>
+            <Form.Item label="Y">
+              <InputNumber
+                value={object.transform.y}
+                onChange={(val) => handleTransformChange('y', val)}
                 style={{ width: '100%' }}
               />
-            </div>
+            </Form.Item>
           </div>
-        </div>
 
-        {/* 圆角（仅矩形） */}
-        {props.type === 'rectangle' && (
-          <div className={styles['property-panel-section']}>
-            <div className={styles['property-panel-section-title']}>圆角</div>
-            <div className={styles['property-panel-section-content']}>
-              <div className={styles['property-panel-field']}>
-                <label className={styles['property-panel-field-label']}>
-                  圆角半径 ({(props as RectangleProperties).cornerRadius || 0}px)
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="50"
-                  step="1"
-                  value={(props as RectangleProperties).cornerRadius || 0}
-                  onChange={e =>
-                    handleChange('cornerRadius', parseFloat(e.target.value))
-                  }
+          {object.width !== undefined && (
+            <div className={styles.row}>
+              <Form.Item label="宽度">
+                <InputNumber
+                  value={object.width}
+                  onChange={(val) => handleChange('width', val)}
+                  min={1}
                   style={{ width: '100%' }}
                 />
-              </div>
+              </Form.Item>
+              <Form.Item label="高度">
+                <InputNumber
+                  value={object.height}
+                  onChange={(val) => handleChange('height', val)}
+                  min={1}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* 外观 */}
-        <div className={styles['property-panel-section']}>
-          <div className={styles['property-panel-section-title']}>外观</div>
-          <div className={styles['property-panel-section-content']}>
-            <div className={styles['property-panel-field']}>
-              <label className={styles['property-panel-field-label']}>填充颜色</label>
-              <input
-                type="color"
-                className={styles['property-panel-field-input']}
-                value={
-                  typeof props.fill === 'number'
-                    ? `#${props.fill.toString(16).padStart(6, '0')}`
-                    : typeof props.fill === 'string'
-                      ? props.fill
-                      : '#cccccc'
-                }
-                onChange={e => handleChange('fill', e.target.value)}
+          {object.radius !== undefined && (
+            <Form.Item label="半径">
+              <InputNumber
+                value={object.radius}
+                onChange={(val) => handleChange('radius', val)}
+                min={1}
+                style={{ width: '100%' }}
               />
-            </div>
-            {props.stroke && (
-              <>
-                <div className={styles['property-panel-field']}>
-                  <label className={styles['property-panel-field-label']}>描边颜色</label>
-                  <input
-                    type="color"
-                    className={styles['property-panel-field-input']}
-                    value={
-                      typeof props.stroke.color === 'number'
-                        ? `#${props.stroke.color.toString(16).padStart(6, '0')}`
-                        : typeof props.stroke.color === 'string'
-                          ? props.stroke.color
-                          : '#000000'
-                    }
-                    onChange={e =>
-                      handleChange('stroke', { ...props.stroke, color: e.target.value })
-                    }
-                  />
-                </div>
-                <div className={styles['property-panel-field']}>
-                  <label className={styles['property-panel-field-label']}>
-                    描边宽度 ({props.stroke.width}px)
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="20"
-                    step="1"
-                    value={props.stroke.width}
-                    onChange={e =>
-                      handleChange('stroke', {
-                        ...props.stroke,
-                        width: parseFloat(e.target.value),
-                      })
-                    }
-                    style={{ width: '100%' }}
-                  />
-                </div>
-              </>
-            )}
+            </Form.Item>
+          )}
+
+          {/* 变换 */}
+          <Divider orientation="left">变换</Divider>
+
+          <Form.Item label="旋转">
+            <Slider
+              value={Math.round((object.transform.rotation * 180) / Math.PI)}
+              onChange={(val) => handleTransformChange('rotation', (val * Math.PI) / 180)}
+              min={0}
+              max={360}
+            />
+          </Form.Item>
+
+          <div className={styles.row}>
+            <Form.Item label="缩放 X">
+              <InputNumber
+                value={object.transform.scaleX}
+                onChange={(val) => handleTransformChange('scaleX', val)}
+                min={0.1}
+                max={10}
+                step={0.1}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
+            <Form.Item label="缩放 Y">
+              <InputNumber
+                value={object.transform.scaleY}
+                onChange={(val) => handleTransformChange('scaleY', val)}
+                min={0.1}
+                max={10}
+                step={0.1}
+                style={{ width: '100%' }}
+              />
+            </Form.Item>
           </div>
-        </div>
+
+          {/* 外观 */}
+          <Divider orientation="left">外观</Divider>
+
+          <Form.Item label="不透明度">
+            <Slider
+              value={object.opacity * 100}
+              onChange={(val) => handleChange('opacity', val / 100)}
+              min={0}
+              max={100}
+            />
+          </Form.Item>
+
+          {object.fill && (
+            <Form.Item label="填充颜色">
+              <ColorPicker
+                value={object.fill.color}
+                onChange={(color) =>
+                  handleChange('fill', { ...object.fill, color: color.toHexString() })
+                }
+              />
+            </Form.Item>
+          )}
+
+          {object.stroke && (
+            <>
+              <Form.Item label="描边颜色">
+                <ColorPicker
+                  value={object.stroke.color}
+                  onChange={(color) =>
+                    handleChange('stroke', {
+                      ...object.stroke,
+                      color: color.toHexString(),
+                    })
+                  }
+                />
+              </Form.Item>
+              <Form.Item label="描边宽度">
+                <InputNumber
+                  value={object.stroke.width}
+                  onChange={(val) =>
+                    handleChange('stroke', { ...object.stroke, width: val })
+                  }
+                  min={0}
+                  max={20}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </>
+          )}
+
+          {/* 其他 */}
+          <Divider orientation="left">其他</Divider>
+
+          <Form.Item label="可见">
+            <Switch
+              checked={object.visible}
+              onChange={(val) => handleChange('visible', val)}
+            />
+          </Form.Item>
+
+          <Form.Item label="锁定">
+            <Switch
+              checked={object.locked}
+              onChange={(val) => handleChange('locked', val)}
+            />
+          </Form.Item>
+        </Form>
       </div>
     </div>
   );

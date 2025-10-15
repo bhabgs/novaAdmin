@@ -1,219 +1,232 @@
-import * as PIXI from 'pixi.js';
-import type {
-  IGraphicObject,
-  IConnectionPoint,
-  ObjectProperties,
-  Point,
-  ConnectionType,
-} from '../types';
-
-/**
- * 连接点实现
- */
-export class ConnectionPoint implements IConnectionPoint {
-  id: string;
-  parentObjectId: string;
-  position: Point;
-  type: ConnectionType;
-  connectedPipes: string[] = [];
-  private parentObject: GraphicObject;
-
-  constructor(
-    id: string,
-    parentObject: GraphicObject,
-    position: Point,
-    type: ConnectionType
-  ) {
-    this.id = id;
-    this.parentObjectId = parentObject.id;
-    this.parentObject = parentObject;
-    this.position = position;
-    this.type = type;
-  }
-
-  getWorldPosition(): Point {
-    const objPos = this.parentObject.properties.position;
-    const objRotation = this.parentObject.properties.rotation;
-    const objScale = this.parentObject.properties.scale;
-
-    // 应用缩放
-    let x = this.position.x * objScale.x;
-    let y = this.position.y * objScale.y;
-
-    // 应用旋转
-    if (objRotation !== 0) {
-      const cos = Math.cos(objRotation);
-      const sin = Math.sin(objRotation);
-      const rotatedX = x * cos - y * sin;
-      const rotatedY = x * sin + y * cos;
-      x = rotatedX;
-      y = rotatedY;
-    }
-
-    // 应用位置
-    return {
-      x: objPos.x + x,
-      y: objPos.y + y,
-    };
-  }
-
-  canConnectTo(other: IConnectionPoint): boolean {
-    // 不能连接到自己
-    if (this.id === other.id) return false;
-
-    // 不能连接到同一个父对象
-    if (this.parentObjectId === other.parentObjectId) return false;
-
-    // 输入只能连接到输出，输出只能连接到输入
-    if (this.type === ConnectionType.INPUT && other.type === ConnectionType.OUTPUT) {
-      return true;
-    }
-    if (this.type === ConnectionType.OUTPUT && other.type === ConnectionType.INPUT) {
-      return true;
-    }
-
-    // 双向点可以连接到任何类型
-    if (this.type === ConnectionType.BIDIRECTIONAL || other.type === ConnectionType.BIDIRECTIONAL) {
-      return true;
-    }
-
-    return false;
-  }
-}
-
 /**
  * 图形对象基类
  */
-export abstract class GraphicObject implements IGraphicObject {
-  id: string;
-  properties: ObjectProperties;
-  pixiObject: PIXI.Container;
-  connectionPoints: IConnectionPoint[] = [];
 
+import * as PIXI from 'pixi.js';
+import { EventEmitter } from './EventEmitter';
+import { ObjectProperties, Point, ObjectType, Transform } from '../types';
+import { generateId, deepClone } from '../utils/helpers';
+
+export abstract class GraphicObject extends EventEmitter {
+  public id: string;
+  public type: ObjectType;
+  protected properties: ObjectProperties;
+  protected displayObject: PIXI.Container;
   protected graphics: PIXI.Graphics;
-  protected selectionBorder: PIXI.Graphics | null = null;
-  private _selected: boolean = false;
+  protected isDragging: boolean = false;
 
-  constructor(properties: ObjectProperties) {
-    this.id = properties.id;
-    this.properties = properties;
+  constructor(type: ObjectType, properties: Partial<ObjectProperties>) {
+    super();
 
-    // 创建容器
-    this.pixiObject = new PIXI.Container();
-    this.pixiObject.x = properties.position.x;
-    this.pixiObject.y = properties.position.y;
-    this.pixiObject.rotation = properties.rotation;
-    this.pixiObject.scale.set(properties.scale.x, properties.scale.y);
-    this.pixiObject.alpha = properties.alpha;
-    this.pixiObject.visible = properties.visible;
+    this.id = properties.id || generateId('obj');
+    this.type = type;
 
-    // 创建图形对象
+    // 设置默认属性
+    this.properties = {
+      id: this.id,
+      type,
+      name: properties.name || `${type}_${this.id}`,
+      transform: properties.transform || {
+        x: 0,
+        y: 0,
+        scaleX: 1,
+        scaleY: 1,
+        rotation: 0,
+      },
+      visible: properties.visible !== undefined ? properties.visible : true,
+      locked: properties.locked || false,
+      opacity: properties.opacity !== undefined ? properties.opacity : 1,
+      zIndex: properties.zIndex || 0,
+      ...properties,
+    };
+
+    // 创建显示对象容器
+    this.displayObject = new PIXI.Container();
+    this.displayObject.eventMode = 'static';
+    this.displayObject.cursor = 'pointer';
+
+    // 创建图形绘制对象
     this.graphics = new PIXI.Graphics();
-    this.pixiObject.addChild(this.graphics);
+    this.displayObject.addChild(this.graphics);
 
-    // 创建选中边框
-    this.selectionBorder = new PIXI.Graphics();
-    this.selectionBorder.visible = false;
-    this.pixiObject.addChild(this.selectionBorder);
+    // 应用变换
+    this.applyTransform();
 
-    // 设置交互
-    this.pixiObject.eventMode = 'static';
-    this.pixiObject.cursor = 'pointer';
+    // 绑定交互事件
+    this.setupInteraction();
   }
 
-  updateProperties(props: Partial<ObjectProperties>): void {
+  /**
+   * 设置交互事件
+   */
+  protected setupInteraction(): void {
+    this.displayObject.on('pointerdown', this.onPointerDown.bind(this));
+    this.displayObject.on('pointerup', this.onPointerUp.bind(this));
+    this.displayObject.on('pointerupoutside', this.onPointerUp.bind(this));
+    this.displayObject.on('pointermove', this.onPointerMove.bind(this));
+    this.displayObject.on('pointerover', this.onPointerOver.bind(this));
+    this.displayObject.on('pointerout', this.onPointerOut.bind(this));
+  }
+
+  /**
+   * 指针按下
+   */
+  protected onPointerDown(e: PIXI.FederatedPointerEvent): void {
+    if (this.properties.locked) return;
+
+    this.isDragging = true;
+    this.emit('pointerdown', { event: e, object: this });
+    e.stopPropagation();
+  }
+
+  /**
+   * 指针释放
+   */
+  protected onPointerUp(e: PIXI.FederatedPointerEvent): void {
+    this.isDragging = false;
+    this.emit('pointerup', { event: e, object: this });
+  }
+
+  /**
+   * 指针移动
+   */
+  protected onPointerMove(e: PIXI.FederatedPointerEvent): void {
+    this.emit('pointermove', { event: e, object: this });
+  }
+
+  /**
+   * 指针悬停
+   */
+  protected onPointerOver(e: PIXI.FederatedPointerEvent): void {
+    if (!this.properties.locked) {
+      this.displayObject.cursor = 'move';
+    }
+    this.emit('pointerover', { event: e, object: this });
+  }
+
+  /**
+   * 指针移出
+   */
+  protected onPointerOut(e: PIXI.FederatedPointerEvent): void {
+    this.displayObject.cursor = 'pointer';
+    this.emit('pointerout', { event: e, object: this });
+  }
+
+  /**
+   * 应用变换
+   */
+  protected applyTransform(): void {
+    const { transform, visible, opacity, zIndex } = this.properties;
+
+    this.displayObject.position.set(transform.x, transform.y);
+    this.displayObject.scale.set(transform.scaleX, transform.scaleY);
+    this.displayObject.rotation = transform.rotation;
+    this.displayObject.visible = visible;
+    this.displayObject.alpha = opacity;
+    this.displayObject.zIndex = zIndex;
+
+    if (transform.skewX !== undefined) {
+      this.displayObject.skew.x = transform.skewX;
+    }
+    if (transform.skewY !== undefined) {
+      this.displayObject.skew.y = transform.skewY;
+    }
+  }
+
+  /**
+   * 渲染图形（抽象方法，由子类实现）
+   */
+  protected abstract render(): void;
+
+  /**
+   * 更新属性
+   */
+  public updateProperties(props: Partial<ObjectProperties>): void {
     this.properties = { ...this.properties, ...props };
-
-    // 更新 PIXI 对象属性
-    if (props.position) {
-      this.pixiObject.x = props.position.x;
-      this.pixiObject.y = props.position.y;
-    }
-    if (props.rotation !== undefined) {
-      this.pixiObject.rotation = props.rotation;
-    }
-    if (props.scale) {
-      this.pixiObject.scale.set(props.scale.x, props.scale.y);
-    }
-    if (props.alpha !== undefined) {
-      this.pixiObject.alpha = props.alpha;
-    }
-    if (props.visible !== undefined) {
-      this.pixiObject.visible = props.visible;
-    }
-
-    // 重新渲染
+    this.applyTransform();
     this.render();
-  }
-
-  abstract render(): void;
-
-  /**
-   * 设置选中状态
-   */
-  setSelected(selected: boolean): void {
-    this._selected = selected;
-    this.updateSelectionBorder();
+    this.emit('propertiesUpdated', { properties: this.properties });
   }
 
   /**
-   * 获取选中状态
+   * 获取属性
    */
-  isSelected(): boolean {
-    return this._selected;
+  public getProperties(): ObjectProperties {
+    return deepClone(this.properties);
   }
 
   /**
-   * 更新选中边框
+   * 获取显示对象
    */
-  protected abstract updateSelectionBorder(): void;
-
-  addConnectionPoint(point: IConnectionPoint): void {
-    this.connectionPoints.push(point);
-  }
-
-  removeConnectionPoint(pointId: string): void {
-    const index = this.connectionPoints.findIndex(p => p.id === pointId);
-    if (index > -1) {
-      this.connectionPoints.splice(index, 1);
-    }
-  }
-
-  destroy(): void {
-    if (this.selectionBorder) {
-      this.selectionBorder.destroy();
-    }
-    this.graphics.destroy();
-    this.pixiObject.destroy({ children: true });
+  public getDisplayObject(): PIXI.Container {
+    return this.displayObject;
   }
 
   /**
-   * 应用填充样式
+   * 获取边界框
    */
-  protected applyFill(graphics: PIXI.Graphics): void {
-    const { fill } = this.properties;
-    if (!fill) return;
-
-    if (typeof fill === 'string' || typeof fill === 'number') {
-      // 纯色填充
-      graphics.fill(fill);
-    } else if ('type' in fill) {
-      // 渐变填充
-      // TODO: 实现渐变填充
-      graphics.fill(0xcccccc);
-    }
+  public getBounds(): PIXI.Rectangle {
+    return this.displayObject.getBounds();
   }
 
   /**
-   * 应用描边样式
+   * 设置位置
    */
-  protected applyStroke(graphics: PIXI.Graphics): void {
-    const { stroke } = this.properties;
-    if (!stroke) return;
-
-    graphics.stroke({
-      color: stroke.color,
-      width: stroke.width,
+  public setPosition(x: number, y: number): void {
+    this.updateProperties({
+      ...this.properties,
+      transform: { ...this.properties.transform, x, y },
     });
+  }
+
+  /**
+   * 设置缩放
+   */
+  public setScale(scaleX: number, scaleY?: number): void {
+    this.updateProperties({
+      ...this.properties,
+      transform: {
+        ...this.properties.transform,
+        scaleX,
+        scaleY: scaleY !== undefined ? scaleY : scaleX,
+      },
+    });
+  }
+
+  /**
+   * 设置旋转
+   */
+  public setRotation(rotation: number): void {
+    this.updateProperties({
+      ...this.properties,
+      transform: { ...this.properties.transform, rotation },
+    });
+  }
+
+  /**
+   * 设置可见性
+   */
+  public setVisible(visible: boolean): void {
+    this.updateProperties({ ...this.properties, visible });
+  }
+
+  /**
+   * 销毁
+   */
+  public destroy(): void {
+    this.displayObject.destroy({ children: true });
+    this.removeAllListeners();
+  }
+
+  /**
+   * 克隆
+   */
+  public abstract clone(): GraphicObject;
+
+  /**
+   * 序列化
+   */
+  public serialize(): ObjectProperties {
+    return this.getProperties();
   }
 }

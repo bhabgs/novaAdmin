@@ -1,164 +1,118 @@
-import React from 'react';
-import {
-  Square,
-  Circle,
-  Minus,
-  Type,
-  MousePointer,
-  Move,
-  Undo,
-  Redo,
-  ZoomIn,
-  ZoomOut,
-  Maximize,
-  Save,
-  Download,
-  Play,
-  Pause,
-} from 'lucide-react';
-import type { ToolType } from '../types';
-import styles from '../index.module.less';
+/**
+ * 工具栏组件
+ */
 
-export interface ToolbarProps {
-  currentTool: ToolType;
-  onToolChange: (tool: ToolType) => void;
-  canUndo: boolean;
-  canRedo: boolean;
-  onUndo: () => void;
-  onRedo: () => void;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onFitScreen: () => void;
-  onSave?: () => void;
-  onExport?: () => void;
-  isPlaying: boolean;
-  onTogglePlay: () => void;
-}
+import React from 'react';
+import { Button, Space, Divider, Tooltip } from 'antd';
+import {
+  SelectOutlined,
+  DragOutlined,
+  BorderOutlined,
+  RadiusSettingOutlined,
+  LineOutlined,
+  FontSizeOutlined,
+  UndoOutlined,
+  RedoOutlined,
+  ExportOutlined,
+  ImportOutlined,
+  ZoomInOutlined,
+  ZoomOutOutlined,
+} from '@ant-design/icons';
+import { ToolbarProps, ToolMode } from '../types';
+import styles from './Toolbar.module.less';
 
 const Toolbar: React.FC<ToolbarProps> = ({
-  currentTool,
+  toolMode,
   onToolChange,
-  canUndo,
-  canRedo,
   onUndo,
   onRedo,
-  onZoomIn,
-  onZoomOut,
-  onFitScreen,
-  onSave,
+  canUndo,
+  canRedo,
   onExport,
-  isPlaying,
-  onTogglePlay,
+  onImport,
 }) => {
   const tools = [
-    { type: 'select' as ToolType, icon: MousePointer, tooltip: '选择工具' },
-    { type: 'move' as ToolType, icon: Move, tooltip: '移动工具' },
-    { type: 'rectangle' as ToolType, icon: Square, tooltip: '矩形工具' },
-    { type: 'circle' as ToolType, icon: Circle, tooltip: '圆形工具' },
-    { type: 'line' as ToolType, icon: Minus, tooltip: '线条工具' },
-    { type: 'text' as ToolType, icon: Type, tooltip: '文本工具' },
+    {
+      mode: ToolMode.Select,
+      icon: <SelectOutlined />,
+      label: '选择',
+    },
+    {
+      mode: ToolMode.Hand,
+      icon: <DragOutlined />,
+      label: '平移',
+    },
+    {
+      mode: ToolMode.Rectangle,
+      icon: <BorderOutlined />,
+      label: '矩形',
+    },
+    {
+      mode: ToolMode.Circle,
+      icon: <RadiusSettingOutlined />,
+      label: '圆形',
+    },
+    {
+      mode: ToolMode.Line,
+      icon: <LineOutlined />,
+      label: '线条',
+    },
+    {
+      mode: ToolMode.Text,
+      icon: <FontSizeOutlined />,
+      label: '文本',
+    },
+    {
+      mode: ToolMode.Pipe,
+      icon: <LineOutlined rotate={45} />,
+      label: '管道',
+    },
   ];
 
   return (
-    <div className={styles['pixi-editor-toolbar']}>
-      {/* 工具组 */}
-      <div className={styles['pixi-editor-toolbar-group']}>
-        {tools.map(tool => {
-          const Icon = tool.icon;
-          return (
-            <button
-              key={tool.type}
-              className={`${styles['pixi-editor-toolbar-button']} ${
-                currentTool === tool.type ? styles.active : ''
-              }`}
-              onClick={() => onToolChange(tool.type)}
-              title={tool.tooltip}
-            >
-              <Icon size={16} />
-            </button>
-          );
-        })}
-      </div>
+    <div className={styles.toolbar}>
+      <Space split={<Divider type="vertical" />}>
+        {/* 工具组 */}
+        <Space size="small">
+          {tools.map((tool) => (
+            <Tooltip key={tool.mode} title={tool.label}>
+              <Button
+                type={toolMode === tool.mode ? 'primary' : 'default'}
+                icon={tool.icon}
+                onClick={() => onToolChange(tool.mode)}
+              />
+            </Tooltip>
+          ))}
+        </Space>
 
-      {/* 操作组 */}
-      <div className={styles['pixi-editor-toolbar-group']}>
-        <button
-          className={styles['pixi-editor-toolbar-button']}
-          onClick={onUndo}
-          disabled={!canUndo}
-          title="撤销 (Ctrl+Z)"
-        >
-          <Undo size={16} />
-        </button>
-        <button
-          className={styles['pixi-editor-toolbar-button']}
-          onClick={onRedo}
-          disabled={!canRedo}
-          title="重做 (Ctrl+Y)"
-        >
-          <Redo size={16} />
-        </button>
-      </div>
+        {/* 操作组 */}
+        <Space size="small">
+          <Tooltip title="撤销 (Ctrl+Z)">
+            <Button
+              icon={<UndoOutlined />}
+              disabled={!canUndo}
+              onClick={onUndo}
+            />
+          </Tooltip>
+          <Tooltip title="重做 (Ctrl+Y)">
+            <Button
+              icon={<RedoOutlined />}
+              disabled={!canRedo}
+              onClick={onRedo}
+            />
+          </Tooltip>
+        </Space>
 
-      {/* 视图组 */}
-      <div className={styles['pixi-editor-toolbar-group']}>
-        <button
-          className={styles['pixi-editor-toolbar-button']}
-          onClick={onZoomIn}
-          title="放大"
-        >
-          <ZoomIn size={16} />
-        </button>
-        <button
-          className={styles['pixi-editor-toolbar-button']}
-          onClick={onZoomOut}
-          title="缩小"
-        >
-          <ZoomOut size={16} />
-        </button>
-        <button
-          className={styles['pixi-editor-toolbar-button']}
-          onClick={onFitScreen}
-          title="适应窗口"
-        >
-          <Maximize size={16} />
-        </button>
-      </div>
-
-      {/* 动画组 */}
-      <div className={styles['pixi-editor-toolbar-group']}>
-        <button
-          className={styles['pixi-editor-toolbar-button']}
-          onClick={onTogglePlay}
-          title={isPlaying ? '暂停动画' : '播放动画'}
-        >
-          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-        </button>
-      </div>
-
-      <div style={{ flex: 1 }} />
-
-      {/* 文件操作组 */}
-      <div className={styles['pixi-editor-toolbar-group']}>
-        {onSave && (
-          <button
-            className={styles['pixi-editor-toolbar-button']}
-            onClick={onSave}
-            title="保存"
-          >
-            <Save size={16} />
-          </button>
-        )}
-        {onExport && (
-          <button
-            className={styles['pixi-editor-toolbar-button']}
-            onClick={onExport}
-            title="导出"
-          >
-            <Download size={16} />
-          </button>
-        )}
-      </div>
+        {/* 文件操作组 */}
+        <Space size="small">
+          <Tooltip title="导入">
+            <Button icon={<ImportOutlined />} onClick={onImport} />
+          </Tooltip>
+          <Tooltip title="导出">
+            <Button icon={<ExportOutlined />} onClick={onExport} />
+          </Tooltip>
+        </Space>
+      </Space>
     </div>
   );
 };

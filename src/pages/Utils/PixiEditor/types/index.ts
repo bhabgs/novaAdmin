@@ -1,6 +1,11 @@
-import type * as PIXI from 'pixi.js';
+/**
+ * PixiJS 图形编辑器 - 类型定义
+ */
 
-// 基础类型定义
+import * as PIXI from 'pixi.js';
+
+// ============= 基础类型 =============
+
 export interface Point {
   x: number;
   y: number;
@@ -11,263 +16,277 @@ export interface Size {
   height: number;
 }
 
-// 对象类型枚举
+export interface Rect extends Point, Size {}
+
+// ============= 图形对象类型 =============
+
 export enum ObjectType {
-  RECTANGLE = 'rectangle',
-  CIRCLE = 'circle',
-  LINE = 'line',
-  TEXT = 'text',
-  POLYGON = 'polygon',
-  GROUP = 'group',
+  Rectangle = 'rectangle',
+  Circle = 'circle',
+  Ellipse = 'ellipse',
+  Line = 'line',
+  Polyline = 'polyline',
+  Polygon = 'polygon',
+  Text = 'text',
+  Group = 'group',
 }
 
-// 连接点类型
 export enum ConnectionType {
-  INPUT = 'input',
-  OUTPUT = 'output',
-  BIDIRECTIONAL = 'bidirectional',
+  Input = 'input',
+  Output = 'output',
+  BiDirectional = 'bidirectional',
 }
 
-// 管道类型
-export enum PipeType {
-  STRAIGHT = 'straight', // 直线
-  POLYLINE = 'polyline', // 折线
-  CURVE = 'curve', // 曲线
+// ============= 图形属性 =============
+
+export interface FillStyle {
+  type: 'solid' | 'gradient' | 'texture';
+  color?: string;
+  alpha?: number;
+  gradient?: {
+    type: 'linear' | 'radial';
+    colors: string[];
+    stops: number[];
+    angle?: number;
+  };
+  texture?: string;
 }
 
-// 管道样式
-export enum PipeLineStyle {
-  SOLID = 'solid',
-  DASHED = 'dashed',
-  DOTTED = 'dotted',
-}
-
-// 管道端点样式
-export enum PipeEndStyle {
-  NONE = 'none',
-  ARROW = 'arrow',
-  CIRCLE = 'circle',
-  SQUARE = 'square',
-}
-
-// 颜色类型
-export type Color = string | number;
-
-// 渐变类型
-export interface GradientColor {
-  type: 'linear' | 'radial';
-  colors: Array<{ offset: number; color: Color }>;
-  angle?: number; // 线性渐变角度
-}
-
-// 填充类型
-export type FillStyle = Color | GradientColor | PIXI.Texture;
-
-// 描边样式
 export interface StrokeStyle {
-  color: Color;
+  color: string;
   width: number;
-  style: PipeLineStyle;
+  alpha?: number;
+  style?: 'solid' | 'dashed' | 'dotted';
+  dashArray?: number[];
+  cap?: 'butt' | 'round' | 'square';
+  join?: 'miter' | 'round' | 'bevel';
 }
 
-// 阴影样式
 export interface ShadowStyle {
+  color: string;
+  blur: number;
   offsetX: number;
   offsetY: number;
-  blur: number;
-  color: Color;
 }
 
-// 基础属性
-export interface BaseProperties {
+export interface Transform {
+  x: number;
+  y: number;
+  scaleX: number;
+  scaleY: number;
+  rotation: number; // 弧度
+  skewX?: number;
+  skewY?: number;
+}
+
+export interface ObjectProperties {
   id: string;
   type: ObjectType;
-  position: Point;
-  rotation: number;
-  scale: Point;
-  alpha: number;
-  visible: boolean;
-  locked: boolean;
   name: string;
-}
-
-// 图形对象属性
-export interface ObjectProperties extends BaseProperties {
-  size: Size;
+  transform: Transform;
   fill?: FillStyle;
   stroke?: StrokeStyle;
   shadow?: ShadowStyle;
+  visible: boolean;
+  locked: boolean;
+  opacity: number;
   zIndex: number;
+  // 特定图形的属性
+  width?: number;
+  height?: number;
+  radius?: number;
+  radiusX?: number;
+  radiusY?: number;
+  cornerRadius?: number;
+  points?: Point[];
+  text?: string;
+  fontSize?: number;
+  fontFamily?: string;
+  fontWeight?: string | number;
+  textAlign?: 'left' | 'center' | 'right';
+  lineHeight?: number;
 }
 
-// 矩形特定属性
-export interface RectangleProperties extends ObjectProperties {
-  type: ObjectType.RECTANGLE;
-  cornerRadius: number;
+// ============= 连接点 =============
+
+export interface ConnectionPointConfig {
+  id: string;
+  parentId: string;
+  type: ConnectionType;
+  position: Point; // 相对于父对象的位置
+  offset?: Point; // 可选的偏移量
+  direction?: 'top' | 'right' | 'bottom' | 'left'; // 连接方向
 }
 
-// 圆形特定属性
-export interface CircleProperties extends ObjectProperties {
-  type: ObjectType.CIRCLE;
-  radius: number;
+// ============= 管道系统 =============
+
+export enum PipeType {
+  Straight = 'straight', // 直线
+  Polyline = 'polyline', // 折线
+  Bezier = 'bezier', // 贝塞尔曲线
+  Spline = 'spline', // 样条曲线
 }
 
-// 文本特定属性
-export interface TextProperties extends ObjectProperties {
-  type: ObjectType.TEXT;
-  content: string;
-  fontSize: number;
-  fontFamily: string;
-  fontWeight: string | number;
-  textAlign: 'left' | 'center' | 'right';
-}
-
-// 贝塞尔曲线控制点
 export interface BezierPoint {
   point: Point;
   controlPoint1?: Point;
   controlPoint2?: Point;
 }
 
-// 管道样式
 export interface PipeStyle {
-  color: Color;
-  width: number;
-  lineStyle: PipeLineStyle;
-  dashPattern?: number[];
-  startStyle: PipeEndStyle;
-  endStyle: PipeEndStyle;
+  type: PipeType;
+  strokeColor: string;
+  strokeWidth: number;
+  strokeAlpha?: number;
+  dashArray?: number[];
+  lineCap?: 'butt' | 'round' | 'square';
+  lineJoin?: 'miter' | 'round' | 'bevel';
+  // 端点样式
+  startArrow?: ArrowStyle;
+  endArrow?: ArrowStyle;
+  // 桥形效果
+  bridgeEnabled?: boolean;
+  bridgeHeight?: number;
+  bridgeWidth?: number;
 }
 
-// 管道动画配置
-export interface PipeAnimationConfig {
+export interface ArrowStyle {
+  type: 'arrow' | 'circle' | 'square' | 'diamond' | 'none';
+  size: number;
+  filled?: boolean;
+}
+
+export interface PipeAnimation {
   enabled: boolean;
   type: 'particle' | 'dash' | 'gradient';
-  speed: number;
+  speed: number; // 速度
   direction: 'forward' | 'backward' | 'bidirectional';
-  particleDensity?: number;
+  particleDensity?: number; // 粒子密度
   loop: boolean;
 }
 
-// 连接点接口
-export interface IConnectionPoint {
-  id: string;
-  parentObjectId: string;
-  position: Point; // 相对于父对象的位置
-  type: ConnectionType;
-  connectedPipes: string[];
-  getWorldPosition(): Point;
-  canConnectTo(other: IConnectionPoint): boolean;
-}
-
-// 管道接口
-export interface IPipe {
+export interface PipeConfig {
   id: string;
   startPointId: string;
   endPointId: string;
   style: PipeStyle;
-  pipeType: PipeType;
   bezierPoints?: BezierPoint[];
-  animation?: PipeAnimationConfig;
-  bridgeHeight?: number; // 桥形高度
+  animation?: PipeAnimation;
 }
 
-// 图形对象接口
-export interface IGraphicObject {
+// ============= 图层系统 =============
+
+export interface LayerNode {
   id: string;
-  properties: ObjectProperties;
-  pixiObject: PIXI.DisplayObject;
-  connectionPoints: IConnectionPoint[];
-
-  updateProperties(props: Partial<ObjectProperties>): void;
-  render(): void;
-  destroy(): void;
-  addConnectionPoint(point: IConnectionPoint): void;
-  removeConnectionPoint(pointId: string): void;
+  name: string;
+  type: ObjectType | 'pipe';
+  visible: boolean;
+  locked: boolean;
+  children?: LayerNode[];
+  parentId?: string;
+  expanded?: boolean;
 }
 
-// 历史记录动作类型
-export enum HistoryActionType {
-  CREATE = 'create',
-  DELETE = 'delete',
-  UPDATE = 'update',
-  MOVE = 'move',
-  TRANSFORM = 'transform',
+// ============= 编辑器状态 =============
+
+export enum ToolMode {
+  Select = 'select',
+  Hand = 'hand',
+  Rectangle = 'rectangle',
+  Circle = 'circle',
+  Line = 'line',
+  Text = 'text',
+  Pipe = 'pipe',
+  BezierEdit = 'bezier-edit',
 }
 
-// 历史记录项
-export interface HistoryItem {
-  type: HistoryActionType;
+export interface EditorState {
+  toolMode: ToolMode;
+  selectedIds: string[];
+  hoveredId: string | null;
+  clipboardData: ObjectProperties[] | null;
+  zoom: number;
+  pan: Point;
+  gridEnabled: boolean;
+  gridSize: number;
+  snapEnabled: boolean;
+  snapThreshold: number;
+}
+
+// ============= 历史记录 =============
+
+export enum ActionType {
+  Create = 'create',
+  Delete = 'delete',
+  Update = 'update',
+  Move = 'move',
+  Transform = 'transform',
+  Group = 'group',
+  Ungroup = 'ungroup',
+}
+
+export interface HistoryAction {
+  type: ActionType;
   timestamp: number;
-  objectId: string;
+  objectId: string | string[];
   beforeState?: any;
   afterState?: any;
-  description: string;
+  description?: string;
 }
 
-// 选择状态
-export interface SelectionState {
-  selectedIds: Set<string>;
-  selectionBox?: PIXI.Graphics;
-  isDragging: boolean;
-  dragStart?: Point;
-}
+// ============= 事件系统 =============
 
-// 视图状态
-export interface ViewState {
-  zoom: number;
-  panX: number;
-  panY: number;
-  centerX: number;
-  centerY: number;
-}
-
-// 工具类型
-export enum ToolType {
-  SELECT = 'select',
-  MOVE = 'move',
-  RECTANGLE = 'rectangle',
-  CIRCLE = 'circle',
-  LINE = 'line',
-  TEXT = 'text',
-  PIPE = 'pipe',
-  BEZIER_EDIT = 'bezier_edit',
-}
-
-// 编辑器状态
-export interface EditorState {
-  currentTool: ToolType;
-  objects: Map<string, IGraphicObject>;
-  pipes: Map<string, IPipe>;
-  connectionPoints: Map<string, IConnectionPoint>;
-  selection: SelectionState;
-  view: ViewState;
-  history: HistoryItem[];
-  historyIndex: number;
-  isPlaying: boolean; // 动画播放状态
-}
-
-// 引擎配置
-export interface EngineConfig {
-  width: number;
-  height: number;
-  backgroundColor: number;
-  antialias: boolean;
-  resolution: number;
-  autoDensity: boolean;
-}
-
-// 事件类型
 export interface EditorEvent {
   type: string;
+  target?: any;
   data?: any;
   timestamp: number;
 }
 
-// 导出配置
+export type EventCallback = (event: EditorEvent) => void;
+
+// ============= 导出配置 =============
+
 export interface ExportConfig {
   format: 'png' | 'jpg' | 'svg' | 'json';
   quality?: number;
   scale?: number;
-  backgroundColor?: Color;
+  backgroundColor?: string;
+  transparent?: boolean;
+  area?: Rect;
+}
+
+// ============= 组件 Props =============
+
+export interface ToolbarProps {
+  toolMode: ToolMode;
+  onToolChange: (mode: ToolMode) => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+  onExport: () => void;
+  onImport: () => void;
+}
+
+export interface LayerPanelProps {
+  layers: LayerNode[];
+  selectedIds: string[];
+  onSelectLayer: (id: string, multi?: boolean) => void;
+  onToggleVisible: (id: string) => void;
+  onToggleLocked: (id: string) => void;
+  onRenameLayer: (id: string, name: string) => void;
+  onDeleteLayer: (id: string) => void;
+  onReorderLayer: (id: string, targetId: string, position: 'before' | 'after' | 'inside') => void;
+}
+
+export interface PropertyPanelProps {
+  selectedObjects: ObjectProperties[];
+  onUpdateProperties: (id: string, props: Partial<ObjectProperties>) => void;
+}
+
+export interface CanvasProps {
+  width: number;
+  height: number;
+  onReady?: (app: PIXI.Application) => void;
 }

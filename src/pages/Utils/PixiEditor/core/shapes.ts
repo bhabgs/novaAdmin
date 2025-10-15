@@ -1,335 +1,418 @@
+/**
+ * 具体图形类实现
+ */
+
 import * as PIXI from 'pixi.js';
-import { GraphicObject, ConnectionPoint } from './GraphicObject';
+import { GraphicObject } from './GraphicObject';
+import { ObjectProperties, ObjectType, Point } from '../types';
 import {
-  ConnectionType,
-  ObjectType,
-} from '../types';
-import type {
-  RectangleProperties,
-  CircleProperties,
-  TextProperties,
-} from '../types';
+  DEFAULT_FILL_COLOR,
+  DEFAULT_STROKE_COLOR,
+  DEFAULT_STROKE_WIDTH,
+} from '../utils/constants';
+import { colorStringToHex } from '../utils/helpers';
 
 /**
- * 矩形对象
+ * 矩形
  */
-export class RectangleObject extends GraphicObject {
-  declare properties: RectangleProperties;
+export class Rectangle extends GraphicObject {
+  constructor(properties: Partial<ObjectProperties>) {
+    super(ObjectType.Rectangle, {
+      width: 100,
+      height: 100,
+      cornerRadius: 0,
+      fill: {
+        type: 'solid',
+        color: '#ffffff',
+        alpha: 1,
+      },
+      stroke: {
+        color: '#000000',
+        width: 2,
+        alpha: 1,
+      },
+      ...properties,
+    });
 
-  constructor(properties: RectangleProperties) {
-    super(properties);
-    this.setupConnectionPoints();
     this.render();
   }
 
-  private setupConnectionPoints(): void {
-    const { size } = this.properties;
-    const halfWidth = size.width / 2;
-    const halfHeight = size.height / 2;
+  protected render(): void {
+    const { width, height, cornerRadius, fill, stroke } = this.properties;
 
-    // 添加四个边的连接点
-    const points = [
-      { id: `${this.id}-top`, pos: { x: 0, y: -halfHeight }, type: ConnectionType.BIDIRECTIONAL },
-      { id: `${this.id}-right`, pos: { x: halfWidth, y: 0 }, type: ConnectionType.OUTPUT },
-      { id: `${this.id}-bottom`, pos: { x: 0, y: halfHeight }, type: ConnectionType.BIDIRECTIONAL },
-      { id: `${this.id}-left`, pos: { x: -halfWidth, y: 0 }, type: ConnectionType.INPUT },
-    ];
-
-    points.forEach(p => {
-      const point = new ConnectionPoint(p.id, this, p.pos, p.type);
-      this.addConnectionPoint(point);
-    });
-  }
-
-  render(): void {
     this.graphics.clear();
 
-    const { size, cornerRadius, fill, stroke } = this.properties;
-    const halfWidth = size.width / 2;
-    const halfHeight = size.height / 2;
-
-    // 绘制矩形（中心点为原点）
-    if (cornerRadius > 0) {
+    // 绘制矩形
+    if (cornerRadius && cornerRadius > 0) {
       this.graphics.roundRect(
-        -halfWidth,
-        -halfHeight,
-        size.width,
-        size.height,
-        cornerRadius
+        -(width || 100) / 2,
+        -(height || 100) / 2,
+        width || 100,
+        height || 100,
+        cornerRadius,
       );
     } else {
-      this.graphics.rect(-halfWidth, -halfHeight, size.width, size.height);
+      this.graphics.rect(
+        -(width || 100) / 2,
+        -(height || 100) / 2,
+        width || 100,
+        height || 100,
+      );
     }
 
-    // 应用填充
-    if (fill) {
-      this.applyFill(this.graphics);
+    // 填充
+    if (fill && fill.color) {
+      const fillColor = colorStringToHex(fill.color);
+      this.graphics.fill({ color: fillColor, alpha: fill.alpha || 1 });
     }
 
-    // 应用描边
+    // 描边
     if (stroke) {
-      this.applyStroke(this.graphics);
+      const strokeColor = colorStringToHex(stroke.color);
+      this.graphics.stroke({
+        color: strokeColor,
+        width: stroke.width,
+        alpha: stroke.alpha || 1,
+      });
     }
-
-    // 更新选中边框
-    this.updateSelectionBorder();
   }
 
-  protected updateSelectionBorder(): void {
-    if (!this.selectionBorder) return;
-
-    this.selectionBorder.clear();
-
-    if (this.isSelected()) {
-      const { size, cornerRadius } = this.properties;
-      const halfWidth = size.width / 2;
-      const halfHeight = size.height / 2;
-      const padding = 4;
-
-      this.selectionBorder.rect(
-        -halfWidth - padding,
-        -halfHeight - padding,
-        size.width + padding * 2,
-        size.height + padding * 2
-      );
-      this.selectionBorder.stroke({ color: 0x007acc, width: 2 });
-      this.selectionBorder.visible = true;
-    } else {
-      this.selectionBorder.visible = false;
-    }
+  public clone(): Rectangle {
+    return new Rectangle(this.getProperties());
   }
 }
 
 /**
- * 圆形对象
+ * 圆形
  */
-export class CircleObject extends GraphicObject {
-  declare properties: CircleProperties;
+export class Circle extends GraphicObject {
+  constructor(properties: Partial<ObjectProperties>) {
+    super(ObjectType.Circle, {
+      radius: 50,
+      fill: {
+        type: 'solid',
+        color: '#ffffff',
+        alpha: 1,
+      },
+      stroke: {
+        color: '#000000',
+        width: 2,
+        alpha: 1,
+      },
+      ...properties,
+    });
 
-  constructor(properties: CircleProperties) {
-    super(properties);
-    this.setupConnectionPoints();
     this.render();
   }
 
-  private setupConnectionPoints(): void {
-    const { radius } = this.properties;
-
-    // 添加四个方向的连接点
-    const points = [
-      { id: `${this.id}-top`, pos: { x: 0, y: -radius }, type: ConnectionType.BIDIRECTIONAL },
-      { id: `${this.id}-right`, pos: { x: radius, y: 0 }, type: ConnectionType.OUTPUT },
-      { id: `${this.id}-bottom`, pos: { x: 0, y: radius }, type: ConnectionType.BIDIRECTIONAL },
-      { id: `${this.id}-left`, pos: { x: -radius, y: 0 }, type: ConnectionType.INPUT },
-    ];
-
-    points.forEach(p => {
-      const point = new ConnectionPoint(p.id, this, p.pos, p.type);
-      this.addConnectionPoint(point);
-    });
-  }
-
-  render(): void {
-    this.graphics.clear();
-
+  protected render(): void {
     const { radius, fill, stroke } = this.properties;
 
-    // 绘制圆形（中心点为原点）
-    this.graphics.circle(0, 0, radius);
-
-    // 应用填充
-    if (fill) {
-      this.applyFill(this.graphics);
-    }
-
-    // 应用描边
-    if (stroke) {
-      this.applyStroke(this.graphics);
-    }
-
-    // 更新选中边框
-    this.updateSelectionBorder();
-  }
-
-  protected updateSelectionBorder(): void {
-    if (!this.selectionBorder) return;
-
-    this.selectionBorder.clear();
-
-    if (this.isSelected()) {
-      const { radius } = this.properties;
-      const padding = 4;
-
-      this.selectionBorder.circle(0, 0, radius + padding);
-      this.selectionBorder.stroke({ color: 0x007acc, width: 2 });
-      this.selectionBorder.visible = true;
-    } else {
-      this.selectionBorder.visible = false;
-    }
-  }
-}
-
-/**
- * 文本对象
- */
-export class TextObject extends GraphicObject {
-  declare properties: TextProperties;
-  private textObject: PIXI.Text | null = null;
-
-  constructor(properties: TextProperties) {
-    super(properties);
-    this.setupConnectionPoints();
-    this.render();
-  }
-
-  private setupConnectionPoints(): void {
-    // 文本对象可以有简单的连接点
-    const points = [
-      { id: `${this.id}-left`, pos: { x: -50, y: 0 }, type: ConnectionType.INPUT },
-      { id: `${this.id}-right`, pos: { x: 50, y: 0 }, type: ConnectionType.OUTPUT },
-    ];
-
-    points.forEach(p => {
-      const point = new ConnectionPoint(p.id, this, p.pos, p.type);
-      this.addConnectionPoint(point);
-    });
-  }
-
-  render(): void {
-    // 移除旧的文本对象
-    if (this.textObject) {
-      this.pixiObject.removeChild(this.textObject);
-      this.textObject.destroy();
-    }
-
-    const { content, fontSize, fontFamily, fontWeight, textAlign, fill } = this.properties;
-
-    // 创建文本样式
-    const style = new PIXI.TextStyle({
-      fontFamily: fontFamily || 'Arial',
-      fontSize: fontSize || 16,
-      fontWeight: fontWeight || 'normal',
-      fill: fill || 0x000000,
-      align: textAlign || 'left',
-    });
-
-    // 创建文本对象
-    this.textObject = new PIXI.Text({
-      text: content,
-      style,
-    });
-
-    // 设置文本锚点为中心
-    this.textObject.anchor.set(0.5);
-
-    this.pixiObject.addChild(this.textObject);
-
-    // 更新选中边框
-    this.updateSelectionBorder();
-  }
-
-  protected updateSelectionBorder(): void {
-    if (!this.selectionBorder || !this.textObject) return;
-
-    this.selectionBorder.clear();
-
-    if (this.isSelected()) {
-      const bounds = this.textObject.getLocalBounds();
-      const padding = 4;
-
-      this.selectionBorder.rect(
-        bounds.x - padding,
-        bounds.y - padding,
-        bounds.width + padding * 2,
-        bounds.height + padding * 2
-      );
-      this.selectionBorder.stroke({ color: 0x007acc, width: 2 });
-      this.selectionBorder.visible = true;
-    } else {
-      this.selectionBorder.visible = false;
-    }
-  }
-
-  destroy(): void {
-    if (this.textObject) {
-      this.textObject.destroy();
-    }
-    super.destroy();
-  }
-}
-
-/**
- * 线条对象
- */
-export class LineObject extends GraphicObject {
-  private endPoint: { x: number; y: number } = { x: 100, y: 0 };
-
-  constructor(properties: any) {
-    super(properties);
-    this.render();
-  }
-
-  setEndPoint(x: number, y: number): void {
-    this.endPoint = { x, y };
-    this.render();
-  }
-
-  render(): void {
     this.graphics.clear();
 
-    const { stroke } = this.properties;
+    // 绘制圆形
+    this.graphics.circle(0, 0, radius || 50);
 
-    // 绘制线条
-    this.graphics.moveTo(0, 0);
-    this.graphics.lineTo(this.endPoint.x, this.endPoint.y);
-
-    // 应用描边
-    if (stroke) {
-      this.applyStroke(this.graphics);
-    } else {
-      this.graphics.stroke({ color: 0x000000, width: 2 });
+    // 填充
+    if (fill && fill.color) {
+      const fillColor = colorStringToHex(fill.color);
+      this.graphics.fill({ color: fillColor, alpha: fill.alpha || 1 });
     }
 
-    // 更新选中边框
-    this.updateSelectionBorder();
+    // 描边
+    if (stroke) {
+      const strokeColor = colorStringToHex(stroke.color);
+      this.graphics.stroke({
+        color: strokeColor,
+        width: stroke.width,
+        alpha: stroke.alpha || 1,
+      });
+    }
   }
 
-  protected updateSelectionBorder(): void {
-    if (!this.selectionBorder) return;
-
-    this.selectionBorder.clear();
-
-    if (this.isSelected()) {
-      const padding = 4;
-
-      this.selectionBorder.moveTo(0, -padding);
-      this.selectionBorder.lineTo(this.endPoint.x, this.endPoint.y - padding);
-      this.selectionBorder.lineTo(this.endPoint.x, this.endPoint.y + padding);
-      this.selectionBorder.lineTo(0, padding);
-      this.selectionBorder.lineTo(0, -padding);
-
-      this.selectionBorder.stroke({ color: 0x007acc, width: 2 });
-      this.selectionBorder.visible = true;
-    } else {
-      this.selectionBorder.visible = false;
-    }
+  public clone(): Circle {
+    return new Circle(this.getProperties());
   }
 }
 
 /**
- * 工厂函数：根据类型创建图形对象
+ * 椭圆
  */
-export function createGraphicObject(type: ObjectType, properties: any): GraphicObject {
-  switch (type) {
-    case 'rectangle':
-      return new RectangleObject(properties);
-    case 'circle':
-      return new CircleObject(properties);
-    case 'text':
-      return new TextObject(properties);
-    case 'line':
-      return new LineObject(properties);
-    default:
-      throw new Error(`Unknown object type: ${type}`);
+export class Ellipse extends GraphicObject {
+  constructor(properties: Partial<ObjectProperties>) {
+    super(ObjectType.Ellipse, {
+      radiusX: 80,
+      radiusY: 50,
+      fill: {
+        type: 'solid',
+        color: '#ffffff',
+        alpha: 1,
+      },
+      stroke: {
+        color: '#000000',
+        width: 2,
+        alpha: 1,
+      },
+      ...properties,
+    });
+
+    this.render();
+  }
+
+  protected render(): void {
+    const { radiusX, radiusY, fill, stroke } = this.properties;
+
+    this.graphics.clear();
+
+    // 绘制椭圆
+    this.graphics.ellipse(0, 0, radiusX || 80, radiusY || 50);
+
+    // 填充
+    if (fill && fill.color) {
+      const fillColor = colorStringToHex(fill.color);
+      this.graphics.fill({ color: fillColor, alpha: fill.alpha || 1 });
+    }
+
+    // 描边
+    if (stroke) {
+      const strokeColor = colorStringToHex(stroke.color);
+      this.graphics.stroke({
+        color: strokeColor,
+        width: stroke.width,
+        alpha: stroke.alpha || 1,
+      });
+    }
+  }
+
+  public clone(): Ellipse {
+    return new Ellipse(this.getProperties());
+  }
+}
+
+/**
+ * 线条
+ */
+export class Line extends GraphicObject {
+  constructor(properties: Partial<ObjectProperties>) {
+    super(ObjectType.Line, {
+      points: [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+      stroke: {
+        color: '#000000',
+        width: 2,
+        alpha: 1,
+      },
+      ...properties,
+    });
+
+    this.render();
+  }
+
+  protected render(): void {
+    const { points, stroke } = this.properties;
+
+    this.graphics.clear();
+
+    if (!points || points.length < 2) return;
+
+    // 绘制线条
+    const firstPoint = points[0];
+    this.graphics.moveTo(firstPoint.x, firstPoint.y);
+
+    for (let i = 1; i < points.length; i++) {
+      this.graphics.lineTo(points[i].x, points[i].y);
+    }
+
+    // 描边
+    if (stroke) {
+      const strokeColor = colorStringToHex(stroke.color);
+      this.graphics.stroke({
+        color: strokeColor,
+        width: stroke.width,
+        alpha: stroke.alpha || 1,
+      });
+    }
+  }
+
+  public clone(): Line {
+    return new Line(this.getProperties());
+  }
+}
+
+/**
+ * 折线
+ */
+export class Polyline extends GraphicObject {
+  constructor(properties: Partial<ObjectProperties>) {
+    super(ObjectType.Polyline, {
+      points: [
+        { x: 0, y: 0 },
+        { x: 50, y: 50 },
+        { x: 100, y: 0 },
+      ],
+      stroke: {
+        color: '#000000',
+        width: 2,
+        alpha: 1,
+      },
+      ...properties,
+    });
+
+    this.render();
+  }
+
+  protected render(): void {
+    const { points, stroke } = this.properties;
+
+    this.graphics.clear();
+
+    if (!points || points.length < 2) return;
+
+    // 绘制折线
+    const firstPoint = points[0];
+    this.graphics.moveTo(firstPoint.x, firstPoint.y);
+
+    for (let i = 1; i < points.length; i++) {
+      this.graphics.lineTo(points[i].x, points[i].y);
+    }
+
+    // 描边
+    if (stroke) {
+      const strokeColor = colorStringToHex(stroke.color);
+      this.graphics.stroke({
+        color: strokeColor,
+        width: stroke.width,
+        alpha: stroke.alpha || 1,
+      });
+    }
+  }
+
+  public clone(): Polyline {
+    return new Polyline(this.getProperties());
+  }
+}
+
+/**
+ * 多边形
+ */
+export class Polygon extends GraphicObject {
+  constructor(properties: Partial<ObjectProperties>) {
+    super(ObjectType.Polygon, {
+      points: [
+        { x: 0, y: -50 },
+        { x: 48, y: 15 },
+        { x: 29, y: 48 },
+        { x: -29, y: 48 },
+        { x: -48, y: 15 },
+      ],
+      fill: {
+        type: 'solid',
+        color: '#ffffff',
+        alpha: 1,
+      },
+      stroke: {
+        color: '#000000',
+        width: 2,
+        alpha: 1,
+      },
+      ...properties,
+    });
+
+    this.render();
+  }
+
+  protected render(): void {
+    const { points, fill, stroke } = this.properties;
+
+    this.graphics.clear();
+
+    if (!points || points.length < 3) return;
+
+    // 绘制多边形
+    const path: number[] = [];
+    points.forEach((p) => {
+      path.push(p.x, p.y);
+    });
+    this.graphics.poly(path);
+
+    // 填充
+    if (fill && fill.color) {
+      const fillColor = colorStringToHex(fill.color);
+      this.graphics.fill({ color: fillColor, alpha: fill.alpha || 1 });
+    }
+
+    // 描边
+    if (stroke) {
+      const strokeColor = colorStringToHex(stroke.color);
+      this.graphics.stroke({
+        color: strokeColor,
+        width: stroke.width,
+        alpha: stroke.alpha || 1,
+      });
+    }
+  }
+
+  public clone(): Polygon {
+    return new Polygon(this.getProperties());
+  }
+}
+
+/**
+ * 文本
+ */
+export class Text extends GraphicObject {
+  private textObject: PIXI.Text;
+
+  constructor(properties: Partial<ObjectProperties>) {
+    super(ObjectType.Text, {
+      text: 'Text',
+      fontSize: 16,
+      fontFamily: 'Arial',
+      fontWeight: 'normal',
+      textAlign: 'left',
+      fill: {
+        type: 'solid',
+        color: '#000000',
+        alpha: 1,
+      },
+      ...properties,
+    });
+
+    this.textObject = new PIXI.Text('', {
+      fontSize: 16,
+      fill: '#000000',
+    });
+
+    this.displayObject.addChild(this.textObject);
+    this.render();
+  }
+
+  protected render(): void {
+    const { text, fontSize, fontFamily, fontWeight, textAlign, fill } =
+      this.properties;
+
+    // 更新文本样式
+    this.textObject.text = text || 'Text';
+    this.textObject.style = new PIXI.TextStyle({
+      fontSize: fontSize || 16,
+      fontFamily: fontFamily || 'Arial',
+      fontWeight: (fontWeight as any) || 'normal',
+      align: textAlign || 'left',
+      fill: fill?.color || '#000000',
+    });
+
+    // 居中文本
+    this.textObject.anchor.set(0.5);
+  }
+
+  public clone(): Text {
+    return new Text(this.getProperties());
+  }
+
+  public destroy(): void {
+    this.textObject.destroy();
+    super.destroy();
   }
 }

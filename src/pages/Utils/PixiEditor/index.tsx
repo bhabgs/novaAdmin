@@ -1,66 +1,96 @@
+/**
+ * PixiEditor 主入口组件
+ */
+
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { message } from 'antd';
 import { PixiEngine } from './core/PixiEngine';
-import { createGraphicObject } from './core/shapes';
+import { InteractionManager } from './core/InteractionManager';
+import { Rectangle, Circle, Text } from './core/shapes';
+import { HistoryManager } from './core/HistoryManager';
+import { ConnectionPointFactory } from './core/ConnectionPoint';
+import { Pipe } from './core/Pipe';
 import Toolbar from './components/Toolbar';
 import LayerPanel from './components/LayerPanel';
 import PropertyPanel from './components/PropertyPanel';
-import type {
-  ToolType,
-  IGraphicObject,
+import {
+  ToolMode,
   ObjectType,
-  RectangleProperties,
-  CircleProperties,
-  TextProperties,
+  LayerNode,
   ObjectProperties,
+  ActionType,
+  PipeType,
 } from './types';
+import { generateId } from './utils/helpers';
 import styles from './index.module.less';
 
 const PixiEditor: React.FC = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<PixiEngine | null>(null);
+  const interactionRef = useRef<InteractionManager | null>(null);
+  const historyRef = useRef<HistoryManager>(new HistoryManager());
 
-  const [currentTool, setCurrentTool] = useState<ToolType>('select');
-  const [objects, setObjects] = useState<IGraphicObject[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [toolMode, setToolMode] = useState<ToolMode>(ToolMode.Select);
+  const [layers, setLayers] = useState<LayerNode[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedObjects, setSelectedObjects] = useState<ObjectProperties[]>([]);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
-  const [zoom, setZoom] = useState(1);
-  const [isPlaying, setIsPlaying] = useState(false);
 
-  // 初始化引擎
+  // 初始化编辑器
   useEffect(() => {
     if (!canvasRef.current || engineRef.current) return;
 
-    const engine = new PixiEngine();
-    engineRef.current = engine;
+    let mounted = true;
 
-    engine.initialize(canvasRef.current, {
-      backgroundColor: 0x1e1e1e,
-    }).then(() => {
-      console.log('PixiEngine initialized');
+    const initEngine = async () => {
+      try {
+        const engine = await PixiEngine.create(
+          canvasRef.current!,
+          canvasRef.current!.clientWidth,
+          canvasRef.current!.clientHeight,
+        );
 
-      // 监听事件
-      engine.on('*', event => {
-        console.log('Engine event:', event.type);
-      });
+        if (!mounted) {
+          engine.destroy();
+          return;
+        }
 
-      engine.on('history:changed', event => {
-        setCanUndo(event.data.canUndo);
-        setCanRedo(event.data.canRedo);
-      });
+        engineRef.current = engine;
 
-      engine.on('view:zoom', event => {
-        setZoom(event.data.zoom);
-      });
+        // 创建交互管理器
+        const interaction = new InteractionManager(engine);
+        interactionRef.current = interaction;
 
-      // 添加示例对象
-      addSampleObjects(engine);
+        // 监听引擎事件
+        engine.on('objectAdded', handleObjectAdded);
+        engine.on('selectionChanged', handleSelectionChanged);
 
-      // 设置画布交互
-      setupCanvasInteraction(engine);
-    });
+        // 监听历史记录事件
+        historyRef.current.on('historyChanged', handleHistoryChanged);
+        historyRef.current.on('undo', handleUndo);
+        historyRef.current.on('redo', handleRedo);
+
+        // 窗口大小变化
+        const handleResize = () => {
+          if (canvasRef.current && engine) {
+            engine.resize(canvasRef.current.clientWidth, canvasRef.current.clientHeight);
+          }
+        };
+        window.addEventListener('resize', handleResize);
+
+        // 添加示例对象
+        addSampleObjects(engine);
+      } catch (error) {
+        console.error('Failed to initialize PixiEditor:', error);
+        message.error('编辑器初始化失败');
+      }
+    };
+
+    initEngine();
 
     return () => {
+      mounted = false;
       if (engineRef.current) {
         engineRef.current.destroy();
         engineRef.current = null;
@@ -71,382 +101,233 @@ const PixiEditor: React.FC = () => {
   // 添加示例对象
   const addSampleObjects = (engine: PixiEngine) => {
     // 添加矩形
-    const rect: RectangleProperties = {
-      id: 'rect-1',
-      type: 'rectangle' as ObjectType,
-      name: '矩形 1',
-      position: { x: 200, y: 200 },
-      rotation: 0,
-      scale: { x: 1, y: 1 },
-      alpha: 1,
-      visible: true,
-      locked: false,
-      size: { width: 120, height: 80 },
-      fill: 0x4a90e2,
-      stroke: { color: 0x2c5aa0, width: 2, style: 'solid' as const },
-      cornerRadius: 8,
-      zIndex: 1,
-    };
-    const rectObj = createGraphicObject('rectangle', rect);
-    engine.addObject(rectObj);
+    const rect = new Rectangle({
+      transform: { x: 200, y: 200, scaleX: 1, scaleY: 1, rotation: 0 },
+      width: 150,
+      height: 100,
+      fill: { type: 'solid', color: '#4CAF50', alpha: 1 },
+      stroke: { color: '#2E7D32', width: 2, alpha: 1 },
+    });
+    engine.addObject(rect);
 
     // 添加圆形
-    const circle: CircleProperties = {
-      id: 'circle-1',
-      type: 'circle' as ObjectType,
-      name: '圆形 1',
-      position: { x: 400, y: 200 },
-      rotation: 0,
-      scale: { x: 1, y: 1 },
-      alpha: 1,
-      visible: true,
-      locked: false,
-      size: { width: 100, height: 100 },
-      fill: 0x50c878,
-      stroke: { color: 0x2d8659, width: 2, style: 'solid' as const },
-      radius: 50,
-      zIndex: 1,
-    };
-    const circleObj = createGraphicObject('circle', circle);
-    engine.addObject(circleObj);
+    const circle = new Circle({
+      transform: { x: 500, y: 200, scaleX: 1, scaleY: 1, rotation: 0 },
+      radius: 60,
+      fill: { type: 'solid', color: '#2196F3', alpha: 1 },
+      stroke: { color: '#1565C0', width: 2, alpha: 1 },
+    });
+    engine.addObject(circle);
 
     // 添加文本
-    const text: TextProperties = {
-      id: 'text-1',
-      type: 'text' as ObjectType,
-      name: '文本 1',
-      position: { x: 300, y: 350 },
-      rotation: 0,
-      scale: { x: 1, y: 1 },
-      alpha: 1,
-      visible: true,
-      locked: false,
-      size: { width: 200, height: 50 },
-      fill: 0xffffff,
-      content: 'Hello PixiJS!',
+    const text = new Text({
+      transform: { x: 350, y: 400, scaleX: 1, scaleY: 1, rotation: 0 },
+      text: 'PixiJS Editor',
       fontSize: 24,
-      fontFamily: 'Arial',
-      fontWeight: 'bold',
-      textAlign: 'center',
-      zIndex: 2,
-    };
-    const textObj = createGraphicObject('text', text);
-    engine.addObject(textObj);
-
-    // 更新对象列表
-    setObjects([rectObj, circleObj, textObj]);
+      fill: { type: 'solid', color: '#333333', alpha: 1 },
+    });
+    engine.addObject(text);
   };
 
-  // 设置画布交互
-  const setupCanvasInteraction = (engine: PixiEngine) => {
-    const allObjects = engine.getAllObjects();
+  // 对象添加事件
+  const handleObjectAdded = useCallback(({ object }: any) => {
+    updateLayers();
 
-    allObjects.forEach(obj => {
-      // 点击对象选中
-      obj.pixiObject.on('pointerdown', (event: any) => {
-        event.stopPropagation();
-        const isMultiSelect = event.data.originalEvent.ctrlKey || event.data.originalEvent.metaKey;
-        handleSelect(obj.id, isMultiSelect);
-      });
-    });
-
-    // 点击画布取消选中
-    const app = engine.getApp();
-    if (app) {
-      app.stage.on('pointerdown', () => {
-        setSelectedIds(new Set());
-        // 更新所有对象的选中状态
-        allObjects.forEach(obj => {
-          obj.setSelected(false);
-        });
-        // 清除变换控制器
-        engine.setSelectedObjects(new Set());
-      });
-    }
-  };
-
-  // 创建新对象
-  const createObject = useCallback((type: ObjectType) => {
-    if (!engineRef.current) return;
-
-    const id = `${type}-${Date.now()}`;
-    const baseProps = {
-      id,
-      type,
-      name: `${type} ${id.slice(-4)}`,
-      position: { x: 300, y: 300 },
-      rotation: 0,
-      scale: { x: 1, y: 1 },
-      alpha: 1,
-      visible: true,
-      locked: false,
-      zIndex: 1,
-    };
-
-    let obj: IGraphicObject;
-
-    switch (type) {
-      case 'rectangle': {
-        const props: RectangleProperties = {
-          ...baseProps,
-          type: 'rectangle',
-          size: { width: 100, height: 100 },
-          fill: 0x4a90e2,
-          stroke: { color: 0x2c5aa0, width: 2, style: 'solid' },
-          cornerRadius: 0,
-        };
-        obj = createGraphicObject('rectangle', props);
-        break;
-      }
-      case 'circle': {
-        const props: CircleProperties = {
-          ...baseProps,
-          type: 'circle',
-          size: { width: 80, height: 80 },
-          fill: 0x50c878,
-          stroke: { color: 0x2d8659, width: 2, style: 'solid' },
-          radius: 40,
-        };
-        obj = createGraphicObject('circle', props);
-        break;
-      }
-      case 'text': {
-        const props: TextProperties = {
-          ...baseProps,
-          type: 'text',
-          size: { width: 200, height: 50 },
-          fill: 0xffffff,
-          content: 'New Text',
-          fontSize: 16,
-          fontFamily: 'Arial',
-          fontWeight: 'normal',
-          textAlign: 'center',
-        };
-        obj = createGraphicObject('text', props);
-        break;
-      }
-      default:
-        return;
-    }
-
-    engineRef.current.addObject(obj);
-    setObjects(prev => [...prev, obj]);
-
-    // 选中新创建的对象
-    const newSelectedIds = new Set([id]);
-    setSelectedIds(newSelectedIds);
-
-    // 更新所有对象的选中状态
-    engineRef.current.getAllObjects().forEach(o => {
-      o.setSelected(o.id === id);
-    });
-
-    // 更新变换控制器
-    engineRef.current.setSelectedObjects(newSelectedIds);
-
-    // 为新对象添加交互
-    obj.pixiObject.on('pointerdown', (event: any) => {
-      event.stopPropagation();
-      const isMultiSelect = event.data.originalEvent.ctrlKey || event.data.originalEvent.metaKey;
-      handleSelect(obj.id, isMultiSelect);
+    // 记录到历史
+    historyRef.current.push({
+      type: ActionType.Create,
+      timestamp: Date.now(),
+      objectId: object.id,
+      afterState: object.serialize(),
     });
   }, []);
 
-  // 处理工具切换
-  const handleToolChange = useCallback((tool: ToolType) => {
-    setCurrentTool(tool);
+  // 选择变化事件
+  const handleSelectionChanged = useCallback(
+    ({ selectedIds: ids }: any) => {
+      setSelectedIds(ids);
 
-    // 如果切换到绘图工具，创建对应的对象
-    switch (tool) {
-      case 'rectangle':
-        createObject('rectangle');
-        setCurrentTool('select');
-        break;
-      case 'circle':
-        createObject('circle');
-        setCurrentTool('select');
-        break;
-      case 'text':
-        createObject('text');
-        setCurrentTool('select');
-        break;
-    }
-  }, [createObject]);
+      if (engineRef.current) {
+        const objects = ids
+          .map((id: string) => engineRef.current!.getObject(id))
+          .filter(Boolean)
+          .map((obj: any) => obj.getProperties());
 
-  // 选择对象
-  const handleSelect = useCallback((id: string, multi: boolean) => {
-    if (!engineRef.current) return;
+        setSelectedObjects(objects);
 
-    setSelectedIds(prev => {
-      let newSet: Set<string>;
-      if (multi) {
-        newSet = new Set(prev);
-        if (newSet.has(id)) {
-          newSet.delete(id);
-        } else {
-          newSet.add(id);
+        // 更新交互管理器中的变换控制器
+        if (interactionRef.current) {
+          interactionRef.current.updateSelection();
         }
-      } else {
-        newSet = new Set([id]);
       }
 
-      // 更新所有对象的选中状态
-      const allObjects = engineRef.current!.getAllObjects();
-      allObjects.forEach(obj => {
-        obj.setSelected(newSet.has(obj.id));
-      });
+      updateLayers();
+    },
+    [],
+  );
 
-      // 更新变换控制器
-      engineRef.current!.setSelectedObjects(newSet);
+  // 历史记录变化
+  const handleHistoryChanged = useCallback(
+    ({ canUndo: undo, canRedo: redo }: any) => {
+      setCanUndo(undo);
+      setCanRedo(redo);
+    },
+    [],
+  );
 
-      return newSet;
+  // 撤销
+  const handleUndo = useCallback((action: any) => {
+    // TODO: 实现撤销逻辑
+    message.info('撤销操作');
+  }, []);
+
+  // 重做
+  const handleRedo = useCallback((action: any) => {
+    // TODO: 实现重做逻辑
+    message.info('重做操作');
+  }, []);
+
+  // 更新图层列表
+  const updateLayers = useCallback(() => {
+    if (!engineRef.current) return;
+
+    const objects = engineRef.current.getAllObjects();
+    const layerNodes: LayerNode[] = objects.map((obj) => {
+      const props = obj.getProperties();
+      return {
+        id: props.id,
+        name: props.name,
+        type: props.type,
+        visible: props.visible,
+        locked: props.locked,
+      };
     });
+
+    setLayers(layerNodes);
+  }, []);
+
+  // 工具变化
+  const handleToolChange = useCallback((mode: ToolMode) => {
+    setToolMode(mode);
+    if (engineRef.current) {
+      engineRef.current.setToolMode(mode);
+    }
+  }, []);
+
+  // 图层选择
+  const handleSelectLayer = useCallback((id: string, multi?: boolean) => {
+    if (engineRef.current) {
+      engineRef.current.selectObject(id, multi);
+    }
   }, []);
 
   // 切换可见性
   const handleToggleVisible = useCallback((id: string) => {
-    if (!engineRef.current) return;
-    const obj = engineRef.current.getObject(id);
+    const obj = engineRef.current?.getObject(id);
     if (obj) {
-      obj.updateProperties({ visible: !obj.properties.visible });
-      setObjects(prev => [...prev]);
+      const props = obj.getProperties();
+      obj.updateProperties({ ...props, visible: !props.visible });
+      updateLayers();
     }
   }, []);
 
   // 切换锁定
-  const handleToggleLock = useCallback((id: string) => {
-    if (!engineRef.current) return;
-    const obj = engineRef.current.getObject(id);
+  const handleToggleLocked = useCallback((id: string) => {
+    const obj = engineRef.current?.getObject(id);
     if (obj) {
-      obj.updateProperties({ locked: !obj.properties.locked });
-      setObjects(prev => [...prev]);
+      const props = obj.getProperties();
+      obj.updateProperties({ ...props, locked: !props.locked });
+      updateLayers();
     }
   }, []);
 
-  // 删除对象
-  const handleDelete = useCallback((id: string) => {
-    if (!engineRef.current) return;
-    engineRef.current.removeObject(id);
-    setObjects(prev => prev.filter(obj => obj.id !== id));
-    setSelectedIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(id);
-      return newSet;
-    });
+  // 重命名图层
+  const handleRenameLayer = useCallback((id: string, name: string) => {
+    const obj = engineRef.current?.getObject(id);
+    if (obj) {
+      const props = obj.getProperties();
+      obj.updateProperties({ ...props, name });
+      updateLayers();
+    }
+  }, []);
+
+  // 删除图层
+  const handleDeleteLayer = useCallback((id: string) => {
+    if (engineRef.current) {
+      engineRef.current.removeObject(id);
+      updateLayers();
+    }
   }, []);
 
   // 更新属性
   const handleUpdateProperties = useCallback(
     (id: string, props: Partial<ObjectProperties>) => {
-      if (!engineRef.current) return;
-      const obj = engineRef.current.getObject(id);
+      const obj = engineRef.current?.getObject(id);
       if (obj) {
-        obj.updateProperties(props);
-        setObjects(prev => [...prev]);
-
-        // 更新变换控制器
-        const transformControls = engineRef.current.getTransformControls();
-        if (transformControls) {
-          transformControls.update();
-        }
+        obj.updateProperties({ ...obj.getProperties(), ...props });
+        setSelectedObjects([obj.getProperties()]);
+        updateLayers();
       }
     },
-    []
+    [],
   );
 
-  // 撤销/重做
-  const handleUndo = useCallback(() => {
-    engineRef.current?.undo();
+  // 导出
+  const handleExport = useCallback(async () => {
+    if (engineRef.current) {
+      try {
+        const base64 = await engineRef.current.exportAsImage('png');
+        const a = document.createElement('a');
+        a.href = base64;
+        a.download = 'pixi-editor-export.png';
+        a.click();
+        message.success('导出成功');
+      } catch (error) {
+        console.error('Export error:', error);
+        message.error('导出失败');
+      }
+    }
   }, []);
 
-  const handleRedo = useCallback(() => {
-    engineRef.current?.redo();
+  // 导入
+  const handleImport = useCallback(() => {
+    message.info('导入功能开发中');
   }, []);
-
-  // 缩放控制
-  const handleZoomIn = useCallback(() => {
-    if (!engineRef.current) return;
-    const viewState = engineRef.current.getViewState();
-    engineRef.current.setZoom(viewState.zoom * 1.2);
-  }, []);
-
-  const handleZoomOut = useCallback(() => {
-    if (!engineRef.current) return;
-    const viewState = engineRef.current.getViewState();
-    engineRef.current.setZoom(viewState.zoom / 1.2);
-  }, []);
-
-  const handleFitScreen = useCallback(() => {
-    engineRef.current?.fitToScreen();
-  }, []);
-
-  // 动画控制
-  const handleTogglePlay = useCallback(() => {
-    setIsPlaying(prev => !prev);
-  }, []);
-
-  // 获取选中的对象
-  const selectedObjects = objects.filter(obj => selectedIds.has(obj.id));
 
   return (
-    <div className={styles['pixi-editor']}>
-      {/* 工具栏 */}
+    <div className={styles.pixiEditor}>
       <Toolbar
-        currentTool={currentTool}
+        toolMode={toolMode}
         onToolChange={handleToolChange}
+        onUndo={() => historyRef.current.undo()}
+        onRedo={() => historyRef.current.redo()}
         canUndo={canUndo}
         canRedo={canRedo}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onFitScreen={handleFitScreen}
-        isPlaying={isPlaying}
-        onTogglePlay={handleTogglePlay}
+        onExport={handleExport}
+        onImport={handleImport}
       />
 
-      {/* 内容区域 */}
-      <div className={styles['pixi-editor-content']}>
-        {/* 图层面板 */}
-        <LayerPanel
-          objects={objects}
-          selectedIds={selectedIds}
-          onSelect={handleSelect}
-          onToggleVisible={handleToggleVisible}
-          onToggleLock={handleToggleLock}
-          onDelete={handleDelete}
-        />
-
-        {/* 画布 */}
-        <div className={styles['pixi-editor-canvas']} ref={canvasRef} />
-
-        {/* 属性面板 */}
-        <PropertyPanel
-          selectedObjects={selectedObjects}
-          onUpdateProperties={handleUpdateProperties}
-        />
-      </div>
-
-      {/* 状态栏 */}
-      <div className={styles['pixi-editor-status']}>
-        <div className={styles['pixi-editor-status-item']}>
-          <span className={styles['pixi-editor-status-item-label']}>缩放:</span>
-          <span className={styles['pixi-editor-status-item-value']}>
-            {Math.round(zoom * 100)}%
-          </span>
+      <div className={styles.content}>
+        <div className={styles.leftPanel}>
+          <LayerPanel
+            layers={layers}
+            selectedIds={selectedIds}
+            onSelectLayer={handleSelectLayer}
+            onToggleVisible={handleToggleVisible}
+            onToggleLocked={handleToggleLocked}
+            onRenameLayer={handleRenameLayer}
+            onDeleteLayer={handleDeleteLayer}
+            onReorderLayer={() => {}}
+          />
         </div>
-        <div className={styles['pixi-editor-status-item']}>
-          <span className={styles['pixi-editor-status-item-label']}>对象:</span>
-          <span className={styles['pixi-editor-status-item-value']}>{objects.length}</span>
-        </div>
-        <div className={styles['pixi-editor-status-item']}>
-          <span className={styles['pixi-editor-status-item-label']}>选中:</span>
-          <span className={styles['pixi-editor-status-item-value']}>{selectedIds.size}</span>
-        </div>
-        <div className={styles['pixi-editor-status-spacer']} />
-        <div className={styles['pixi-editor-status-item']}>
-          <span className={styles['pixi-editor-status-item-label']}>工具:</span>
-          <span className={styles['pixi-editor-status-item-value']}>{currentTool}</span>
+
+        <div className={styles.canvas} ref={canvasRef} />
+
+        <div className={styles.rightPanel}>
+          <PropertyPanel
+            selectedObjects={selectedObjects}
+            onUpdateProperties={handleUpdateProperties}
+          />
         </div>
       </div>
     </div>

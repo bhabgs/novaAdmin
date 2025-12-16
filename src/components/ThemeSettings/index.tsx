@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Card,
   Typography,
@@ -22,69 +22,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { updateTheme, resetSettings } from '../../store/slices/settingsSlice';
+import { PRESET_COLORS, getPresetThemes } from '../../constants/theme';
 import styles from './index.module.less';
 
 const { Title, Text } = Typography;
-
-// 预设主题色
-const PRESET_COLORS = [
-  '#1890ff', // 默认蓝色
-  '#52c41a', // 绿色
-  '#fa8c16', // 橙色
-  '#eb2f96', // 粉色
-  '#722ed1', // 紫色
-  '#13c2c2', // 青色
-  '#f5222d', // 红色
-  '#fa541c', // 火红色
-  '#faad14', // 金色
-  '#a0d911', // 青绿色
-  '#1677ff', // 亮蓝色
-  '#00b96b', // 翠绿色
-];
-
-// 预设主题方案
-const getPresetThemes = (t: any) => [
-  {
-    name: t('settings.defaultTheme'),
-    key: 'default',
-    colors: ['#1890ff', '#f0f2f5', '#ffffff'],
-    config: {
-      mode: 'light' as const,
-      primaryColor: '#1890ff',
-      borderRadius: 6,
-    },
-  },
-  {
-    name: t('settings.darkTheme'),
-    key: 'dark',
-    colors: ['#1890ff', '#141414', '#1f1f1f'],
-    config: {
-      mode: 'dark' as const,
-      primaryColor: '#1890ff',
-      borderRadius: 6,
-    },
-  },
-  {
-    name: t('settings.techBlue'),
-    key: 'tech',
-    colors: ['#1677ff', '#f0f5ff', '#ffffff'],
-    config: {
-      mode: 'light' as const,
-      primaryColor: '#1677ff',
-      borderRadius: 8,
-    },
-  },
-  {
-    name: t('settings.natureGreen'),
-    key: 'nature',
-    colors: ['#52c41a', '#f6ffed', '#ffffff'],
-    config: {
-      mode: 'light' as const,
-      primaryColor: '#52c41a',
-      borderRadius: 6,
-    },
-  },
-];
 
 const ThemeSettings: React.FC = () => {
   const { t } = useTranslation();
@@ -94,40 +35,34 @@ const ThemeSettings: React.FC = () => {
 
   const PRESET_THEMES = getPresetThemes(t);
 
-  // 切换主题模式
-  const handleModeChange = (mode: 'light' | 'dark') => {
+  const handleModeChange = useCallback((mode: 'light' | 'dark') => {
     dispatch(updateTheme({ mode }));
     message.success(t('settings.themeUpdateSuccess'));
-  };
+  }, [dispatch, t]);
 
-  // 更改主题色
-  const handleColorChange = (color: string) => {
+  const handleColorChange = useCallback((color: string) => {
     setCustomColor(color);
     dispatch(updateTheme({ primaryColor: color }));
     message.success(t('settings.colorUpdateSuccess'));
-  };
+  }, [dispatch, t]);
 
-  // 更改圆角大小
-  const handleBorderRadiusChange = (value: number) => {
+  const handleBorderRadiusChange = useCallback((value: number) => {
     dispatch(updateTheme({ borderRadius: value }));
-  };
+  }, [dispatch]);
 
-  // 应用预设主题
-  const handlePresetTheme = (preset: ReturnType<typeof getPresetThemes>[0]) => {
+  const handlePresetTheme = useCallback((preset: ReturnType<typeof getPresetThemes>[0]) => {
     dispatch(updateTheme(preset.config));
     setCustomColor(preset.config.primaryColor);
     message.success(t('settings.themeApplied', { name: preset.name }));
-  };
+  }, [dispatch, t]);
 
-  // 重置主题
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     dispatch(resetSettings());
     setCustomColor('#1890ff');
     message.success(t('settings.resetSuccess'));
-  };
+  }, [dispatch, t]);
 
-  // 导出主题配置
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     const config = {
       theme,
       timestamp: new Date().toISOString(),
@@ -142,7 +77,7 @@ const ThemeSettings: React.FC = () => {
     a.click();
     URL.revokeObjectURL(url);
     message.success(t('settings.themeExported'));
-  };
+  }, [theme, t]);
 
   return (
     <div className={styles.themeSettings}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Table,
   Button,
@@ -6,8 +6,6 @@ import {
   Input,
   Card,
   Tag,
-  Modal,
-  message,
   Popconfirm,
   Row,
   Col,
@@ -29,6 +27,7 @@ import type { Role } from "../../types/role";
 import RoleForm from "./RoleForm";
 import PermissionModal from "./PermissionModal";
 import PageContainer from "../../components/PageContainer";
+import { useListManagement } from "../../hooks/useListManagement";
 
 const { Search } = Input;
 
@@ -37,81 +36,46 @@ const RoleList: React.FC = () => {
   const dispatch = useAppDispatch();
   const { roles, loading, total } = useAppSelector((state) => state.role);
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [searchText, setSearchText] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isPermissionModalVisible, setIsPermissionModalVisible] =
-    useState(false);
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [isPermissionModalVisible, setIsPermissionModalVisible] = useState(false);
+  const [permissionRole, setPermissionRole] = useState<Role | null>(null);
 
-  useEffect(() => {
-    loadRoles();
-  }, [currentPage, pageSize, searchText]);
+  const {
+    selectedRowKeys,
+    isModalVisible,
+    editingItem: editingRole,
+    setIsModalVisible,
+    setEditingItem: setEditingRole,
+    handleSearch,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    handleBatchDelete,
+    handleRefresh,
+    rowSelection: baseRowSelection,
+    paginationConfig,
+  } = useListManagement<Role>({
+    dispatch,
+    fetchAction: fetchRoles as any,
+    deleteAction: deleteRole,
+    loadingSelector: loading,
+    totalSelector: total,
+    deleteSuccessKey: 'role.deleteSuccess',
+    selectWarningKey: 'role.selectRoles',
+    deleteConfirmKey: 'role.confirmDelete',
+    batchDeleteConfirmKey: 'role.batchDeleteConfirm',
+  });
 
-  const loadRoles = () => {
-    dispatch(
-      fetchRoles({
-        page: currentPage,
-        pageSize,
-        search: searchText,
-      })
-    );
-  };
-
-  const handleSearch = (value: string) => {
-    setSearchText(value);
-    setCurrentPage(1);
-  };
-
-  const handleAdd = () => {
-    setEditingRole(null);
-    setIsModalVisible(true);
-  };
-
-  const handleEdit = (record: Role) => {
-    setEditingRole(record);
-    setIsModalVisible(true);
-  };
-
-  const handlePermissions = (record: Role) => {
-    setEditingRole(record);
+  const handlePermissions = useCallback((record: Role) => {
+    setPermissionRole(record);
     setIsPermissionModalVisible(true);
-  };
+  }, []);
 
-  const handleDelete = async (id: string) => {
-    try {
-      await dispatch(deleteRole(id)).unwrap();
-      message.success(t("role.deleteSuccess"));
-      loadRoles();
-    } catch (error) {
-      message.error(t("message.error"));
-    }
-  };
-
-  const handleBatchDelete = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning(t("role.selectRoles"));
-      return;
-    }
-
-    Modal.confirm({
-      title: t("role.confirmDelete"),
-      content: t("role.batchDeleteConfirm", { count: selectedRowKeys.length }),
-      onOk: async () => {
-        try {
-          for (const id of selectedRowKeys) {
-            await dispatch(deleteRole(id as string)).unwrap();
-          }
-          message.success(t("role.deleteSuccess"));
-          setSelectedRowKeys([]);
-          loadRoles();
-        } catch (error) {
-          message.error(t("message.error"));
-        }
-      },
-    });
+  // Override rowSelection to disable admin role
+  const rowSelection = {
+    ...baseRowSelection,
+    getCheckboxProps: (record: Role) => ({
+      disabled: record.code === "admin",
+    }),
   };
 
   const columns = [
@@ -186,7 +150,7 @@ const RoleList: React.FC = () => {
       title: t("common.operation"),
       key: "action",
       width: 250,
-      render: (_, record: Role) => (
+      render: (_: unknown, record: Role) => (
         <Space size="small">
           <Button
             type="link"
@@ -212,7 +176,7 @@ const RoleList: React.FC = () => {
               type="link"
               danger
               icon={<DeleteOutlined />}
-              disabled={record.code === "admin"} // 禁止删除管理员角色
+              disabled={record.code === "admin"}
             >
               {t("common.delete")}
             </Button>
@@ -221,16 +185,6 @@ const RoleList: React.FC = () => {
       ),
     },
   ];
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys: React.Key[]) => {
-      setSelectedRowKeys(newSelectedRowKeys);
-    },
-    getCheckboxProps: (record: Role) => ({
-      disabled: record.code === "admin", // 禁止选择管理员角色
-    }),
-  };
 
   return (
     <PageContainer title={t("role.title")} ghost>
@@ -256,7 +210,7 @@ const RoleList: React.FC = () => {
               >
                 {t("role.batchDelete")}
               </Button>
-              <Button icon={<ReloadOutlined />} onClick={loadRoles}>
+              <Button icon={<ReloadOutlined />} onClick={handleRefresh}>
                 {t("common.refresh")}
               </Button>
             </Space>
@@ -269,18 +223,7 @@ const RoleList: React.FC = () => {
           dataSource={roles}
           rowKey="id"
           loading={loading}
-          pagination={{
-            current: currentPage,
-            pageSize,
-            total,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => t("common.total", { count: total }),
-            onChange: (page, size) => {
-              setCurrentPage(page);
-              setPageSize(size || 10);
-            },
-          }}
+          pagination={paginationConfig}
         />
       </Card>
 
@@ -290,17 +233,17 @@ const RoleList: React.FC = () => {
         onCancel={() => setIsModalVisible(false)}
         onSuccess={() => {
           setIsModalVisible(false);
-          loadRoles();
+          handleRefresh();
         }}
       />
 
       <PermissionModal
         visible={isPermissionModalVisible}
-        role={editingRole}
+        role={permissionRole}
         onCancel={() => setIsPermissionModalVisible(false)}
         onSuccess={() => {
           setIsPermissionModalVisible(false);
-          loadRoles();
+          handleRefresh();
         }}
       />
     </PageContainer>

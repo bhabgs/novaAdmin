@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosRequestConfig } from 'axios';
 import { message } from 'antd';
 import { tokenUtils } from '../utils/auth';
+import i18n from '../i18n';
 
 // 创建axios实例
 const request: AxiosInstance = axios.create({
@@ -52,7 +53,7 @@ request.interceptors.response.use(
         return data;
       } else {
         // 业务错误
-        const errorMessage = data.message || '请求失败';
+        const errorMessage = data.message || i18n.t('api.requestFailed');
         message.error(errorMessage);
         return Promise.reject(new Error(errorMessage));
       }
@@ -66,7 +67,7 @@ request.interceptors.response.use(
 
     // 网络错误
     if (!error.response) {
-      message.error('网络连接失败，请检查网络设置');
+      message.error(i18n.t('api.networkConnectionFailed'));
       return Promise.reject(error);
     }
 
@@ -76,20 +77,20 @@ request.interceptors.response.use(
       case 401:
         // 未授权，清除token并跳转到登录页
         tokenUtils.removeToken();
-        message.error('登录已过期，请重新登录');
+        message.error(i18n.t('api.unauthorized'));
         window.location.href = '/auth/login';
         break;
       case 403:
-        message.error('没有权限访问该资源');
+        message.error(i18n.t('api.forbidden'));
         break;
       case 404:
-        message.error('请求的资源不存在');
+        message.error(i18n.t('api.notFound'));
         break;
       case 500:
-        message.error('服务器内部错误');
+        message.error(i18n.t('api.serverError'));
         break;
       default:
-        message.error(data?.message || `请求失败 (${status})`);
+        message.error(data?.message || i18n.t('api.requestFailedWithCode', { code: status }));
     }
 
     return Promise.reject(error);

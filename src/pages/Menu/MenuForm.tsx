@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   Modal,
   Form,
@@ -14,42 +14,25 @@ import {
   Button
 } from 'antd';
 import {
-  MenuOutlined,
   FolderOutlined,
   FileOutlined,
   AppstoreOutlined,
-  LinkOutlined,
-  CodeOutlined,
-  SortAscendingOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { createMenu, updateMenu, fetchMenus } from '../../store/slices/menuSlice';
+import { createMenu, updateMenu } from '../../store/slices/menuSlice';
+import type { Menu, MenuFormData } from '../../types/menu';
+import { buildMenuTree } from '../../utils/menuUtils';
+import { MENU_ICONS } from '../../constants/icons';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 interface MenuFormProps {
   visible: boolean;
-  menu?: any;
+  menu?: Menu | null;
   onSubmit: () => void;
   onCancel: () => void;
-}
-
-interface MenuFormData {
-  name: string;
-  path: string;
-  icon: string;
-  parentId: string | null;
-  type: 'directory' | 'page' | 'button';
-  status: 'active' | 'inactive';
-  sortOrder: number;
-  permission: string;
-  component: string;
-  description: string;
-  remark: string;
-  hideInMenu: boolean;
-  keepAlive: boolean;
 }
 
 const MenuForm: React.FC<MenuFormProps> = ({
@@ -67,7 +50,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
 
   useEffect(() => {
     if (visible) {
-      if (isEditing) {
+      if (isEditing && menu) {
         form.setFieldsValue({
           ...menu,
           status: menu.status === 'active',
@@ -85,49 +68,18 @@ const MenuForm: React.FC<MenuFormProps> = ({
     }
   }, [visible, menu, isEditing, form]);
 
-  // 构建父级菜单树形数据
-  const buildParentMenuTree = (menus: any[]): any[] => {
-    const menuMap = new Map();
-    const rootMenus: any[] = [];
+  const parentMenuOptions = buildMenuTree(menus, menu?.id);
 
-    // 过滤掉按钮类型的菜单，只有目录和页面可以作为父级
-    const validParentMenus = menus.filter(m => m.type !== 'button');
-
-    validParentMenus.forEach(menu => {
-      menuMap.set(menu.id, {
-        value: menu.id,
-        title: menu.name,
-        key: menu.id,
-        children: [],
-        disabled: isEditing && menu.id === menu?.id, // 禁止选择自己作为父级
-      });
-    });
-
-    validParentMenus.forEach(menu => {
-      const menuItem = menuMap.get(menu.id);
-      if (menu.parentId && menuMap.has(menu.parentId)) {
-        const parent = menuMap.get(menu.parentId);
-        parent.children.push(menuItem);
-      } else {
-        rootMenus.push(menuItem);
-      }
-    });
-
-    return rootMenus;
-  };
-
-  const parentMenuOptions = buildParentMenuTree(menus);
-
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     try {
       const values = await form.validateFields();
       const formData: MenuFormData = {
         ...values,
         status: values.status ? 'active' : 'inactive',
-        parentId: values.parentId || null,
+        parentId: values.parentId || undefined,
       };
 
-      if (isEditing) {
+      if (isEditing && menu) {
         await dispatch(updateMenu({ id: menu.id, menuData: formData })).unwrap();
         message.success(t('menu.updateSuccess'));
       } else {
@@ -137,38 +89,24 @@ const MenuForm: React.FC<MenuFormProps> = ({
 
       onSubmit();
     } catch (error) {
+      console.error('Menu form submit error:', error);
       if (error instanceof Error) {
         message.error(error.message);
       } else {
         message.error(t('message.error'));
       }
     }
-  };
+  }, [form, isEditing, menu, dispatch, t, onSubmit]);
 
-  const handleTypeChange = (type: string) => {
-    // 根据菜单类型设置默认值
-    if (type === 'directory') {
-      form.setFieldsValue({
-        path: '',
-        component: '',
-      });
-    } else if (type === 'button') {
+  const handleTypeChange = useCallback((type: 'directory' | 'page' | 'button') => {
+    // Set default values based on menu type
+    if (type === 'directory' || type === 'button') {
       form.setFieldsValue({
         path: '',
         component: '',
       });
     }
-  };
-
-  const iconOptions = [
-    { value: 'MenuOutlined', label: 'Menu', icon: <MenuOutlined /> },
-    { value: 'FolderOutlined', label: 'Folder', icon: <FolderOutlined /> },
-    { value: 'FileOutlined', label: 'File', icon: <FileOutlined /> },
-    { value: 'AppstoreOutlined', label: 'App', icon: <AppstoreOutlined /> },
-    { value: 'LinkOutlined', label: 'Link', icon: <LinkOutlined /> },
-    { value: 'CodeOutlined', label: 'Code', icon: <CodeOutlined /> },
-    { value: 'SortAscendingOutlined', label: 'Sort', icon: <SortAscendingOutlined /> },
-  ];
+  }, [form]);
 
   return (
     <Modal
@@ -260,7 +198,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
               label={t('menu.menuIcon')}
             >
               <Select placeholder={t('menu.menuIconPlaceholder')} allowClear>
-                {iconOptions.map(option => (
+                {MENU_ICONS.map(option => (
                   <Option key={option.value} value={option.value}>
                     <Space>
                       {option.icon}

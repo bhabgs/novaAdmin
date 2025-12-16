@@ -244,6 +244,19 @@
     "confirmOperation": "Are you sure you want to perform this operation?",
     "networkError": "Network error, please try again later",
     "permissionDenied": "Permission denied",
-    "dataNotFound": "Data not found"
+    "dataNotFound": "Data not found",
+    "deleteSuccess": "Deleted successfully",
+    "selectWarning": "Please select items to operate",
+    "deleteConfirm": "Confirm deletion",
+    "batchDeleteConfirm": "Are you sure you want to delete {{count}} selected items?"
+  },
+  "api": {
+    "requestFailed": "Request failed",
+    "networkConnectionFailed": "Network connection failed, please check your network settings",
+    "unauthorized": "Session expired, please login again",
+    "forbidden": "You don't have permission to access this resource",
+    "notFound": "The requested resource does not exist",
+    "serverError": "Internal server error",
+    "requestFailedWithCode": "Request failed ({{code}})"
   }
 }

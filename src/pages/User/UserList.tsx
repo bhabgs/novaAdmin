@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Table,
   Button,
@@ -8,7 +8,6 @@ import {
   Card,
   Tag,
   Avatar,
-  Modal,
   message,
   Popconfirm,
   Row,
@@ -32,6 +31,7 @@ import {
 import type { User } from "../../types/user";
 import UserForm from "./UserForm";
 import PageContainer from "../../components/PageContainer";
+import { useListManagement } from "../../hooks/useListManagement";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -41,92 +41,48 @@ const UserList: React.FC = () => {
   const dispatch = useAppDispatch();
   const { users, loading, total } = useAppSelector((state) => state.user);
 
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    loadUsers();
-  }, [currentPage, pageSize, searchText, statusFilter]);
+  const {
+    selectedRowKeys,
+    isModalVisible,
+    editingItem: editingUser,
+    setIsModalVisible,
+    setEditingItem: setEditingUser,
+    handleSearch,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    handleBatchDelete,
+    handleRefresh,
+    rowSelection,
+    paginationConfig,
+  } = useListManagement<User>({
+    dispatch,
+    fetchAction: fetchUsers as any,
+    deleteAction: deleteUser,
+    loadingSelector: loading,
+    totalSelector: total,
+    deleteSuccessKey: 'user.deleteSuccess',
+    selectWarningKey: 'user.selectUsers',
+    deleteConfirmKey: 'user.confirmDelete',
+    batchDeleteConfirmKey: 'user.batchDeleteConfirm',
+  });
 
-  const loadUsers = () => {
-    dispatch(
-      fetchUsers({
-        page: currentPage,
-        pageSize,
-        search: searchText,
-        status: statusFilter,
-      })
-    );
-  };
-
-  const handleSearch = (value: string) => {
-    setSearchText(value);
-    setCurrentPage(1);
-  };
-
-  const handleStatusFilter = (value: string) => {
+  const handleStatusFilter = useCallback((value: string) => {
     setStatusFilter(value);
-    setCurrentPage(1);
-  };
+  }, []);
 
-  const handleAdd = () => {
-    setEditingUser(null);
-    setIsModalVisible(true);
-  };
-
-  const handleEdit = (record: User) => {
-    setEditingUser(record);
-    setIsModalVisible(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    try {
-      await dispatch(deleteUser(id)).unwrap();
-      message.success(t("user.deleteSuccess"));
-      loadUsers();
-    } catch (error) {
-      message.error(t("message.error"));
-    }
-  };
-
-  const handleBatchDelete = async () => {
-    if (selectedRowKeys.length === 0) {
-      message.warning(t("user.selectUsers"));
-      return;
-    }
-
-    Modal.confirm({
-      title: t("user.confirmDelete"),
-      content: t("user.batchDeleteConfirm", { count: selectedRowKeys.length }),
-      onOk: async () => {
-        try {
-          for (const id of selectedRowKeys) {
-            await dispatch(deleteUser(id as string)).unwrap();
-          }
-          message.success(t("user.deleteSuccess"));
-          setSelectedRowKeys([]);
-          loadUsers();
-        } catch (error) {
-          message.error(t("message.error"));
-        }
-      },
-    });
-  };
-
-  const handleStatusChange = async (id: string, status: string) => {
+  const handleStatusChange = useCallback(async (id: string, status: string) => {
     try {
       await dispatch(updateUserStatus({ id, status })).unwrap();
       message.success(t("user.saveSuccess"));
-      loadUsers();
+      handleRefresh();
     } catch (error) {
+      console.error('Status change error:', error);
       message.error(t("message.error"));
     }
-  };
+  }, [dispatch, t, handleRefresh]);
 
   const columns = [
     {
@@ -134,7 +90,7 @@ const UserList: React.FC = () => {
       dataIndex: "avatar",
       key: "avatar",
       width: 80,
-      render: (avatar: string, record: User) => (
+      render: (avatar: string) => (
         <Avatar size={40} src={avatar} icon={<UserOutlined />} />
       ),
     },
@@ -177,31 +133,23 @@ const UserList: React.FC = () => {
       title: t("user.status"),
       dataIndex: "status",
       key: "status",
-      render: (status: string, record: User) => {
-        const statusConfig = {
-          active: { color: "green", text: t("user.active") },
-          inactive: { color: "orange", text: t("user.inactive") },
-          banned: { color: "red", text: t("user.banned") },
-        };
-        const config = statusConfig[status as keyof typeof statusConfig];
-        return (
-          <Select
-            value={status}
-            style={{ width: 100 }}
-            onChange={(value) => handleStatusChange(record.id, value)}
-          >
-            <Option value="active">
-              <Tag color="green">{t("user.active")}</Tag>
-            </Option>
-            <Option value="inactive">
-              <Tag color="orange">{t("user.inactive")}</Tag>
-            </Option>
-            <Option value="banned">
-              <Tag color="red">{t("user.banned")}</Tag>
-            </Option>
-          </Select>
-        );
-      },
+      render: (status: string, record: User) => (
+        <Select
+          value={status}
+          style={{ width: 100 }}
+          onChange={(value) => handleStatusChange(record.id, value)}
+        >
+          <Option value="active">
+            <Tag color="green">{t("user.active")}</Tag>
+          </Option>
+          <Option value="inactive">
+            <Tag color="orange">{t("user.inactive")}</Tag>
+          </Option>
+          <Option value="banned">
+            <Tag color="red">{t("user.banned")}</Tag>
+          </Option>
+        </Select>
+      ),
     },
     {
       title: t("user.lastLoginTime"),
@@ -213,7 +161,7 @@ const UserList: React.FC = () => {
       title: t("common.operation"),
       key: "action",
       width: 200,
-      render: (_, record: User) => (
+      render: (_: unknown, record: User) => (
         <Space size="small">
           <Button
             type="link"
@@ -236,13 +184,6 @@ const UserList: React.FC = () => {
       ),
     },
   ];
-
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys: React.Key[]) => {
-      setSelectedRowKeys(newSelectedRowKeys);
-    },
-  };
 
   return (
     <PageContainer title={t("user.title")} ghost>
@@ -280,7 +221,7 @@ const UserList: React.FC = () => {
               >
                 {t("user.batchDelete")}
               </Button>
-              <Button icon={<ReloadOutlined />} onClick={loadUsers}>
+              <Button icon={<ReloadOutlined />} onClick={handleRefresh}>
                 {t("common.refresh")}
               </Button>
             </Space>
@@ -293,18 +234,7 @@ const UserList: React.FC = () => {
           dataSource={users}
           rowKey="id"
           loading={loading}
-          pagination={{
-            current: currentPage,
-            pageSize,
-            total,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => t("common.total", { count: total }),
-            onChange: (page, size) => {
-              setCurrentPage(page);
-              setPageSize(size || 10);
-            },
-          }}
+          pagination={paginationConfig}
         />
       </Card>
 
@@ -314,7 +244,7 @@ const UserList: React.FC = () => {
         onCancel={() => setIsModalVisible(false)}
         onSuccess={() => {
           setIsModalVisible(false);
-          loadUsers();
+          handleRefresh();
         }}
       />
     </PageContainer>

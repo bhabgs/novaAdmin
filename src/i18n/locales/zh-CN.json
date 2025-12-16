@@ -244,6 +244,19 @@
     "confirmOperation": "确定要执行此操作吗？",
     "networkError": "网络错误，请稍后重试",
     "permissionDenied": "权限不足",
-    "dataNotFound": "数据不存在"
+    "dataNotFound": "数据不存在",
+    "deleteSuccess": "删除成功",
+    "selectWarning": "请先选择要操作的项",
+    "deleteConfirm": "确认删除",
+    "batchDeleteConfirm": "确定要删除选中的 {{count}} 项吗？"
+  },
+  "api": {
+    "requestFailed": "请求失败",
+    "networkConnectionFailed": "网络连接失败，请检查网络设置",
+    "unauthorized": "登录已过期，请重新登录",
+    "forbidden": "没有权限访问该资源",
+    "notFound": "请求的资源不存在",
+    "serverError": "服务器内部错误",
+    "requestFailedWithCode": "请求失败 ({{code}})"
   }
 }

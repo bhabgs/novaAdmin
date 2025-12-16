@@ -142,7 +142,7 @@ const generateMockMenus = () => {
           i18nKey: "menu.richtextEditor",
           type: "page" as const,
           path: "/util/richtext-editor",
-          component: "tools/Utils/RichTextEditor",
+          component: "tools/RichTextEditor",
           icon: "EditOutlined",
           parentId: "600",
           sortOrder: 4,
@@ -158,7 +158,7 @@ const generateMockMenus = () => {
           i18nKey: "menu.pixiEditor",
           type: "page" as const,
           path: "/util/pixi-editor",
-          component: "tools/Utils/PixiEditor",
+          component: "tools/PixiEditor",
           icon: "PlusOutlined",
           parentId: "600",
           sortOrder: 5,
@@ -199,9 +199,9 @@ const availableIcons = [
 ];
 
 // localStorage 键名
-const MENU_STORAGE_KEY = 'mock_menus_data';
-const MENU_VERSION_KEY = 'mock_menus_version';
-const CURRENT_MENU_VERSION = '2.0'; // 路径格式版本
+const MENU_STORAGE_KEY = "mock_menus_data";
+const MENU_VERSION_KEY = "mock_menus_version";
+const CURRENT_MENU_VERSION = "2.0"; // 路径格式版本
 
 // 修复子菜单的 parentId（数据迁移）
 const fixMenuParentIds = (menus: any[]): any[] => {
@@ -235,7 +235,9 @@ const loadMenusFromStorage = (): any[] => {
 
     // 如果版本不匹配，清除旧数据
     if (storedVersion !== CURRENT_MENU_VERSION) {
-      console.log(`[Mock Menu] Version mismatch (${storedVersion} -> ${CURRENT_MENU_VERSION}), resetting menus`);
+      console.log(
+        `[Mock Menu] Version mismatch (${storedVersion} -> ${CURRENT_MENU_VERSION}), resetting menus`
+      );
       localStorage.removeItem(MENU_STORAGE_KEY);
       localStorage.setItem(MENU_VERSION_KEY, CURRENT_MENU_VERSION);
 
@@ -246,7 +248,7 @@ const loadMenusFromStorage = (): any[] => {
     }
 
     if (stored) {
-      console.log('[Mock Menu] Loading menus from localStorage');
+      console.log("[Mock Menu] Loading menus from localStorage");
       let menus = JSON.parse(stored);
 
       // 自动修复缺少 parentId 的子菜单
@@ -258,11 +260,11 @@ const loadMenusFromStorage = (): any[] => {
       return menus;
     }
   } catch (error) {
-    console.error('[Mock Menu] Failed to load from localStorage:', error);
+    console.error("[Mock Menu] Failed to load from localStorage:", error);
   }
 
   // 如果没有存储数据或加载失败，使用默认数据并保存
-  console.log('[Mock Menu] Initializing with default menus');
+  console.log("[Mock Menu] Initializing with default menus");
   localStorage.setItem(MENU_VERSION_KEY, CURRENT_MENU_VERSION);
   const defaultMenus = generateMockMenus();
   saveMenusToStorage(defaultMenus);
@@ -273,9 +275,9 @@ const loadMenusFromStorage = (): any[] => {
 const saveMenusToStorage = (menus: any[]): void => {
   try {
     localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(menus));
-    console.log('[Mock Menu] Saved menus to localStorage');
+    console.log("[Mock Menu] Saved menus to localStorage");
   } catch (error) {
-    console.error('[Mock Menu] Failed to save to localStorage:', error);
+    console.error("[Mock Menu] Failed to save to localStorage:", error);
   }
 };
 

@@ -1,14 +1,15 @@
 import { lazy, ComponentType, LazyExoticComponent } from 'react';
 
 /**
- * 页面组件懒加载映射表
- * 将菜单中的 component 字段映射到实际的 React 组件
+ * 页面组件懒加载映射表（向后兼容）
+ *
+ * 注意：现在推荐使用路径格式（如 "base/Dashboard"）
+ * 这个映射表仅用于向后兼容旧的组件名格式
  *
  * 目录结构:
  * - base/: 基础模块 (Dashboard, Home, Login, Profile, TemplateIntroduction)
  * - system/: 系统管理 (User, Role, Menu, Settings)
- * - tools/: 工具模块 (Utils, MarkdownViewer, IframeView)
- * - Games/: 游戏模块
+ * - tools/: 工具模块 (MarkdownViewer, RichTextEditor, PixiEditor)
  */
 export const componentMap: Record<string, LazyExoticComponent<ComponentType<any>>> = {
   // ===== 基础模块 (base/) =====
@@ -18,26 +19,16 @@ export const componentMap: Record<string, LazyExoticComponent<ComponentType<any>
   Profile: lazy(() => import('@/pages/base/Profile')),
 
   // ===== 系统管理 (system/) =====
-  // 用户管理
   UserList: lazy(() => import('@/pages/system/User/UserList')),
   UserDetail: lazy(() => import('@/pages/system/User/UserDetail')),
-
-  // 角色管理
   RoleList: lazy(() => import('@/pages/system/Role/RoleList')),
-
-  // 菜单管理
   MenuList: lazy(() => import('@/pages/system/Menu/MenuList')),
-
-  // 系统设置
   Settings: lazy(() => import('@/pages/system/Settings')),
-  SystemSettings: lazy(() => import('@/pages/system/Settings')),
 
   // ===== 工具模块 (tools/) =====
   MarkdownViewer: lazy(() => import('@/pages/tools/MarkdownViewer')),
-  MarkdownViewerPage: lazy(() => import('@/pages/tools/MarkdownViewer')),
   RichTextEditor: lazy(() => import('@/pages/tools/Utils/RichTextEditor')),
   PixiEditor: lazy(() => import('@/pages/tools/Utils/PixiEditor')),
-  IframeView: lazy(() => import('@/pages/tools/IframeView')),
 };
 
 /**

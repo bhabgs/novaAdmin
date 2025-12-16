@@ -54,13 +54,11 @@ src/
 │   │   ├── Role/          # 角色管理
 │   │   ├── Menu/          # 菜单管理
 │   │   └── Settings/      # 系统设置
-│   ├── tools/             # 工具模块
-│   │   ├── Utils/         # 工具集
-│   │   │   ├── RichTextEditor/  # 富文本编辑器
-│   │   │   └── PixiEditor/      # 图形编辑器
-│   │   ├── MarkdownViewer/      # Markdown 查看器
-│   │   └── IframeView/          # Iframe 视图
-│   └── Games/             # 游戏模块
+│   └── tools/             # 工具模块
+│       ├── Utils/         # 工具集
+│       │   ├── RichTextEditor/  # 富文本编辑器
+│       │   └── PixiEditor/      # 图形编辑器
+│       └── MarkdownViewer/      # Markdown 查看器
 ├── router/                # 动态路由系统
 │   ├── componentMap.tsx   # 组件注册表（重要）
 │   ├── generateRoutes.tsx # 路由生成器
@@ -244,12 +242,12 @@ changeLanguage('en-US');
 
 ## 动态路由系统
 
-### 1. 添加新页面（3 步）
+### 1. 添加新页面（2 步）
 
 **Step 1**: 创建页面组件
 
 ```typescript
-// src/pages/Example/index.tsx
+// src/pages/system/Example/index.tsx
 import React from 'react';
 import { Card } from 'antd';
 import PageContainer from '@/components/PageContainer';
@@ -265,19 +263,9 @@ const ExamplePage: React.FC = () => {
 export default ExamplePage;
 ```
 
-**Step 2**: 注册到组件映射表
+**Step 2**: 在菜单管理中配置
 
-```typescript
-// src/router/componentMap.tsx
-export const componentMap = {
-  // ...existing components
-  Example: lazy(() => import('../pages/Example')),
-};
-```
-
-**Step 3**: 在菜单管理中配置
-
-在后台菜单管理页面添加菜单，或直接修改 Mock 数据：
+直接使用 **路径格式**（推荐），无需在 componentMap 中注册：
 
 ```typescript
 // src/api/mock/menu.ts
@@ -287,13 +275,20 @@ export const componentMap = {
   i18nKey: "menu.example",
   type: "page",
   path: "/example",
-  component: "Example",  // 必须与 componentMap 中的 key 一致
+  component: "system/Example",  // ← 直接使用 pages/ 下的相对路径
   icon: "AppstoreOutlined",
   sortOrder: 10,
   status: "active",
   parentId: undefined,   // 顶级菜单
 }
 ```
+
+**路径格式说明**：
+- `component: "base/Dashboard"` → 对应 `src/pages/base/Dashboard.tsx`
+- `component: "system/User/UserList"` → 对应 `src/pages/system/User/UserList.tsx`
+- 系统会自动查找 `.tsx`、`.ts`、`/index.tsx`、`/index.ts`
+
+**向后兼容**：组件名格式（如 `"Dashboard"`）仍然支持，会从 `componentMap.tsx` 查找。
 
 ### 2. 菜单类型说明
 
@@ -476,13 +471,115 @@ export default ExamplePage;
 
 | 组件 | 路径 | 用途 |
 |------|------|------|
+| **CrudPage** | components/CrudPage | **CRUD 页面组件（推荐）** |
 | PageContainer | components/PageContainer | 页面容器（带标题、面包屑） |
 | CommonTable | components/CommonTable | 增强型表格 |
 | CommonForm | components/CommonForm | 动态表单 |
 | CommonModal | components/CommonModal | 模态框 |
 | PermissionWrapper | components/PermissionWrapper | 权限包装 |
 
-### 3. 类型定义
+### 3. CrudPage 组件使用
+
+`CrudPage` 是封装好的 CRUD 页面组件，包含搜索、过滤、表格、分页、增删改查等功能。
+
+**基础用法：**
+
+```typescript
+import CrudPage, { FilterConfig } from "@/components/CrudPage";
+import { useListManagement } from "@/hooks/useListManagement";
+
+const UserList: React.FC = () => {
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+  const { users, loading, total } = useAppSelector((state) => state.user);
+
+  // 使用列表管理 Hook
+  const {
+    selectedRowKeys,
+    isModalVisible,
+    editingItem,
+    handleSearch,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    handleBatchDelete,
+    handleRefresh,
+    rowSelection,
+    paginationConfig,
+  } = useListManagement<User>({
+    dispatch,
+    fetchAction: fetchUsers,
+    deleteAction: deleteUser,
+    loadingSelector: loading,
+    totalSelector: total,
+  });
+
+  // 表格列配置
+  const columns = [
+    { title: t("user.name"), dataIndex: "name", key: "name" },
+    { title: t("user.email"), dataIndex: "email", key: "email" },
+  ];
+
+  // 过滤器配置
+  const filters: FilterConfig[] = [
+    {
+      key: "status",
+      span: 4,
+      component: (
+        <Select placeholder="状态" allowClear style={{ width: "100%" }}>
+          <Option value="active">激活</Option>
+          <Option value="inactive">禁用</Option>
+        </Select>
+      ),
+    },
+  ];
+
+  return (
+    <CrudPage<User>
+      title={t("user.title")}
+      dataSource={users}
+      columns={columns}
+      loading={loading}
+      pagination={paginationConfig}
+      rowSelection={rowSelection}
+      selectedRowKeys={selectedRowKeys}
+      searchPlaceholder={t("user.searchPlaceholder")}
+      onSearch={handleSearch}
+      filters={filters}
+      onAdd={handleAdd}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+      onBatchDelete={handleBatchDelete}
+      onRefresh={handleRefresh}
+    />
+  );
+};
+```
+
+**CrudPage 主要属性：**
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| `title` | string | 页面标题 |
+| `dataSource` | T[] | 表格数据 |
+| `columns` | ColumnsType | 表格列配置 |
+| `loading` | boolean | 加载状态 |
+| `pagination` | object | 分页配置 |
+| `rowSelection` | object | 行选择配置 |
+| `searchPlaceholder` | string | 搜索框占位文本 |
+| `onSearch` | (value) => void | 搜索回调 |
+| `filters` | FilterConfig[] | 额外过滤器 |
+| `onAdd` | () => void | 添加按钮回调 |
+| `onEdit` | (record) => void | 编辑按钮回调 |
+| `onDelete` | (id) => void | 删除按钮回调 |
+| `onBatchDelete` | () => void | 批量删除回调 |
+| `onRefresh` | () => void | 刷新按钮回调 |
+| `showOperationColumn` | boolean | 是否显示操作列 |
+| `operationColumnRender` | (record) => ReactNode | 自定义操作列 |
+| `modalVisible` | boolean | 模态框可见状态 |
+| `formContent` | ReactNode | 表单内容 |
+
+### 4. 类型定义
 
 所有类型定义放在 `src/types/` 目录：
 

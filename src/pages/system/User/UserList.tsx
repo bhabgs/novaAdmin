@@ -1,26 +1,6 @@
 import React, { useState, useCallback } from "react";
-import {
-  Table,
-  Button,
-  Space,
-  Input,
-  Select,
-  Card,
-  Tag,
-  Avatar,
-  message,
-  Popconfirm,
-  Row,
-  Col,
-} from "antd";
-import {
-  PlusOutlined,
-  SearchOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  UserOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
+import { Select, Tag, Avatar, message } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
@@ -30,10 +10,9 @@ import {
 } from "@/store/slices/userSlice";
 import type { User } from "@/types/user";
 import UserForm from "./UserForm";
-import PageContainer from "@/components/PageContainer";
+import CrudPage, { FilterConfig } from "@/components/CrudPage";
 import { useListManagement } from "@/hooks/useListManagement";
 
-const { Search } = Input;
 const { Option } = Select;
 
 const UserList: React.FC = () => {
@@ -63,27 +42,27 @@ const UserList: React.FC = () => {
     deleteAction: deleteUser,
     loadingSelector: loading,
     totalSelector: total,
-    deleteSuccessKey: 'user.deleteSuccess',
-    selectWarningKey: 'user.selectUsers',
-    deleteConfirmKey: 'user.confirmDelete',
-    batchDeleteConfirmKey: 'user.batchDeleteConfirm',
+    deleteSuccessKey: "user.deleteSuccess",
+    selectWarningKey: "user.selectUsers",
+    deleteConfirmKey: "user.confirmDelete",
+    batchDeleteConfirmKey: "user.batchDeleteConfirm",
   });
 
-  const handleStatusFilter = useCallback((value: string) => {
-    setStatusFilter(value);
-  }, []);
+  const handleStatusChange = useCallback(
+    async (id: string, status: string) => {
+      try {
+        await dispatch(updateUserStatus({ id, status })).unwrap();
+        message.success(t("user.saveSuccess"));
+        handleRefresh();
+      } catch (error) {
+        console.error("Status change error:", error);
+        message.error(t("message.error"));
+      }
+    },
+    [dispatch, t, handleRefresh]
+  );
 
-  const handleStatusChange = useCallback(async (id: string, status: string) => {
-    try {
-      await dispatch(updateUserStatus({ id, status })).unwrap();
-      message.success(t("user.saveSuccess"));
-      handleRefresh();
-    } catch (error) {
-      console.error('Status change error:', error);
-      message.error(t("message.error"));
-    }
-  }, [dispatch, t, handleRefresh]);
-
+  // 表格列配置
   const columns = [
     {
       title: t("user.avatar"),
@@ -157,86 +136,51 @@ const UserList: React.FC = () => {
       key: "lastLoginTime",
       render: (time: string) => time || "-",
     },
+  ];
+
+  // 过滤器配置
+  const filters: FilterConfig[] = [
     {
-      title: t("common.operation"),
-      key: "action",
-      width: 200,
-      render: (_: unknown, record: User) => (
-        <Space size="small">
-          <Button
-            type="link"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            {t("common.edit")}
-          </Button>
-          <Popconfirm
-            title={t("user.confirmDelete")}
-            onConfirm={() => handleDelete(record.id)}
-            okText={t("common.confirm")}
-            cancelText={t("common.cancel")}
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              {t("common.delete")}
-            </Button>
-          </Popconfirm>
-        </Space>
+      key: "status",
+      span: 4,
+      component: (
+        <Select
+          placeholder={t("user.filterByStatus")}
+          allowClear
+          style={{ width: "100%" }}
+          onChange={setStatusFilter}
+          value={statusFilter || undefined}
+        >
+          <Option value="active">{t("user.active")}</Option>
+          <Option value="inactive">{t("user.inactive")}</Option>
+          <Option value="banned">{t("user.banned")}</Option>
+        </Select>
       ),
     },
   ];
 
   return (
-    <PageContainer title={t("user.title")} ghost>
-      <Card bordered={false}>
-        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-          <Col span={8}>
-            <Search
-              placeholder={t("user.searchPlaceholder")}
-              allowClear
-              enterButton={<SearchOutlined />}
-              onSearch={handleSearch}
-            />
-          </Col>
-          <Col span={4}>
-            <Select
-              placeholder={t("user.filterByStatus")}
-              allowClear
-              style={{ width: "100%" }}
-              onChange={handleStatusFilter}
-            >
-              <Option value="active">{t("user.active")}</Option>
-              <Option value="inactive">{t("user.inactive")}</Option>
-              <Option value="banned">{t("user.banned")}</Option>
-            </Select>
-          </Col>
-          <Col span={12}>
-            <Space style={{ float: "right" }}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                {t("user.addUser")}
-              </Button>
-              <Button
-                danger
-                disabled={selectedRowKeys.length === 0}
-                onClick={handleBatchDelete}
-              >
-                {t("user.batchDelete")}
-              </Button>
-              <Button icon={<ReloadOutlined />} onClick={handleRefresh}>
-                {t("common.refresh")}
-              </Button>
-            </Space>
-          </Col>
-        </Row>
-
-        <Table
-          rowSelection={rowSelection}
-          columns={columns}
-          dataSource={users}
-          rowKey="id"
-          loading={loading}
-          pagination={paginationConfig}
-        />
-      </Card>
+    <>
+      <CrudPage<User>
+        title={t("user.title")}
+        dataSource={users}
+        columns={columns}
+        loading={loading}
+        rowSelection={rowSelection}
+        selectedRowKeys={selectedRowKeys}
+        pagination={paginationConfig}
+        searchPlaceholder={t("user.searchPlaceholder")}
+        onSearch={handleSearch}
+        filters={filters}
+        addButtonText={t("user.addUser")}
+        batchDeleteButtonText={t("user.batchDelete")}
+        onAdd={handleAdd}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onBatchDelete={handleBatchDelete}
+        onRefresh={handleRefresh}
+        deleteConfirmTitle={t("user.confirmDelete")}
+      />
 
       <UserForm
         visible={isModalVisible}
@@ -247,7 +191,7 @@ const UserList: React.FC = () => {
           handleRefresh();
         }}
       />
-    </PageContainer>
+    </>
   );
 };
 

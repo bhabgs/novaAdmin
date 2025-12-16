@@ -203,7 +203,7 @@ const MainLayout: React.FC = () => {
           trigger={null}
           collapsible
           collapsed={sidebarCollapsed}
-          width={256}
+          width={200}
           className={styles.sider}
         >
           {sidebarContent}
@@ -218,7 +218,7 @@ const MainLayout: React.FC = () => {
           onClose={() => setMobileDrawerVisible(false)}
           open={mobileDrawerVisible}
           bodyStyle={{ padding: 0 }}
-          width={256}
+          width={200}
         >
           {sidebarContent}
         </Drawer>

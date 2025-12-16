@@ -1,9 +1,10 @@
 .pageTabs {
   background: #dee1e6;
-  padding: 6px 8px 0;
+  padding: 4px 6px 0;
   position: sticky;
   top: 64px;
   z-index: 99;
+  overflow: hidden;
 
   :global {
     .ant-tabs {
@@ -12,6 +13,29 @@
       .ant-tabs-nav {
         margin: 0;
         padding: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin; // Firefox 细滚动条
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent; // Firefox 滚动条颜色
+
+        // Chrome、Safari 和 Opera 自定义滚动条
+        &::-webkit-scrollbar {
+          height: 4px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: rgba(0, 0, 0, 0.2);
+          border-radius: 2px;
+          transition: background 0.2s ease;
+
+          &:hover {
+            background: rgba(0, 0, 0, 0.3);
+          }
+        }
 
         &::before {
           border: none;
@@ -28,12 +52,12 @@
         margin: 0;
         background: #c5c9ce;
         border: none;
-        border-radius: 6px 6px 0 0;
+        border-radius: 4px 4px 0 0;
         transition: background 0.15s ease;
         color: rgba(0, 0, 0, 0.65);
-        min-width: 100px;
-        max-width: 180px;
-        font-size: 13px;
+        min-width: 80px;
+        max-width: 150px;
+        font-size: 12px;
 
         &:hover:not(.ant-tabs-tab-active) {
           background: #b4b8bd;
@@ -53,13 +77,13 @@
       .ant-tabs-tab-btn {
         display: flex;
         align-items: center;
-        padding: 6px 10px;
+        padding: 4px 8px;
         width: 100%;
       }
 
       .ant-tabs-tab-remove {
         position: absolute !important;
-        right: 6px;
+        right: 4px;
         top: 50%;
         transform: translateY(-50%);
         margin: 0 !important;
@@ -69,10 +93,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
-        font-size: 11px;
+        font-size: 10px;
 
         &:hover {
           color: rgba(0, 0, 0, 0.88);
@@ -96,7 +120,7 @@
 
       // 有关闭按钮时，调整文本区域
       .ant-tabs-tab:not([data-node-key$="-add"]) .ant-tabs-tab-btn {
-        padding-right: 28px;
+        padding-right: 24px;
       }
     }
   }

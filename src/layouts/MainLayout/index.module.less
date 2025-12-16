@@ -1,4 +1,4 @@
-@import '../../index.less';
+@import "../../index.less";
 
 // 主布局容器
 .mainLayout {
@@ -34,7 +34,7 @@
 }
 
 // RTL 模式下的侧边栏
-[dir='rtl'] .sider {
+[dir="rtl"] .sider {
   left: auto;
   right: 0;
   border-right: none;
@@ -58,13 +58,13 @@
   border-bottom: 1px solid @border-color-base;
   background: @component-background;
   padding: 0 16px;
-  
+
   .logoFull {
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  
+
   .logoIcon {
     width: 32px;
     height: 32px;
@@ -73,14 +73,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     span {
       color: white;
       font-weight: bold;
       font-size: 14px;
     }
   }
-  
+
   .logoText {
     font-size: 18px;
     font-weight: bold;
@@ -115,7 +115,11 @@
     }
 
     &.ant-menu-item-selected {
-      background: linear-gradient(135deg, @primary-color, @primary-color-hover) !important;
+      background: linear-gradient(
+        135deg,
+        @primary-color,
+        @primary-color-hover
+      ) !important;
       color: white !important;
       box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3) !important;
       transform: translateX(2px) !important;
@@ -150,7 +154,7 @@
 }
 
 // RTL 模式下的菜单样式
-[dir='rtl'] .menu {
+[dir="rtl"] .menu {
   :global(.ant-menu-item) {
     &:hover:not(.ant-menu-item-selected) {
       transform: translateX(-1px) !important;
@@ -176,7 +180,7 @@
 }
 
 // RTL 模式下的布局
-[dir='rtl'] .layout {
+[dir="rtl"] .layout {
   &.withSider {
     margin-left: 0;
     margin-right: 256px;
@@ -215,7 +219,7 @@
 .trigger {
   color: @text-color-secondary !important;
   font-size: 16px;
-  
+
   &:hover {
     color: @text-color !important;
     background: @item-hover-bg !important;
@@ -238,7 +242,7 @@
 .actionButton {
   color: @text-color-secondary !important;
   font-size: 16px;
-  
+
   &:hover {
     color: @text-color !important;
     background: @item-hover-bg !important;
@@ -254,20 +258,24 @@
   padding: 4px 8px;
   border-radius: 6px;
   transition: all 0.2s ease;
-  
+
   &:hover {
     background: @item-hover-bg;
   }
 }
 
 .avatar {
-  background: linear-gradient(135deg, @primary-color, @primary-color-hover) !important;
+  background: linear-gradient(
+    135deg,
+    @primary-color,
+    @primary-color-hover
+  ) !important;
 }
 
 .userName {
   color: @text-color;
   font-weight: 500;
-  
+
   @media (max-width: 640px) {
     display: none;
   }
@@ -276,7 +284,6 @@
 // 主内容区域
 .content {
   background: @layout-body-background;
-  padding: 24px;
   overflow: auto;
   min-height: calc(100vh - 64px - 40px); // 64px header + 40px tabs
 }
@@ -323,7 +330,7 @@
 }
 
 // 暗色主题适配
-[data-theme='dark'] {
+[data-theme="dark"] {
   .mainLayout {
     background: #000000;
   }
@@ -334,7 +341,7 @@
   }
 
   // RTL 模式下的暗色侧边栏
-  &[dir='rtl'] .sider {
+  &[dir="rtl"] .sider {
     border-right: none;
     border-left: 1px solid #434343;
   }
@@ -377,7 +384,11 @@
       }
 
       &.ant-menu-item-selected {
-        background: linear-gradient(135deg, @primary-color, @primary-color-hover) !important;
+        background: linear-gradient(
+          135deg,
+          @primary-color,
+          @primary-color-hover
+        ) !important;
         color: white !important;
 
         .anticon {

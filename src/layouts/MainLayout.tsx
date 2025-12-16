@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Avatar, Dropdown, Button, Badge, Drawer } from 'antd';
+import React, { useState, useEffect } from "react";
+import { Layout, Menu, Avatar, Dropdown, Button, Badge, Drawer } from "antd";
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -12,19 +12,19 @@ import {
   MenuOutlined as MenuIcon,
   LinkOutlined,
   FileTextOutlined,
-} from '@ant-design/icons';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '../store';
-import { logout, fetchUserInfo } from '../store/slices/authSlice';
-import { fetchUserMenus } from '../store/slices/menuSlice';
-import { toggleSidebar } from '../store/slices/settingsSlice';
-import CustomBreadcrumb from '../components/Breadcrumb';
-import PageTabs from '../components/PageTabs';
-import { Menu as MenuType } from '../types/menu';
-import styles from './MainLayout/index.module.less';
+} from "@ant-design/icons";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useAppDispatch, useAppSelector } from "../store";
+import { logout, fetchUserInfo } from "../store/slices/authSlice";
+import { fetchUserMenus } from "../store/slices/menuSlice";
+import { toggleSidebar } from "../store/slices/settingsSlice";
+import CustomBreadcrumb from "../components/Breadcrumb";
+import PageTabs from "../components/PageTabs";
+import { Menu as MenuType } from "../types/menu";
+import styles from "./MainLayout/index.module.less";
 
-const { Header, Sider, Content } = Layout;
+const { Header, Sider } = Layout;
 
 const MainLayout: React.FC = () => {
   const { t } = useTranslation();
@@ -32,9 +32,9 @@ const MainLayout: React.FC = () => {
   const location = useLocation();
   const dispatch = useAppDispatch();
 
-  const { user } = useAppSelector(state => state.auth);
-  const { userMenus } = useAppSelector(state => state.menu);
-  const { layout } = useAppSelector(state => state.settings);
+  const { user } = useAppSelector((state) => state.auth);
+  const { userMenus } = useAppSelector((state) => state.menu);
+  const { layout } = useAppSelector((state) => state.settings);
   const sidebarCollapsed = layout.sidebarCollapsed;
 
   const [mobileDrawerVisible, setMobileDrawerVisible] = useState(false);
@@ -45,11 +45,11 @@ const MainLayout: React.FC = () => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ const MainLayout: React.FC = () => {
 
   // 生成菜单项
   const generateMenuItems = (menuData: MenuType[]) => {
-    return menuData.map(menu => {
+    return menuData.map((menu) => {
       const icon = getMenuIcon(menu.icon);
       // 使用 i18nKey 或回退到 name
       const label = menu.i18nKey ? t(menu.i18nKey) : menu.name;
@@ -81,7 +81,7 @@ const MainLayout: React.FC = () => {
         icon,
         label,
         onClick: () => {
-          navigate(menu.path || '/');
+          navigate(menu.path || "/");
           if (isMobile) {
             setMobileDrawerVisible(false);
           }
@@ -101,14 +101,17 @@ const MainLayout: React.FC = () => {
       LinkOutlined: <LinkOutlined />,
       FileTextOutlined: <FileTextOutlined />,
     };
-    
-    return iconMap[iconName || ''] || <MenuIcon />;
+
+    return iconMap[iconName || ""] || <MenuIcon />;
   };
 
   // 获取当前选中的菜单
   const getSelectedKeys = () => {
     const currentPath = location.pathname;
-    const findMenuByPath = (menuData: MenuType[], path: string): string | null => {
+    const findMenuByPath = (
+      menuData: MenuType[],
+      path: string
+    ): string | null => {
       for (const menu of menuData) {
         if (menu.path === path) {
           return menu.id;
@@ -120,7 +123,7 @@ const MainLayout: React.FC = () => {
       }
       return null;
     };
-    
+
     const selectedKey = findMenuByPath(userMenus, currentPath);
     return selectedKey ? [selectedKey] : [];
   };
@@ -129,33 +132,33 @@ const MainLayout: React.FC = () => {
   const handleLogout = async () => {
     try {
       await dispatch(logout()).unwrap();
-      navigate('/login');
+      navigate("/login");
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
   // 用户下拉菜单
   const userMenuItems = [
     {
-      key: 'profile',
+      key: "profile",
       icon: <UserOutlined />,
-      label: t('menu.profile'),
-      onClick: () => navigate('/profile'),
+      label: t("menu.profile"),
+      onClick: () => navigate("/profile"),
     },
     {
-      key: 'settings',
+      key: "settings",
       icon: <SettingOutlined />,
-      label: t('menu.systemSettings'),
-      onClick: () => navigate('/settings'),
+      label: t("menu.systemSettings"),
+      onClick: () => navigate("/settings"),
     },
     {
-      type: 'divider' as const,
+      type: "divider" as const,
     },
     {
-      key: 'logout',
+      key: "logout",
       icon: <LogoutOutlined />,
-      label: t('auth.logout'),
+      label: t("auth.logout"),
       onClick: handleLogout,
     },
   ];
@@ -170,9 +173,7 @@ const MainLayout: React.FC = () => {
             <div className={styles.logoIcon}>
               <span>N</span>
             </div>
-            <span className={styles.logoText}>
-              NovaAdmin
-            </span>
+            <span className={styles.logoText}>NovaAdmin</span>
           </div>
         ) : (
           <div className={styles.logoIcon}>
@@ -212,7 +213,7 @@ const MainLayout: React.FC = () => {
       {/* 移动端抽屉 */}
       {isMobile && (
         <Drawer
-          title={t('menu.navigationMenu')}
+          title={t("menu.navigationMenu")}
           placement="left"
           onClose={() => setMobileDrawerVisible(false)}
           open={mobileDrawerVisible}
@@ -223,13 +224,23 @@ const MainLayout: React.FC = () => {
         </Drawer>
       )}
 
-      <Layout className={`${styles.layout} ${!isMobile ? (sidebarCollapsed ? styles.collapsed : styles.withSider) : ''}`}>
+      <Layout
+        className={`${styles.layout} ${
+          !isMobile
+            ? sidebarCollapsed
+              ? styles.collapsed
+              : styles.withSider
+            : ""
+        }`}
+      >
         {/* 顶部导航 */}
         <Header className={styles.header}>
           <div className={styles.headerLeft}>
             <Button
               type="text"
-              icon={sidebarCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              icon={
+                sidebarCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />
+              }
               onClick={() => {
                 if (isMobile) {
                   setMobileDrawerVisible(true);
@@ -239,7 +250,7 @@ const MainLayout: React.FC = () => {
               }}
               className={styles.trigger}
             />
-            
+
             <CustomBreadcrumb />
           </div>
 
@@ -269,22 +280,18 @@ const MainLayout: React.FC = () => {
                   className={styles.avatar}
                 />
                 <span className={styles.userName}>
-                  {user?.name || user?.username || t('menu.user')}
+                  {user?.name || user?.username || t("menu.user")}
                 </span>
               </div>
             </Dropdown>
           </div>
         </Header>
-
         {/* 标签页 */}
         <PageTabs />
-
         {/* 主内容区域 */}
-        <Content className={styles.content}>
-          <div className={styles.contentInner}>
-            <Outlet />
-          </div>
-        </Content>
+        <div className={styles.content}>
+          <Outlet />
+        </div>
       </Layout>
     </Layout>
   );

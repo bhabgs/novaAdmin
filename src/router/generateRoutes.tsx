@@ -1,19 +1,35 @@
-import React, { Suspense, lazy, ComponentType, LazyExoticComponent } from 'react';
-import { RouteObject, Navigate } from 'react-router-dom';
-import type { Menu } from '@/types/menu';
-import { getComponent } from './componentMap';
-import { Spin } from 'antd';
+import React, {
+  Suspense,
+  lazy,
+  ComponentType,
+  LazyExoticComponent,
+} from "react";
+import { RouteObject, Navigate } from "react-router-dom";
+import type { Menu } from "@/types/menu";
+import { getComponent } from "./componentMap";
+import { Spin } from "antd";
 
 // 加载中组件
 const RouteLoading: React.FC = () => (
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100vh'
-  }}>
-    <Spin size="large" tip="加载中..." />
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "100vh",
+    }}
+  >
+    <Spin size="large" />
   </div>
+);
+
+/**
+ * 使用 Vite 的 import.meta.glob 预加载所有页面组件
+ * 支持 .tsx 和 .ts 文件，包括 index 文件
+ */
+const pageModules = import.meta.glob<{ default: ComponentType<any> }>(
+  "/src/pages/**/*.{tsx,ts}",
+  { eager: false }
 );
 
 /**
@@ -25,20 +41,55 @@ const RouteLoading: React.FC = () => (
  * @param componentPath - 组件路径或组件名
  * @returns 懒加载的组件或 null
  */
-function loadComponentByPath(componentPath: string): LazyExoticComponent<ComponentType<any>> | null {
+function loadComponentByPath(
+  componentPath: string
+): LazyExoticComponent<ComponentType<any>> | null {
   try {
     // 如果包含 '/'，说明是路径格式
-    if (componentPath.includes('/')) {
-      // 路径格式：直接使用路径动态导入
-      console.log(`[loadComponent] Loading component by path: ${componentPath}`);
-      return lazy(() => import(`@/pages/${componentPath}`));
+    if (componentPath.includes("/")) {
+      console.log(
+        `[loadComponent] Loading component by path: ${componentPath}`
+      );
+
+      // 尝试多种可能的文件路径
+      const possiblePaths = [
+        `/src/pages/${componentPath}.tsx`,
+        `/src/pages/${componentPath}.ts`,
+        `/src/pages/${componentPath}/index.tsx`,
+        `/src/pages/${componentPath}/index.ts`,
+      ];
+
+      for (const modulePath of possiblePaths) {
+        if (pageModules[modulePath]) {
+          console.log(`[loadComponent] ✓ Found module: ${modulePath}`);
+          return lazy(() =>
+            pageModules[modulePath]().then((m) => ({
+              default: m.default,
+            }))
+          );
+        }
+      }
+
+      console.error(
+        `[loadComponent] ✗ Component not found for path: ${componentPath}`
+      );
+      console.log(
+        "[loadComponent] Available modules:",
+        Object.keys(pageModules).filter((key) => key.includes(componentPath))
+      );
+      return null;
     } else {
       // 组件名格式：从 componentMap 查找（向后兼容）
-      console.log(`[loadComponent] Loading component by name from componentMap: ${componentPath}`);
+      console.log(
+        `[loadComponent] Loading component by name from componentMap: ${componentPath}`
+      );
       return getComponent(componentPath);
     }
   } catch (error) {
-    console.error(`[loadComponent] Failed to load component: ${componentPath}`, error);
+    console.error(
+      `[loadComponent] Failed to load component: ${componentPath}`,
+      error
+    );
     return null;
   }
 }
@@ -51,37 +102,41 @@ function loadComponentByPath(componentPath: string): LazyExoticComponent<Compone
  */
 export function generateRoutesFromMenus(
   menus: Menu[],
-  parentPath: string = ''
+  parentPath: string = ""
 ): RouteObject[] {
   const routes: RouteObject[] = [];
 
-  console.log('[generateRoutes] Processing menus:', menus.length, 'menus');
+  console.log("[generateRoutes] Processing menus:", menus.length, "menus");
 
   menus.forEach((menu) => {
     // 只处理激活状态的菜单
-    if (menu.status !== 'active') {
+    if (menu.status !== "active") {
       return;
     }
 
     const route: RouteObject = {};
 
     // 处理不同类型的菜单
-    if (menu.type === 'directory') {
+    if (menu.type === "directory") {
       // 目录类型：只作为分组，不生成路由，递归处理子菜单
       if (menu.children && menu.children.length > 0) {
         const childRoutes = generateRoutesFromMenus(menu.children, parentPath);
         routes.push(...childRoutes);
       }
-    } else if (menu.type === 'page') {
+    } else if (menu.type === "page") {
       // 页面类型：生成路由
       if (menu.path && menu.component) {
         const Component = loadComponentByPath(menu.component);
 
         if (Component) {
           // 处理路径（移除开头的 /）
-          const path = menu.path.startsWith('/') ? menu.path.slice(1) : menu.path;
+          const path = menu.path.startsWith("/")
+            ? menu.path.slice(1)
+            : menu.path;
 
-          console.log(`[generateRoutes] ✓ Generating route: ${path} -> ${menu.component}`);
+          console.log(
+            `[generateRoutes] ✓ Generating route: ${path} -> ${menu.component}`
+          );
 
           route.path = path;
           route.element = (
@@ -97,10 +152,15 @@ export function generateRoutesFromMenus(
 
           routes.push(route);
         } else {
-          console.warn(`[generateRoutes] ✗ Component "${menu.component}" not found for menu: ${menu.name}`);
+          console.warn(
+            `[generateRoutes] ✗ Component "${menu.component}" not found for menu: ${menu.name}`
+          );
         }
       } else {
-        console.warn(`[generateRoutes] ✗ Menu missing path or component:`, menu.name);
+        console.warn(
+          `[generateRoutes] ✗ Menu missing path or component:`,
+          menu.name
+        );
       }
     }
     // button 类型不生成路由，只用于权限控制
@@ -137,7 +197,7 @@ export function flattenMenuPaths(menus: Menu[]): string[] {
 
   function flatten(menuList: Menu[]) {
     menuList.forEach((menu) => {
-      if (menu.type === 'page' && menu.path) {
+      if (menu.type === "page" && menu.path) {
         paths.push(menu.path);
       }
       if (menu.children && menu.children.length > 0) {

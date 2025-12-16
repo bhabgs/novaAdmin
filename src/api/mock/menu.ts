@@ -200,6 +200,8 @@ const availableIcons = [
 
 // localStorage 键名
 const MENU_STORAGE_KEY = 'mock_menus_data';
+const MENU_VERSION_KEY = 'mock_menus_version';
+const CURRENT_MENU_VERSION = '2.0'; // 路径格式版本
 
 // 修复子菜单的 parentId（数据迁移）
 const fixMenuParentIds = (menus: any[]): any[] => {
@@ -228,7 +230,21 @@ const fixMenuParentIds = (menus: any[]): any[] => {
 // 从 localStorage 加载菜单数据
 const loadMenusFromStorage = (): any[] => {
   try {
+    const storedVersion = localStorage.getItem(MENU_VERSION_KEY);
     const stored = localStorage.getItem(MENU_STORAGE_KEY);
+
+    // 如果版本不匹配，清除旧数据
+    if (storedVersion !== CURRENT_MENU_VERSION) {
+      console.log(`[Mock Menu] Version mismatch (${storedVersion} -> ${CURRENT_MENU_VERSION}), resetting menus`);
+      localStorage.removeItem(MENU_STORAGE_KEY);
+      localStorage.setItem(MENU_VERSION_KEY, CURRENT_MENU_VERSION);
+
+      // 使用新版本的默认数据
+      const defaultMenus = generateMockMenus();
+      saveMenusToStorage(defaultMenus);
+      return defaultMenus;
+    }
+
     if (stored) {
       console.log('[Mock Menu] Loading menus from localStorage');
       let menus = JSON.parse(stored);
@@ -247,6 +263,7 @@ const loadMenusFromStorage = (): any[] => {
 
   // 如果没有存储数据或加载失败，使用默认数据并保存
   console.log('[Mock Menu] Initializing with default menus');
+  localStorage.setItem(MENU_VERSION_KEY, CURRENT_MENU_VERSION);
   const defaultMenus = generateMockMenus();
   saveMenusToStorage(defaultMenus);
   return defaultMenus;

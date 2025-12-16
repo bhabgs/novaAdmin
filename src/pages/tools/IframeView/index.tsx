@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import IframeContainer from '../../components/IframeContainer';
+import IframeContainer from '@/components/IframeContainer';
 import styles from './index.module.less';
 
 const IframeView: React.FC = () => {

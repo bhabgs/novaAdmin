@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Menu } from '../../types/menu';
-import { menuApi } from '../../api/menu';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { Menu } from "../../types/menu";
+import { menuApi } from "../../api/menu";
 
 interface MenuState {
   menus: Menu[];
@@ -24,7 +24,7 @@ const initialState: MenuState = {
 
 // 获取所有菜单（管理用）
 export const fetchMenus = createAsyncThunk(
-  'menu/fetchMenus',
+  "menu/fetchMenus",
   async (_, { rejectWithValue }) => {
     try {
       const response = await menuApi.getMenus();
@@ -34,14 +34,14 @@ export const fetchMenus = createAsyncThunk(
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '获取菜单列表失败');
+      return rejectWithValue(error.message || "获取菜单列表失败");
     }
   }
 );
 
 // 获取用户菜单（导航用）
 export const fetchUserMenus = createAsyncThunk(
-  'menu/fetchUserMenus',
+  "menu/fetchUserMenus",
   async (_, { rejectWithValue }) => {
     try {
       const response = await menuApi.getUserMenus();
@@ -51,14 +51,14 @@ export const fetchUserMenus = createAsyncThunk(
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '获取用户菜单失败');
+      return rejectWithValue(error.message || "获取用户菜单失败");
     }
   }
 );
 
 // 获取菜单详情
 export const fetchMenuById = createAsyncThunk(
-  'menu/fetchMenuById',
+  "menu/fetchMenuById",
   async (id: string, { rejectWithValue }) => {
     try {
       const response = await menuApi.getMenuById(id);
@@ -68,90 +68,97 @@ export const fetchMenuById = createAsyncThunk(
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '获取菜单详情失败');
+      return rejectWithValue(error.message || "获取菜单详情失败");
     }
   }
 );
 
 // 创建菜单
 export const createMenu = createAsyncThunk(
-  'menu/createMenu',
+  "menu/createMenu",
   async (menuData: Partial<Menu>, { rejectWithValue, dispatch }) => {
     try {
       const response = await menuApi.createMenu(menuData);
       if (response.success) {
-        // 创建成功后刷新列表
+        // 创建成功后刷新列表和用户菜单（用于路由更新）
         dispatch(fetchMenus());
+        dispatch(fetchUserMenus());
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '创建菜单失败');
+      return rejectWithValue(error.message || "创建菜单失败");
     }
   }
 );
 
 // 更新菜单
 export const updateMenu = createAsyncThunk(
-  'menu/updateMenu',
-  async ({ id, menuData }: { id: string; menuData: Partial<Menu> }, { rejectWithValue, dispatch }) => {
+  "menu/updateMenu",
+  async (
+    { id, menuData }: { id: string; menuData: Partial<Menu> },
+    { rejectWithValue, dispatch }
+  ) => {
     try {
       const response = await menuApi.updateMenu(id, menuData);
       if (response.success) {
-        // 更新成功后刷新列表
+        // 更新成功后刷新列表和用户菜单（用于路由更新）
         dispatch(fetchMenus());
+        dispatch(fetchUserMenus());
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '更新菜单失败');
+      return rejectWithValue(error.message || "更新菜单失败");
     }
   }
 );
 
 // 删除菜单
 export const deleteMenu = createAsyncThunk(
-  'menu/deleteMenu',
+  "menu/deleteMenu",
   async (id: string, { rejectWithValue, dispatch }) => {
     try {
       const response = await menuApi.deleteMenu(id);
       if (response.success) {
-        // 删除成功后刷新列表
+        // 删除成功后刷新列表和用户菜单（用于路由更新）
         dispatch(fetchMenus());
+        dispatch(fetchUserMenus());
         return id;
       } else {
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '删除菜单失败');
+      return rejectWithValue(error.message || "删除菜单失败");
     }
   }
 );
 
 // 批量删除菜单
 export const batchDeleteMenus = createAsyncThunk(
-  'menu/batchDeleteMenus',
+  "menu/batchDeleteMenus",
   async (ids: string[], { rejectWithValue, dispatch }) => {
     try {
       const response = await menuApi.batchDeleteMenus(ids);
       if (response.success) {
-        // 删除成功后刷新列表
+        // 删除成功后刷新列表和用户菜单（用于路由更新）
         dispatch(fetchMenus());
+        dispatch(fetchUserMenus());
         return ids;
       } else {
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '批量删除菜单失败');
+      return rejectWithValue(error.message || "批量删除菜单失败");
     }
   }
 );
 
 // 更新菜单排序
 export const updateMenuSort = createAsyncThunk(
-  'menu/updateMenuSort',
+  "menu/updateMenuSort",
   async (menuList: Menu[], { rejectWithValue, dispatch }) => {
     try {
       const response = await menuApi.updateMenuSort(menuList);
@@ -163,13 +170,13 @@ export const updateMenuSort = createAsyncThunk(
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '更新菜单排序失败');
+      return rejectWithValue(error.message || "更新菜单排序失败");
     }
   }
 );
 
 const menuSlice = createSlice({
-  name: 'menu',
+  name: "menu",
   initialState,
   reducers: {
     clearError: (state) => {

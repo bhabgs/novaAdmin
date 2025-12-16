@@ -1,14 +1,17 @@
 import React from "react";
-import { createHashRouter, RouterProvider } from "react-router-dom";
-import { routes } from "./routes";
+import { HashRouter } from "react-router-dom";
+import DynamicRoutes from "./DynamicRoutes";
 
-// 创建路由器
-const router = createHashRouter(routes);
-
-// 路由提供者组件
+/**
+ * 路由提供者组件
+ * 使用 HashRouter + 动态路由
+ */
 const AppRouter: React.FC = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <HashRouter>
+      <DynamicRoutes />
+    </HashRouter>
+  );
 };
 
 export default AppRouter;
-export { router };

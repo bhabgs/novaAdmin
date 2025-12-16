@@ -1,6 +1,5 @@
 import { http, HttpResponse } from "msw";
 import { delay, createSuccessResponse, createErrorResponse } from "./utils";
-import i18n from "@/i18n";
 
 // 生成模拟菜单数据
 const generateMockMenus = () => {
@@ -54,7 +53,7 @@ const generateMockMenus = () => {
           path: "/users",
           component: "UserList",
           icon: "UserOutlined",
-          // 放入“系统管理”分组，作为其子菜单
+          parentId: "100",
           sortOrder: 1,
           status: "active" as const,
           children: [],
@@ -69,6 +68,7 @@ const generateMockMenus = () => {
           path: "/roles",
           component: "RoleList",
           icon: "TeamOutlined",
+          parentId: "100",
           sortOrder: 2,
           status: "active" as const,
           children: [],
@@ -83,6 +83,7 @@ const generateMockMenus = () => {
           path: "/menus",
           component: "MenuList",
           icon: "MenuOutlined",
+          parentId: "100",
           sortOrder: 3,
           status: "active" as const,
           children: [],
@@ -97,6 +98,7 @@ const generateMockMenus = () => {
           path: "/settings",
           component: "Settings",
           icon: "SettingOutlined",
+          parentId: "100",
           sortOrder: 4,
           status: "active" as const,
           children: [],
@@ -126,6 +128,7 @@ const generateMockMenus = () => {
           path: "/util/markdown-viewer",
           component: "MarkdownViewer",
           icon: "FileTextOutlined",
+          parentId: "600",
           sortOrder: 3,
           status: "active" as const,
           children: [],
@@ -141,6 +144,7 @@ const generateMockMenus = () => {
           path: "/util/richtext-editor",
           component: "RichTextEditor",
           icon: "EditOutlined",
+          parentId: "600",
           sortOrder: 4,
           status: "active" as const,
           children: [],
@@ -156,6 +160,7 @@ const generateMockMenus = () => {
           path: "/util/pixi-editor",
           component: "PixiEditor",
           icon: "PlusOutlined",
+          parentId: "600",
           sortOrder: 5,
           status: "active" as const,
           children: [],
@@ -193,7 +198,71 @@ const availableIcons = [
   "UnlockOutlined",
 ];
 
-let mockMenus = generateMockMenus();
+// localStorage 键名
+const MENU_STORAGE_KEY = 'mock_menus_data';
+
+// 修复子菜单的 parentId（数据迁移）
+const fixMenuParentIds = (menus: any[]): any[] => {
+  const fixChildren = (items: any[], parentId: string) => {
+    items.forEach((item) => {
+      // 如果子菜单没有 parentId，自动添加
+      if (!item.parentId) {
+        item.parentId = parentId;
+      }
+      // 递归处理子菜单的子菜单
+      if (item.children && item.children.length > 0) {
+        fixChildren(item.children, item.id);
+      }
+    });
+  };
+
+  menus.forEach((menu) => {
+    if (menu.children && menu.children.length > 0) {
+      fixChildren(menu.children, menu.id);
+    }
+  });
+
+  return menus;
+};
+
+// 从 localStorage 加载菜单数据
+const loadMenusFromStorage = (): any[] => {
+  try {
+    const stored = localStorage.getItem(MENU_STORAGE_KEY);
+    if (stored) {
+      console.log('[Mock Menu] Loading menus from localStorage');
+      let menus = JSON.parse(stored);
+
+      // 自动修复缺少 parentId 的子菜单
+      menus = fixMenuParentIds(menus);
+
+      // 保存修复后的数据
+      saveMenusToStorage(menus);
+
+      return menus;
+    }
+  } catch (error) {
+    console.error('[Mock Menu] Failed to load from localStorage:', error);
+  }
+
+  // 如果没有存储数据或加载失败，使用默认数据并保存
+  console.log('[Mock Menu] Initializing with default menus');
+  const defaultMenus = generateMockMenus();
+  saveMenusToStorage(defaultMenus);
+  return defaultMenus;
+};
+
+// 保存菜单数据到 localStorage
+const saveMenusToStorage = (menus: any[]): void => {
+  try {
+    localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(menus));
+    console.log('[Mock Menu] Saved menus to localStorage');
+  } catch (error) {
+    console.error('[Mock Menu] Failed to save to localStorage:', error);
+  }
+};
+
+let mockMenus = loadMenusFromStorage();
 
 // 扁平化菜单数据（用于查找和操作）
 const flattenMenus = (menus: any[]): any[] => {
@@ -236,11 +305,13 @@ const filterMenusByPermissions = (
 };
 
 export const menuHandlers = [
-  // 获取菜单列表（树形结构）
+  // 获取菜单列表（扁平结构，用于菜单管理页面）
   http.get("/api/menus", async () => {
     await delay();
 
-    return HttpResponse.json(createSuccessResponse(mockMenus));
+    // 返回扁平化的菜单列表，以便前端可以根据 parentId 构建树
+    const flatMenus = flattenMenus(mockMenus);
+    return HttpResponse.json(createSuccessResponse(flatMenus));
   }),
 
   // 获取用户菜单（根据权限过滤）
@@ -310,6 +381,9 @@ export const menuHandlers = [
       mockMenus.push(newMenu);
     }
 
+    // 保存到 localStorage
+    saveMenusToStorage(mockMenus);
+
     return HttpResponse.json(createSuccessResponse(newMenu, "菜单创建成功"));
   }),
 
@@ -343,6 +417,9 @@ export const menuHandlers = [
 
     // 更新菜单数据
     Object.assign(flatMenus[menuIndex], updatedMenu);
+
+    // 保存到 localStorage
+    saveMenusToStorage(mockMenus);
 
     return HttpResponse.json(
       createSuccessResponse(updatedMenu, "菜单更新成功")
@@ -379,6 +456,9 @@ export const menuHandlers = [
       mockMenus = mockMenus.filter((m) => m.id !== id);
     }
 
+    // 保存到 localStorage
+    saveMenusToStorage(mockMenus);
+
     return HttpResponse.json(createSuccessResponse(null, "菜单删除成功"));
   }),
 
@@ -391,6 +471,9 @@ export const menuHandlers = [
 
     // 更新菜单排序
     mockMenus = menus;
+
+    // 保存到 localStorage
+    saveMenusToStorage(mockMenus);
 
     return HttpResponse.json(createSuccessResponse(null, "菜单排序更新成功"));
   }),
@@ -436,6 +519,9 @@ export const menuHandlers = [
 
     mockMenus = deleteMenuRecursive(mockMenus);
 
+    // 保存到 localStorage
+    saveMenusToStorage(mockMenus);
+
     return HttpResponse.json(createSuccessResponse(null, "批量删除成功"));
   }),
 
@@ -478,6 +564,9 @@ export const menuHandlers = [
     } else {
       mockMenus.push(newMenu);
     }
+
+    // 保存到 localStorage
+    saveMenusToStorage(mockMenus);
 
     return HttpResponse.json(createSuccessResponse(newMenu, "菜单复制成功"));
   }),

@@ -11,10 +11,10 @@ import {
 } from "antd";
 import { GlobalOutlined, LayoutOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { useAppDispatch, useAppSelector } from "../../store";
-import { updateSettings } from "../../store/slices/settingsSlice";
-import ThemeSettings from "../../components/ThemeSettings";
-import PageContainer from "../../components/PageContainer";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { updateSettings } from "@/store/slices/settingsSlice";
+import ThemeSettings from "@/components/ThemeSettings";
+import PageContainer from "@/components/PageContainer";
 
 const { Title, Text } = Typography;
 const { Option } = Select;

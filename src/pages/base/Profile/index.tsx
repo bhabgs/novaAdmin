@@ -26,9 +26,9 @@ import {
   CalendarOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { changePassword } from '../../store/slices/authSlice';
-import PageContainer from '../../components/PageContainer';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { changePassword } from '@/store/slices/authSlice';
+import PageContainer from '@/components/PageContainer';
 
 const { Title, Text } = Typography;
 

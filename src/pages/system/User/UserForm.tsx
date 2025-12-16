@@ -12,10 +12,10 @@ import {
 } from 'antd';
 import { PlusOutlined, UserOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { createUser, updateUser } from '../../store/slices/userSlice';
-import { fetchRoles } from '../../store/slices/roleSlice';
-import type { User } from '../../types/user';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { createUser, updateUser } from '@/store/slices/userSlice';
+import { fetchRoles } from '@/store/slices/roleSlice';
+import type { User } from '@/types/user';
 
 const { Option } = Select;
 

@@ -9,9 +9,9 @@ import {
   Col,
 } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { createRole, updateRole } from '../../store/slices/roleSlice';
-import type { Role } from '../../types/role';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { createRole, updateRole } from '@/store/slices/roleSlice';
+import type { Role } from '@/types/role';
 
 const { Option } = Select;
 const { TextArea } = Input;

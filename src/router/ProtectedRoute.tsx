@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { Spin } from 'antd';
-import { useAppSelector, useAppDispatch } from '../store';
-import { fetchUserInfo } from '../store/slices/authSlice';
+import { useAppSelector, useAppDispatch } from '@/store';
+import { fetchUserInfo } from '@/store/slices/authSlice';
 import { isAuthenticated } from '../utils/auth';
 
 interface ProtectedRouteProps {

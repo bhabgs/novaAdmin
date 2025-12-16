@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAppSelector } from '../store';
+import { useAppSelector } from '@/store';
 import { isAuthenticated } from '../utils/auth';
 
 interface PublicRouteProps {

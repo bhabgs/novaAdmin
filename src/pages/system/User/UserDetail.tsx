@@ -23,9 +23,9 @@ import {
   CalendarOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { fetchUserById } from '../../store/slices/userSlice';
-import type { User } from '../../types/user';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { fetchUserById } from '@/store/slices/userSlice';
+import type { User } from '@/types/user';
 
 const UserDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

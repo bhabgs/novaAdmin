@@ -5,7 +5,7 @@ import {
   UploadOutlined,
   LinkOutlined,
 } from "@ant-design/icons";
-import MarkdownViewer from "../../components/MarkdownViewer";
+import MarkdownViewer from "@/components/MarkdownViewer";
 import type { UploadFile } from "antd/es/upload/interface";
 import { PageContainer } from "@/components";
 import { t } from "i18next";

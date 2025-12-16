@@ -10,14 +10,14 @@ import {
   ReloadOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '../store';
+import { useAppDispatch, useAppSelector } from '@/store';
 import {
   fetchDashboardStats,
   fetchUserGrowthData,
   fetchOrderTrendData,
   refreshDashboardData,
-} from '../store/slices/dashboardSlice';
-import PageContainer from '../components/PageContainer';
+} from '@/store/slices/dashboardSlice';
+import PageContainer from '@/components/PageContainer';
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, Checkbox, Card, message, Spin } from 'antd';
 import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../store';
-import { login } from '../store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { login } from '@/store/slices/authSlice';
 
 interface LoginForm {
   username: string;

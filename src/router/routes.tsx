@@ -1,41 +1,44 @@
+/**
+ * @deprecated 此文件已被动态路由系统取代
+ * 路由现在由菜单管理系统动态生成
+ * 请参考：
+ * - src/router/DynamicRoutes.tsx - 动态路由组件
+ * - src/router/generateRoutes.tsx - 路由生成器
+ * - src/router/componentMap.tsx - 组件映射表
+ *
+ * 此文件保留仅作为参考
+ */
+
 import React from "react";
 import { RouteObject } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 
 // 布局组件
-import MainLayout from "../layouts/MainLayout";
+import MainLayout from "@/layouts/MainLayout";
 
-// 页面组件
-import Home from "../pages/Home";
-import Login from "../pages/Login";
-import Dashboard from "../pages/Dashboard";
-import NotFound from "../components/NotFound";
+// 基础页面组件
+import Home from "@/pages/base/Home";
+import Login from "@/pages/base/Login";
+import Dashboard from "@/pages/base/Dashboard";
+import Profile from "@/pages/base/Profile";
+import TemplateIntroduction from "@/pages/base/TemplateIntroduction";
+import NotFound from "@/components/NotFound";
 
-// 用户管理模块
-import UserList from "../pages/User/UserList";
-import UserDetail from "../pages/User/UserDetail";
+// 系统管理模块
+import UserList from "@/pages/system/User/UserList";
+import UserDetail from "@/pages/system/User/UserDetail";
+import RoleList from "@/pages/system/Role/RoleList";
+import MenuList from "@/pages/system/Menu/MenuList";
+import SystemSettings from "@/pages/system/Settings";
 
-// 角色管理模块
-import RoleList from "../pages/Role/RoleList";
-
-// 菜单管理模块
-import MenuList from "../pages/Menu/MenuList";
-
-// 系统设置模块
-import SystemSettings from "../pages/Settings";
-import Profile from "../pages/Profile";
-
-// Markdown 查看器
-import MarkdownViewerPage from "../pages/MarkdownViewer";
-
-// Iframe 查看器
-import IframeView from "../pages/IframeView";
+// 工具模块
+import MarkdownViewerPage from "@/pages/tools/MarkdownViewer";
+import IframeView from "@/pages/tools/IframeView";
+import { PixiEditor, RichTextEditor } from "@/pages/tools/Utils";
 
 // 路由守卫组件
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
-import TemplateIntroduction from "@/pages/TemplateIntroduction";
-import { PixiEditor, RichTextEditor } from "@/pages/Utils";
 
 // 定义路由配置
 export const routes: RouteObject[] = [

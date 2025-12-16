@@ -21,13 +21,13 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { useAppDispatch, useAppSelector } from "../../store";
-import { fetchRoles, deleteRole } from "../../store/slices/roleSlice";
-import type { Role } from "../../types/role";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { fetchRoles, deleteRole } from "@/store/slices/roleSlice";
+import type { Role } from "@/types/role";
 import RoleForm from "./RoleForm";
 import PermissionModal from "./PermissionModal";
-import PageContainer from "../../components/PageContainer";
-import { useListManagement } from "../../hooks/useListManagement";
+import PageContainer from "@/components/PageContainer";
+import { useListManagement } from "@/hooks/useListManagement";
 
 const { Search } = Input;
 

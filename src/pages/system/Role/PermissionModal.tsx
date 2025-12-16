@@ -16,9 +16,9 @@ import {
   CloseOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { updateRolePermissions } from '../../store/slices/roleSlice';
-import type { Role } from '../../types/role';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { updateRolePermissions } from '@/store/slices/roleSlice';
+import type { Role } from '@/types/role';
 
 const { Search } = Input;
 

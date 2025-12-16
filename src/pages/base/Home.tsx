@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Card, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { runAllTests } from '../utils/test';
+import { runAllTests } from '@/utils/test';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();

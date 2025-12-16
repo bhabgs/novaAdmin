@@ -24,15 +24,16 @@ import {
   AppstoreOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { useAppDispatch, useAppSelector } from "../../store";
+import { useAppDispatch, useAppSelector } from "@/store";
 import {
   fetchMenus,
+  fetchUserMenus,
   deleteMenu,
   batchDeleteMenus,
-} from "../../store/slices/menuSlice";
-import { Menu } from "../../types/menu";
+} from "@/store/slices/menuSlice";
+import { Menu } from "@/types/menu";
 import MenuForm from "./MenuForm";
-import PageContainer from "../../components/PageContainer";
+import PageContainer from "@/components/PageContainer";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -111,7 +112,7 @@ const MenuList: React.FC = () => {
     try {
       await dispatch(deleteMenu(id)).unwrap();
       message.success(t("menu.deleteSuccess"));
-    } catch (error) {
+    } catch {
       message.error(t("message.error"));
     }
   };
@@ -126,7 +127,7 @@ const MenuList: React.FC = () => {
       await dispatch(batchDeleteMenus(selectedRowKeys as string[])).unwrap();
       message.success(t("menu.deleteSuccess"));
       setSelectedRowKeys([]);
-    } catch (error) {
+    } catch {
       message.error(t("message.error"));
     }
   };
@@ -231,7 +232,7 @@ const MenuList: React.FC = () => {
       title: t("common.operation"),
       key: "operation",
       width: 200,
-      render: (_: any, record: Menu) => (
+      render: (_: unknown, record: Menu) => (
         <Space size="small">
           <Tooltip title={t("common.edit")}>
             <Button
@@ -307,7 +308,11 @@ const MenuList: React.FC = () => {
           </Col>
           <Col span={10}>
             <Space>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAdd}
+              >
                 {t("menu.addMenu")}
               </Button>
               <Button
@@ -324,6 +329,20 @@ const MenuList: React.FC = () => {
               >
                 {t("common.refresh")}
               </Button>
+              <Tooltip title={t("menu.refreshRoutesTooltip")}>
+                <Button
+                  type="primary"
+                  ghost
+                  icon={<ReloadOutlined />}
+                  onClick={() => {
+                    dispatch(fetchMenus());
+                    dispatch(fetchUserMenus());
+                    message.success(t("menu.refreshRoutesSuccess"));
+                  }}
+                >
+                  {t("menu.refreshRoutes")}
+                </Button>
+              </Tooltip>
             </Space>
           </Col>
         </Row>
@@ -337,7 +356,7 @@ const MenuList: React.FC = () => {
           pagination={false}
           expandable={{
             expandedRowKeys: expandedKeys,
-            onExpandedRowsChange: setExpandedKeys,
+            onExpandedRowsChange: (keys) => setExpandedKeys([...keys]),
             defaultExpandAllRows: true,
           }}
           size="middle"

@@ -22,16 +22,16 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import { useAppDispatch, useAppSelector } from "../../store";
+import { useAppDispatch, useAppSelector } from "@/store";
 import {
   fetchUsers,
   deleteUser,
   updateUserStatus,
-} from "../../store/slices/userSlice";
-import type { User } from "../../types/user";
+} from "@/store/slices/userSlice";
+import type { User } from "@/types/user";
 import UserForm from "./UserForm";
-import PageContainer from "../../components/PageContainer";
-import { useListManagement } from "../../hooks/useListManagement";
+import PageContainer from "@/components/PageContainer";
+import { useListManagement } from "@/hooks/useListManagement";
 
 const { Search } = Input;
 const { Option } = Select;

@@ -19,11 +19,11 @@ import {
   AppstoreOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '../../store';
-import { createMenu, updateMenu } from '../../store/slices/menuSlice';
-import type { Menu, MenuFormData } from '../../types/menu';
-import { buildMenuTree } from '../../utils/menuUtils';
-import { MENU_ICONS } from '../../constants/icons';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { createMenu, updateMenu } from '@/store/slices/menuSlice';
+import type { Menu, MenuFormData } from '@/types/menu';
+import { buildMenuTree } from '@/utils/menuUtils';
+import { MENU_ICONS } from '@/constants/icons';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -276,17 +276,17 @@ const MenuForm: React.FC<MenuFormProps> = ({
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item
-              name="sortOrder"
-              label={t('menu.sortOrder')}
-              rules={[{ type: 'number', message: t('role.sortOrderNumber') }]}
-            >
-              <InputNumber
-                placeholder={t('role.sortOrderPlaceholder')}
-                style={{ width: '100%' }}
-                min={0}
-              />
-            </Form.Item>
+              <Form.Item
+                name="sortOrder"
+                label={t('menu.sortOrder')}
+                rules={[{ type: 'number', message: t('menu.sortOrderNumber') }]}
+              >
+                <InputNumber
+                  placeholder={t('menu.sortOrderPlaceholder')}
+                  style={{ width: '100%' }}
+                  min={0}
+                />
+              </Form.Item>
           </Col>
         </Row>
 
@@ -322,7 +322,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
           label={t('common.description')}
         >
           <TextArea
-            placeholder={t('role.descriptionPlaceholder')}
+            placeholder={t('menu.descriptionPlaceholder')}
             rows={3}
             maxLength={200}
             showCount
@@ -334,7 +334,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
           label={t('common.remark')}
         >
           <TextArea
-            placeholder={t('role.remarkPlaceholder')}
+            placeholder={t('menu.remarkPlaceholder')}
             rows={2}
             maxLength={100}
             showCount

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy, ComponentType, LazyExoticComponent } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 import type { Menu } from '@/types/menu';
 import { getComponent } from './componentMap';
@@ -15,6 +15,33 @@ const RouteLoading: React.FC = () => (
     <Spin size="large" tip="加载中..." />
   </div>
 );
+
+/**
+ * 根据组件路径动态导入组件
+ * 支持两种格式：
+ * 1. 路径格式：'base/Dashboard' 或 'system/User/UserList'
+ * 2. 组件名格式：'Dashboard' 或 'UserList'（向后兼容，从 componentMap 查找）
+ *
+ * @param componentPath - 组件路径或组件名
+ * @returns 懒加载的组件或 null
+ */
+function loadComponentByPath(componentPath: string): LazyExoticComponent<ComponentType<any>> | null {
+  try {
+    // 如果包含 '/'，说明是路径格式
+    if (componentPath.includes('/')) {
+      // 路径格式：直接使用路径动态导入
+      console.log(`[loadComponent] Loading component by path: ${componentPath}`);
+      return lazy(() => import(`@/pages/${componentPath}`));
+    } else {
+      // 组件名格式：从 componentMap 查找（向后兼容）
+      console.log(`[loadComponent] Loading component by name from componentMap: ${componentPath}`);
+      return getComponent(componentPath);
+    }
+  } catch (error) {
+    console.error(`[loadComponent] Failed to load component: ${componentPath}`, error);
+    return null;
+  }
+}
 
 /**
  * 将菜单数据转换为路由配置
@@ -48,7 +75,7 @@ export function generateRoutesFromMenus(
     } else if (menu.type === 'page') {
       // 页面类型：生成路由
       if (menu.path && menu.component) {
-        const Component = getComponent(menu.component);
+        const Component = loadComponentByPath(menu.component);
 
         if (Component) {
           // 处理路径（移除开头的 /）

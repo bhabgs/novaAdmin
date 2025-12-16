@@ -12,11 +12,7 @@ export default defineConfig({
     outDir: "nova-admin",
   },
   plugins: [
-    react({
-      babel: {
-        plugins: ["react-dev-locator"],
-      },
-    }),
+    react(),
     tsconfigPaths(),
     // 在构建阶段复制 README.md 到输出目录根
     viteStaticCopy({

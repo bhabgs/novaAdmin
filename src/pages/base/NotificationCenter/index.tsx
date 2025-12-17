@@ -13,6 +13,8 @@ import {
   Spin,
   message,
   Tooltip,
+  Row,
+  Col,
 } from 'antd';
 import {
   BellOutlined,
@@ -23,7 +25,6 @@ import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   CloseCircleOutlined,
-  SettingOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -228,79 +229,81 @@ const NotificationCenter: React.FC = () => {
   }, [notifications]);
 
   return (
-    <PageContainer
-      title={
-        <Space>
-          <BellOutlined />
-          {t('notification.title')}
-          {unreadCount > 0 && (
-            <Badge count={unreadCount} size="small" style={{ marginLeft: 8 }} />
-          )}
-        </Space>
-      }
-      extra={
-        <Space>
-          <Tooltip title={t('notification.refresh')}>
-            <Button icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading} />
-          </Tooltip>
-          {unreadCount > 0 && (
-            <Popconfirm
-              title={t('notification.markAllAsReadConfirm')}
-              onConfirm={handleMarkAllAsRead}
-              okText={t('common.confirm')}
-              cancelText={t('common.cancel')}
-            >
-              <Button icon={<CheckOutlined />} type="primary">
-                {t('notification.markAllAsRead')}
-              </Button>
-            </Popconfirm>
-          )}
-          {selectedIds.length > 0 && (
-            <Popconfirm
-              title={t('notification.batchDeleteConfirm', { count: selectedIds.length })}
-              onConfirm={handleBatchDelete}
-              okText={t('common.confirm')}
-              cancelText={t('common.cancel')}
-            >
-              <Button icon={<DeleteOutlined />} danger>
-                {t('notification.batchDelete')} ({selectedIds.length})
-              </Button>
-            </Popconfirm>
-          )}
-        </Space>
-      }
-    >
-      <Card>
-        {/* 筛选器 */}
-        <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }} size="large">
-          <Space>
-            <Text strong>{t('notification.filterByType')}:</Text>
-            <Segmented
-              value={filterType}
-              onChange={setFilterType}
-              options={[
-                { label: t('notification.all'), value: 'all' },
-                { label: t('notification.typeInfo'), value: 'info' },
-                { label: t('notification.typeSuccess'), value: 'success' },
-                { label: t('notification.typeWarning'), value: 'warning' },
-                { label: t('notification.typeError'), value: 'error' },
-                { label: t('notification.typeSystem'), value: 'system' },
-              ]}
-            />
-          </Space>
-          <Space>
-            <Text strong>{t('notification.filterByStatus')}:</Text>
-            <Segmented
-              value={filterStatus}
-              onChange={setFilterStatus}
-              options={[
-                { label: t('notification.all'), value: 'all' },
-                { label: t('notification.unread'), value: 'unread' },
-                { label: t('notification.read'), value: 'read' },
-              ]}
-            />
-          </Space>
-        </Space>
+    <PageContainer title={t('notification.title')} ghost>
+      <Card variant="borderless">
+        {/* 工具栏 */}
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          {/* 筛选器 */}
+          <Col flex="auto">
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+              <Space wrap>
+                <Text strong>{t('notification.filterByType')}:</Text>
+                <Segmented
+                  value={filterType}
+                  onChange={setFilterType}
+                  options={[
+                    { label: t('notification.all'), value: 'all' },
+                    { label: t('notification.typeInfo'), value: 'info' },
+                    { label: t('notification.typeSuccess'), value: 'success' },
+                    { label: t('notification.typeWarning'), value: 'warning' },
+                    { label: t('notification.typeError'), value: 'error' },
+                    { label: t('notification.typeSystem'), value: 'system' },
+                  ]}
+                />
+              </Space>
+              <Space wrap>
+                <Text strong>{t('notification.filterByStatus')}:</Text>
+                <Segmented
+                  value={filterStatus}
+                  onChange={setFilterStatus}
+                  options={[
+                    { label: t('notification.all'), value: 'all' },
+                    { label: t('notification.unread'), value: 'unread' },
+                    { label: t('notification.read'), value: 'read' },
+                  ]}
+                />
+                {unreadCount > 0 && (
+                  <Badge count={unreadCount} size="small" style={{ marginLeft: 8 }} />
+                )}
+              </Space>
+            </Space>
+          </Col>
+
+          {/* 操作按钮 */}
+          <Col>
+            <Space style={{ float: 'right' }}>
+              {unreadCount > 0 && (
+                <Popconfirm
+                  title={t('notification.markAllAsReadConfirm')}
+                  onConfirm={handleMarkAllAsRead}
+                  okText={t('common.confirm')}
+                  cancelText={t('common.cancel')}
+                >
+                  <Button icon={<CheckOutlined />} type="primary">
+                    {t('notification.markAllAsRead')}
+                  </Button>
+                </Popconfirm>
+              )}
+              {selectedIds.length > 0 && (
+                <Popconfirm
+                  title={t('notification.batchDeleteConfirm', { count: selectedIds.length })}
+                  onConfirm={handleBatchDelete}
+                  okText={t('common.confirm')}
+                  cancelText={t('common.cancel')}
+                >
+                  <Button icon={<DeleteOutlined />} danger>
+                    {t('notification.batchDelete')} ({selectedIds.length})
+                  </Button>
+                </Popconfirm>
+              )}
+              <Tooltip title={t('notification.refresh')}>
+                <Button icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading}>
+                  {t('common.refresh')}
+                </Button>
+              </Tooltip>
+            </Space>
+          </Col>
+        </Row>
 
         {/* 通知列表 */}
         <Spin spinning={loading}>
@@ -323,11 +326,11 @@ const NotificationCenter: React.FC = () => {
               renderItem={(item: Notification) => (
                 <List.Item
                   style={{
-                    backgroundColor: item.status === 'unread' ? '#f0f7ff' : 'transparent',
+                    backgroundColor: item.status === 'unread' ? 'var(--ant-color-primary-bg)' : 'transparent',
                     padding: '16px',
                     borderRadius: '8px',
                     marginBottom: '8px',
-                    border: item.status === 'unread' ? '1px solid #1890ff' : '1px solid #f0f0f0',
+                    border: item.status === 'unread' ? '1px solid var(--ant-color-primary-border)' : '1px solid var(--ant-color-border)',
                   }}
                   actions={[
                     <Space key="actions">

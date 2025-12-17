@@ -1,5 +1,6 @@
 import { http, HttpResponse } from "msw";
 import { delay, createSuccessResponse, createErrorResponse } from "./utils";
+import type { Menu, MenuFormData } from "@/types/menu";
 
 // 生成模拟菜单数据
 const generateMockMenus = () => {
@@ -268,8 +269,8 @@ const MENU_VERSION_KEY = "mock_menus_version";
 const CURRENT_MENU_VERSION = "2.3"; // 添加 iframe 打开方式配置
 
 // 修复子菜单的 parentId（数据迁移）
-const fixMenuParentIds = (menus: any[]): any[] => {
-  const fixChildren = (items: any[], parentId: string) => {
+const fixMenuParentIds = (menus: Menu[]): Menu[] => {
+  const fixChildren = (items: Menu[], parentId: string) => {
     items.forEach((item) => {
       // 如果子菜单没有 parentId，自动添加
       if (!item.parentId) {
@@ -292,7 +293,7 @@ const fixMenuParentIds = (menus: any[]): any[] => {
 };
 
 // 从 localStorage 加载菜单数据
-const loadMenusFromStorage = (): any[] => {
+const loadMenusFromStorage = (): Menu[] => {
   try {
     const storedVersion = localStorage.getItem(MENU_VERSION_KEY);
     const stored = localStorage.getItem(MENU_STORAGE_KEY);
@@ -336,7 +337,7 @@ const loadMenusFromStorage = (): any[] => {
 };
 
 // 保存菜单数据到 localStorage
-const saveMenusToStorage = (menus: any[]): void => {
+const saveMenusToStorage = (menus: Menu[]): void => {
   try {
     localStorage.setItem(MENU_STORAGE_KEY, JSON.stringify(menus));
     console.log("[Mock Menu] Saved menus to localStorage");
@@ -348,10 +349,10 @@ const saveMenusToStorage = (menus: any[]): void => {
 let mockMenus = loadMenusFromStorage();
 
 // 扁平化菜单数据（用于查找和操作）
-const flattenMenus = (menus: any[]): any[] => {
-  const result: any[] = [];
+const flattenMenus = (menus: Menu[]): Menu[] => {
+  const result: Menu[] = [];
 
-  const flatten = (items: any[]) => {
+  const flatten = (items: Menu[]) => {
     items.forEach((item) => {
       result.push(item);
       if (item.children && item.children.length > 0) {
@@ -366,15 +367,15 @@ const flattenMenus = (menus: any[]): any[] => {
 
 // 根据用户权限过滤菜单
 const filterMenusByPermissions = (
-  menus: any[],
+  menus: Menu[],
   permissions: string[]
-): any[] => {
+): Menu[] => {
   if (permissions.includes("*")) {
     return menus;
   }
 
   return menus
-    .filter((menu) => {
+    .filter(() => {
       // 这里可以根据实际需求实现权限过滤逻辑
       // 暂时返回所有菜单
       return true;
@@ -398,7 +399,7 @@ export const menuHandlers = [
   }),
 
   // 获取用户菜单（根据权限过滤）
-  http.get("/api/menus/user", async ({ request }) => {
+  http.get("/api/menus/user", async () => {
     await delay();
 
     // 这里应该根据用户的权限来过滤菜单
@@ -428,7 +429,7 @@ export const menuHandlers = [
   http.post("/api/menus", async ({ request }) => {
     await delay();
 
-    const body = (await request.json()) as any;
+    const body = (await request.json()) as MenuFormData & { i18nKey?: string };
 
     const flatMenus = flattenMenus(mockMenus);
 
@@ -437,7 +438,7 @@ export const menuHandlers = [
       return HttpResponse.json(createErrorResponse("菜单路径已存在", 400));
     }
 
-    const newMenu = {
+    const newMenu: Menu = {
       id: (flatMenus.length + 1).toString(),
       name: body.name,
       i18nKey: body.i18nKey,
@@ -475,7 +476,7 @@ export const menuHandlers = [
     await delay();
 
     const { id } = params;
-    const body = (await request.json()) as any;
+    const body = (await request.json()) as Partial<MenuFormData>;
 
     const flatMenus = flattenMenus(mockMenus);
     const menuIndex = flatMenus.findIndex((m) => m.id === id);
@@ -530,9 +531,9 @@ export const menuHandlers = [
     // 从父菜单或根菜单中删除
     if (menu.parentId) {
       const parentMenu = flatMenus.find((m) => m.id === menu.parentId);
-      if (parentMenu) {
+      if (parentMenu && parentMenu.children) {
         parentMenu.children = parentMenu.children.filter(
-          (child: any) => child.id !== id
+          (child) => child.id !== id
         );
       }
     } else {
@@ -549,7 +550,7 @@ export const menuHandlers = [
   http.post("/api/menus/sort", async ({ request }) => {
     await delay();
 
-    const body = (await request.json()) as any;
+    const body = (await request.json()) as { menus: Menu[] };
     const { menus } = body;
 
     // 更新菜单排序
@@ -572,7 +573,7 @@ export const menuHandlers = [
   http.post("/api/menus/batch-delete", async ({ request }) => {
     await delay();
 
-    const body = (await request.json()) as any;
+    const body = (await request.json()) as { ids: string[] };
     const { ids } = body;
 
     const flatMenus = flattenMenus(mockMenus);
@@ -588,7 +589,7 @@ export const menuHandlers = [
     }
 
     // 删除菜单
-    const deleteMenuRecursive = (menus: any[]): any[] => {
+    const deleteMenuRecursive = (menus: Menu[]): Menu[] => {
       return menus.filter((menu) => {
         if (ids.includes(menu.id)) {
           return false;
@@ -613,7 +614,7 @@ export const menuHandlers = [
     await delay();
 
     const { id } = params;
-    const body = (await request.json()) as any;
+    const body = (await request.json()) as { parentId?: string };
 
     const flatMenus = flattenMenus(mockMenus);
     const sourceMenu = flatMenus.find((m) => m.id === id);
@@ -655,11 +656,10 @@ export const menuHandlers = [
   }),
 
   // 移动菜单
-  http.post("/api/menus/:id/move", async ({ params, request }) => {
+  http.post("/api/menus/:id/move", async ({ params }) => {
     await delay();
 
     const { id } = params;
-    const body = (await request.json()) as any;
 
     const flatMenus = flattenMenus(mockMenus);
     const menu = flatMenus.find((m) => m.id === id);

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import {
   Card,
   Input,
@@ -11,8 +11,9 @@ import {
   Tooltip,
   Empty,
   Spin,
+  Button,
 } from "antd";
-import { CopyOutlined } from "@ant-design/icons";
+import { CopyOutlined, DownOutlined } from "@ant-design/icons";
 import * as AntdIcons from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import PageContainer from "@/components/PageContainer";
@@ -27,6 +28,9 @@ const EXCLUDED_ICONS = [
   "getTwoToneColor",
   "setTwoToneColor",
 ];
+
+// 每次加载的图标数量
+const ICONS_PER_PAGE = 100;
 
 interface IconItem {
   name: string;
@@ -83,11 +87,32 @@ const IconCard: React.FC<IconCardProps> = React.memo(({ icon, onCopy, t }) => {
 
 IconCard.displayName = "IconCard";
 
+// 防抖 hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 const IconList: React.FC = () => {
   const { t } = useTranslation();
   const [searchText, setSearchText] = useState("");
+  const debouncedSearchText = useDebounce(searchText, 300); // 300ms 防抖
   const [iconType, setIconType] = useState<"antd" | "iconfont">("antd");
   const [loading, setLoading] = useState(true);
+  const [displayCount, setDisplayCount] = useState(ICONS_PER_PAGE);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // 获取所有 Ant Design 图标
   const antdIcons = useMemo<IconItem[]>(() => {
@@ -113,21 +138,61 @@ const IconList: React.FC = () => {
 
   // 模拟加载完成
   useEffect(() => {
-    // 使用 setTimeout 让图标处理完成后再显示
     const timer = setTimeout(() => {
       setLoading(false);
     }, 100);
     return () => clearTimeout(timer);
   }, []);
 
-  // 过滤图标
+  // 过滤图标 - 使用防抖后的搜索文本
   const filteredIcons = useMemo(() => {
-    if (!searchText) return antdIcons;
-    const lowerSearch = searchText.toLowerCase();
+    if (!debouncedSearchText) return antdIcons;
+    const lowerSearch = debouncedSearchText.toLowerCase();
     return antdIcons.filter((icon) =>
       icon.name.toLowerCase().includes(lowerSearch)
     );
-  }, [antdIcons, searchText]);
+  }, [antdIcons, debouncedSearchText]);
+
+  // 只渲染前 N 个图标
+  const visibleIcons = useMemo(() => {
+    return filteredIcons.slice(0, displayCount);
+  }, [filteredIcons, displayCount]);
+
+  // 重置显示数量当搜索文本改变时
+  useEffect(() => {
+    setDisplayCount(ICONS_PER_PAGE);
+  }, [debouncedSearchText]);
+
+  // 加载更多
+  const loadMore = useCallback(() => {
+    setDisplayCount((prev) => Math.min(prev + ICONS_PER_PAGE, filteredIcons.length));
+  }, [filteredIcons.length]);
+
+  // 设置 IntersectionObserver 实现自动加载
+  useEffect(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && visibleIcons.length < filteredIcons.length) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loadMore, visibleIcons.length, filteredIcons.length]);
 
   // 复制图标名称 - 使用 useCallback 优化
   const handleCopy = useCallback(
@@ -182,6 +247,8 @@ const IconList: React.FC = () => {
     );
   }
 
+  const hasMore = visibleIcons.length < filteredIcons.length;
+
   return (
     <PageContainer title={t("icons.title")} ghost>
       <Card>
@@ -226,10 +293,15 @@ const IconList: React.FC = () => {
             <Text type="secondary">
               {t("icons.total")}: <Text strong>{antdIcons.length}</Text>
             </Text>
-            {searchText && (
+            {debouncedSearchText && (
               <Text type="secondary">
                 {t("icons.filtered")}:{" "}
                 <Text strong>{filteredIcons.length}</Text>
+              </Text>
+            )}
+            {visibleIcons.length < filteredIcons.length && (
+              <Text type="secondary">
+                显示: <Text strong>{visibleIcons.length}</Text> / {filteredIcons.length}
               </Text>
             )}
           </Space>
@@ -238,22 +310,46 @@ const IconList: React.FC = () => {
         {/* 图标网格 - 使用 CSS Grid 优化性能，自动响应式 */}
         {iconType === "antd" ? (
           filteredIcons.length > 0 ? (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
-                gap: "16px",
-              }}
-            >
-              {filteredIcons.map((icon) => (
-                <IconCard
-                  key={icon.name}
-                  icon={icon}
-                  onCopy={handleCopy}
-                  t={t}
-                />
-              ))}
-            </div>
+            <>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+                  gap: "16px",
+                  marginBottom: hasMore ? "24px" : 0,
+                }}
+              >
+                {visibleIcons.map((icon) => (
+                  <IconCard
+                    key={icon.name}
+                    icon={icon}
+                    onCopy={handleCopy}
+                    t={t}
+                  />
+                ))}
+              </div>
+
+              {/* 加载更多触发器 */}
+              {hasMore && (
+                <div
+                  ref={loadMoreRef}
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    padding: "24px 0",
+                  }}
+                >
+                  <Button
+                    type="primary"
+                    icon={<DownOutlined />}
+                    onClick={loadMore}
+                    size="large"
+                  >
+                    加载更多 ({filteredIcons.length - visibleIcons.length} 个图标)
+                  </Button>
+                </div>
+              )}
+            </>
           ) : (
             <Empty description={t("icons.noResults")} />
           )

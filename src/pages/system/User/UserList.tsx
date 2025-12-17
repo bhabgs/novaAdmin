@@ -18,7 +18,7 @@ const { Option } = Select;
 const UserList: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { users, loading, total } = useAppSelector((state) => state.user);
+  const { users, loading, pagination } = useAppSelector((state) => state.user);
 
   const [statusFilter, setStatusFilter] = useState<string>("");
 
@@ -27,7 +27,6 @@ const UserList: React.FC = () => {
     isModalVisible,
     editingItem: editingUser,
     setIsModalVisible,
-    setEditingItem: setEditingUser,
     handleSearch,
     handleAdd,
     handleEdit,
@@ -38,10 +37,10 @@ const UserList: React.FC = () => {
     paginationConfig,
   } = useListManagement<User>({
     dispatch,
-    fetchAction: fetchUsers as any,
+    fetchAction: fetchUsers,
     deleteAction: deleteUser,
     loadingSelector: loading,
-    totalSelector: total,
+    totalSelector: pagination.total,
     deleteSuccessKey: "user.deleteSuccess",
     selectWarningKey: "user.selectUsers",
     deleteConfirmKey: "user.confirmDelete",

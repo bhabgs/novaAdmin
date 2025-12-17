@@ -17,6 +17,7 @@ import {
   FolderOutlined,
   FileOutlined,
   AppstoreOutlined,
+  LinkOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -98,12 +99,21 @@ const MenuForm: React.FC<MenuFormProps> = ({
     }
   }, [form, isEditing, menu, dispatch, t, onSubmit]);
 
-  const handleTypeChange = useCallback((type: 'directory' | 'page' | 'button') => {
+  const handleTypeChange = useCallback((type: 'directory' | 'page' | 'button' | 'iframe') => {
     // Set default values based on menu type
     if (type === 'directory' || type === 'button') {
       form.setFieldsValue({
         path: '',
         component: '',
+        externalUrl: '',
+      });
+    } else if (type === 'iframe') {
+      form.setFieldsValue({
+        component: '',
+      });
+    } else if (type === 'page') {
+      form.setFieldsValue({
+        externalUrl: '',
       });
     }
   }, [form]);
@@ -167,6 +177,12 @@ const MenuForm: React.FC<MenuFormProps> = ({
                     {t('menu.page')}
                   </Space>
                 </Option>
+                <Option value="iframe">
+                  <Space>
+                    <LinkOutlined />
+                    {t('menu.iframe')}
+                  </Space>
+                </Option>
                 <Option value="button">
                   <Space>
                     <AppstoreOutlined />
@@ -218,49 +234,65 @@ const MenuForm: React.FC<MenuFormProps> = ({
           {({ getFieldValue }) => {
             const menuType = getFieldValue('type');
             return (
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item
-                    name="path"
-                    label={t('menu.menuPath')}
-                    rules={
-                      menuType === 'page'
-                        ? [
-                            { required: true, message: t('menu.menuPathRequired') },
-                            { pattern: /^\//, message: t('menu.menuPathPattern') },
-                          ]
-                        : []
-                    }
-                  >
-                    <Input
-                      placeholder={
-                        menuType === 'directory'
-                          ? t('menu.directoryPathPlaceholder')
-                          : menuType === 'page'
-                          ? t('menu.pagePathPlaceholder')
-                          : t('menu.buttonPathPlaceholder')
+              <>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item
+                      name="path"
+                      label={t('menu.menuPath')}
+                      rules={
+                        menuType === 'page' || menuType === 'iframe'
+                          ? [
+                              { required: true, message: t('menu.menuPathRequired') },
+                              { pattern: /^\//, message: t('menu.menuPathPattern') },
+                            ]
+                          : []
                       }
-                      disabled={menuType === 'button'}
-                    />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
+                    >
+                      <Input
+                        placeholder={
+                          menuType === 'directory'
+                            ? t('menu.directoryPathPlaceholder')
+                            : menuType === 'page'
+                            ? t('menu.pagePathPlaceholder')
+                            : menuType === 'iframe'
+                            ? t('menu.iframePathPlaceholder')
+                            : t('menu.buttonPathPlaceholder')
+                        }
+                        disabled={menuType === 'button'}
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="component"
+                      label={t('menu.component')}
+                      rules={
+                        menuType === 'page'
+                          ? [{ required: true, message: t('menu.componentRequired') }]
+                          : []
+                      }
+                    >
+                      <Input
+                        placeholder={t('menu.componentPlaceholder')}
+                        disabled={menuType !== 'page'}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                {menuType === 'iframe' && (
                   <Form.Item
-                    name="component"
-                    label={t('menu.component')}
-                    rules={
-                      menuType === 'page'
-                        ? [{ required: true, message: t('menu.componentRequired') }]
-                        : []
-                    }
+                    name="externalUrl"
+                    label={t('menu.externalUrl')}
+                    rules={[
+                      { required: true, message: t('menu.externalUrlRequired') },
+                      { type: 'url', message: t('menu.externalUrlPattern') },
+                    ]}
                   >
-                    <Input
-                      placeholder={t('menu.componentPlaceholder')}
-                      disabled={menuType !== 'page'}
-                    />
+                    <Input placeholder={t('menu.externalUrlPlaceholder')} />
                   </Form.Item>
-                </Col>
-              </Row>
+                )}
+              </>
             );
           }}
         </Form.Item>

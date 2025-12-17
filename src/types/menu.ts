@@ -3,11 +3,12 @@ export interface Menu {
   id: string;
   name: string;
   i18nKey?: string;
-  type: 'directory' | 'page' | 'button';
+  type: 'directory' | 'page' | 'button' | 'iframe';
   parentId?: string;
   icon?: string;
   path?: string;
   component?: string;
+  externalUrl?: string; // iframe 外部链接
   permission?: string;
   sortOrder: number;
   status: 'active' | 'inactive';
@@ -24,11 +25,12 @@ export interface Menu {
 
 export interface MenuFormData {
   name: string;
-  type: 'directory' | 'page' | 'button';
+  type: 'directory' | 'page' | 'button' | 'iframe';
   parentId?: string;
   icon?: string;
   path?: string;
   component?: string;
+  externalUrl?: string; // iframe 外部链接
   permission?: string;
   sortOrder: number;
   status: 'active' | 'inactive';

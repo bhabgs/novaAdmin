@@ -99,7 +99,7 @@ export const exampleHandlers = [
   id: "new-id",
   name: "示例页面",
   i18nKey: "menu.example",
-  type: "page",           // directory | page | button
+  type: "page",           // directory | page | button | iframe
   path: "/example",
   component: "system/Example",  // pages/ 下的相对路径
   icon: "AppstoreOutlined",
@@ -110,6 +110,26 @@ export const exampleHandlers = [
 ```
 
 路径格式：`"base/Dashboard"` → `src/pages/base/Dashboard.tsx`
+
+### Iframe 外部页面
+
+菜单支持 iframe 加载外部页面：
+```typescript
+{
+  id: "external-1",
+  name: "外部文档",
+  type: "iframe",
+  path: "/external/docs",
+  externalUrl: "https://ant.design/components/overview-cn",
+  icon: "LinkOutlined",
+  sortOrder: 20,
+  status: "active",
+}
+```
+
+- `type: "iframe"` - 标记为 iframe 类型
+- `externalUrl` - 外部页面 URL
+- 自动使用 `IframeContainer` 组件加载
 
 ## 国际化
 

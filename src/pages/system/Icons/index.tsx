@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Card,
   Input,
@@ -30,8 +30,58 @@ const EXCLUDED_ICONS = [
 
 interface IconItem {
   name: string;
-  component: React.ComponentType;
+  component: React.ComponentType<{ style?: React.CSSProperties }>;
 }
+
+// 图标卡片组件 - 使用 React.memo 优化性能
+interface IconCardProps {
+  icon: IconItem;
+  onCopy: (iconName: string) => void;
+  t: (key: string) => string;
+}
+
+const IconCard: React.FC<IconCardProps> = React.memo(({ icon, onCopy, t }) => {
+  const IconComponent = icon.component;
+
+  return (
+    <Card
+      hoverable
+      size="small"
+      style={{
+        textAlign: "center",
+        cursor: "pointer",
+        height: "100%",
+      }}
+      onClick={() => onCopy(icon.name)}
+      bodyStyle={{
+        padding: "16px 8px",
+      }}
+    >
+      <Space direction="vertical" size="small" style={{ width: "100%" }}>
+        {React.createElement(IconComponent, {
+          style: {
+            fontSize: 32,
+            color: "#1890ff",
+          },
+        })}
+        <Tooltip title={t("common.clickToCopy")}>
+          <Text
+            style={{
+              fontSize: 12,
+              display: "block",
+              wordBreak: "break-word",
+            }}
+            ellipsis
+          >
+            {icon.name}
+          </Text>
+        </Tooltip>
+      </Space>
+    </Card>
+  );
+});
+
+IconCard.displayName = "IconCard";
 
 const IconList: React.FC = () => {
   const { t } = useTranslation();
@@ -46,11 +96,18 @@ const IconList: React.FC = () => {
         (key) =>
           !EXCLUDED_ICONS.includes(key) &&
           key !== key.toLowerCase() &&
-          typeof (AntdIcons as any)[key] === "object"
+          typeof (AntdIcons as unknown as Record<string, React.ComponentType>)[
+            key
+          ] === "object"
       )
       .map((name) => ({
         name,
-        component: (AntdIcons as any)[name],
+        component: (
+          AntdIcons as unknown as Record<
+            string,
+            React.ComponentType<{ style?: React.CSSProperties }>
+          >
+        )[name],
       }));
   }, []);
 
@@ -72,57 +129,20 @@ const IconList: React.FC = () => {
     );
   }, [antdIcons, searchText]);
 
-  // 复制图标名称
-  const handleCopy = (iconName: string) => {
-    navigator.clipboard
-      .writeText(iconName)
-      .then(() => {
-        message.success(t("common.copySuccess", { text: iconName }));
-      })
-      .catch(() => {
-        message.error(t("common.copyError"));
-      });
-  };
-
-  // 渲染图标卡片
-  const renderIconCard = (icon: IconItem) => {
-    const IconComponent = icon.component;
-
-    return (
-      <Col xs={12} sm={8} md={6} lg={4} xl={3} key={icon.name}>
-        <Card
-          hoverable
-          size="small"
-          style={{
-            textAlign: "center",
-            cursor: "pointer",
-          }}
-          onClick={() => handleCopy(icon.name)}
-        >
-          <Space direction="vertical" size="small" style={{ width: "100%" }}>
-            <IconComponent
-              style={{
-                fontSize: 32,
-                color: "#1890ff",
-              }}
-            />
-            <Tooltip title={t("common.clickToCopy")}>
-              <Text
-                style={{
-                  fontSize: 12,
-                  display: "block",
-                  wordBreak: "break-word",
-                }}
-                ellipsis
-              >
-                {icon.name}
-              </Text>
-            </Tooltip>
-          </Space>
-        </Card>
-      </Col>
-    );
-  };
+  // 复制图标名称 - 使用 useCallback 优化
+  const handleCopy = useCallback(
+    (iconName: string) => {
+      navigator.clipboard
+        .writeText(iconName)
+        .then(() => {
+          message.success(t("common.copySuccess", { text: iconName }));
+        })
+        .catch(() => {
+          message.error(t("common.copyError"));
+        });
+    },
+    [t]
+  );
 
   // 渲染 Iconfont 占位
   const renderIconfontPlaceholder = () => {
@@ -208,16 +228,32 @@ const IconList: React.FC = () => {
             </Text>
             {searchText && (
               <Text type="secondary">
-                {t("icons.filtered")}: <Text strong>{filteredIcons.length}</Text>
+                {t("icons.filtered")}:{" "}
+                <Text strong>{filteredIcons.length}</Text>
               </Text>
             )}
           </Space>
         </Space>
 
-        {/* 图标网格 */}
+        {/* 图标网格 - 使用 CSS Grid 优化性能，自动响应式 */}
         {iconType === "antd" ? (
           filteredIcons.length > 0 ? (
-            <Row gutter={[16, 16]}>{filteredIcons.map(renderIconCard)}</Row>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
+                gap: "16px",
+              }}
+            >
+              {filteredIcons.map((icon) => (
+                <IconCard
+                  key={icon.name}
+                  icon={icon}
+                  onCopy={handleCopy}
+                  t={t}
+                />
+              ))}
+            </div>
           ) : (
             <Empty description={t("icons.noResults")} />
           )

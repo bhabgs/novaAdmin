@@ -8,6 +8,7 @@ import { RouteObject, Navigate } from "react-router-dom";
 import type { Menu } from "@/types/menu";
 import { getComponent } from "./componentMap";
 import { Spin } from "antd";
+import IframeContainer from "@/components/IframeContainer";
 
 // 加载中组件
 const RouteLoading: React.FC = () => (
@@ -162,6 +163,30 @@ export function generateRoutesFromMenus(
           menu.name
         );
       }
+    } else if (menu.type === "iframe") {
+      // iframe 类型：生成 iframe 路由
+      if (menu.path && menu.externalUrl) {
+        // 处理路径（移除开头的 /）
+        const path = menu.path.startsWith("/")
+          ? menu.path.slice(1)
+          : menu.path;
+
+        console.log(
+          `[generateRoutes] ✓ Generating iframe route: ${path} -> ${menu.externalUrl}`
+        );
+
+        route.path = path;
+        route.element = (
+          <IframeContainer url={menu.externalUrl} title={menu.name} />
+        );
+
+        routes.push(route);
+      } else {
+        console.warn(
+          `[generateRoutes] ✗ Iframe menu missing path or externalUrl:`,
+          menu.name
+        );
+      }
     }
     // button 类型不生成路由，只用于权限控制
   });
@@ -197,7 +222,7 @@ export function flattenMenuPaths(menus: Menu[]): string[] {
 
   function flatten(menuList: Menu[]) {
     menuList.forEach((menu) => {
-      if (menu.type === "page" && menu.path) {
+      if ((menu.type === "page" || menu.type === "iframe") && menu.path) {
         paths.push(menu.path);
       }
       if (menu.children && menu.children.length > 0) {

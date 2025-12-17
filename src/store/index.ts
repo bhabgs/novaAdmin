@@ -9,6 +9,7 @@ import roleReducer from './slices/roleSlice';
 import menuReducer from './slices/menuSlice';
 import dashboardReducer from './slices/dashboardSlice';
 import tabsReducer from './slices/tabsSlice';
+import notificationReducer from './slices/notificationSlice';
 
 // 配置store
 export const store = configureStore({
@@ -20,6 +21,7 @@ export const store = configureStore({
     menu: menuReducer,
     dashboard: dashboardReducer,
     tabs: tabsReducer,
+    notification: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

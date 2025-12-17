@@ -4,6 +4,7 @@ import { userHandlers } from './user';
 import { roleHandlers } from './role';
 import { menuHandlers } from './menu';
 import { dashboardHandlers } from './dashboard';
+import { notificationHandlers } from './notification';
 
 // 合并所有处理器
 const handlers = [
@@ -12,6 +13,7 @@ const handlers = [
   ...roleHandlers,
   ...menuHandlers,
   ...dashboardHandlers,
+  ...notificationHandlers,
 ];
 
 // 创建 worker
@@ -37,6 +39,7 @@ export const startMockService = async () => {
       console.log('  - Roles: /api/roles/*');
       console.log('  - Menus: /api/menus/*');
       console.log('  - Dashboard: /api/dashboard/*');
+      console.log('  - Notifications: /api/notifications/*');
     } catch (error) {
       console.error('Failed to start Mock Service Worker:', error);
     }

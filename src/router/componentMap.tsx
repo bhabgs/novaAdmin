@@ -7,7 +7,7 @@ import { lazy, ComponentType, LazyExoticComponent } from "react";
  * 这个映射表仅用于向后兼容旧的组件名格式
  *
  * 目录结构:
- * - base/: 基础模块 (Dashboard, Home, Login, Profile, TemplateIntroduction)
+ * - base/: 基础模块 (Dashboard, Home, Login, Profile, TemplateIntroduction, NotificationCenter)
  * - system/: 系统管理 (User, Role, Menu, Settings)
  * - tools/: 工具模块 (MarkdownViewer, RichTextEditor, PixiEditor)
  */
@@ -20,6 +20,7 @@ export const componentMap: Record<
   Dashboard: lazy(() => import("@/pages/base/Dashboard")),
   TemplateIntroduction: lazy(() => import("@/pages/base/TemplateIntroduction")),
   Profile: lazy(() => import("@/pages/base/Profile")),
+  NotificationCenter: lazy(() => import("@/pages/base/NotificationCenter")),
 
   // ===== 系统管理 (system/) =====
   UserList: lazy(() => import("@/pages/system/User/UserList")),

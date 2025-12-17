@@ -5,6 +5,7 @@ export type Language = 'zh-CN' | 'en-US' | 'ar-SA';
 export type { User, UserFormData, UserState, ActivityLog, Role } from './user';
 export type { Role as RoleDetailed, RoleFormData, RoleState } from './role';
 export type { Menu, MenuFormData, MenuState } from './menu';
+export type { Notification, NotificationState, NotificationListResponse, NotificationType, NotificationStatus } from './notification';
 
 // 国际化配置类型
 export interface I18nConfig {

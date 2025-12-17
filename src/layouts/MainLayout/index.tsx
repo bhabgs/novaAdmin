@@ -74,11 +74,15 @@ const MainLayout: React.FC = () => {
       const label = menu.i18nKey ? t(menu.i18nKey) : menu.name;
 
       if (menu.children && menu.children.length > 0) {
+        // 创建副本并排序，避免修改只读数组
+        const sortedChildren = [...menu.children]
+          .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+          .filter((menu1) => !menu1.hideInMenu);
         return {
           key: menu.id,
           icon,
           label,
-          children: generateMenuItems(menu.children),
+          children: generateMenuItems(sortedChildren),
         };
       }
 
@@ -88,8 +92,8 @@ const MainLayout: React.FC = () => {
         label,
         onClick: () => {
           // 如果是 iframe 类型且设置为在新标签页打开
-          if (menu.type === 'iframe' && menu.openInNewTab && menu.externalUrl) {
-            window.open(menu.externalUrl, '_blank', 'noopener,noreferrer');
+          if (menu.type === "iframe" && menu.openInNewTab && menu.externalUrl) {
+            window.open(menu.externalUrl, "_blank", "noopener,noreferrer");
           } else {
             navigate(menu.path || "/");
           }

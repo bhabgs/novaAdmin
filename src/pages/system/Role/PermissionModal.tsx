@@ -51,7 +51,7 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
   const [autoExpandParent, setAutoExpandParent] = useState(true);
 
   // 模拟权限树数据
-  const permissionTree: PermissionNode[] = [
+  const permissionTree: PermissionNode[] = React.useMemo(() => [
     {
       key: 'dashboard',
       title: t('menu.dashboard'),
@@ -103,7 +103,7 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
         { key: 'system:restore', title: t('permission.systemRestore') },
       ],
     },
-  ];
+  ], [t]);
 
   useEffect(() => {
     if (visible && role) {
@@ -115,7 +115,7 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
       const allKeys = getAllKeys(permissionTree);
       setExpandedKeys(allKeys);
     }
-  }, [visible, role]);
+  }, [visible, role, permissionTree]);
 
   const getAllKeys = (nodes: PermissionNode[]): string[] => {
     let keys: string[] = [];

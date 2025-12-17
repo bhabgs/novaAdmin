@@ -105,6 +105,21 @@ const generateMockMenus = () => {
           createTime: "2023-01-01T00:00:00.000Z",
           updateTime: new Date().toISOString(),
         },
+        {
+          id: "9",
+          name: "图标库",
+          i18nKey: "icons.title",
+          type: "page" as const,
+          path: "/icons",
+          component: "system/Icons",
+          icon: "AppstoreOutlined",
+          parentId: "100",
+          sortOrder: 5,
+          status: "active" as const,
+          children: [],
+          createTime: "2023-01-01T00:00:00.000Z",
+          updateTime: new Date().toISOString(),
+        },
       ],
       createTime: "2023-01-01T00:00:00.000Z",
       updateTime: new Date().toISOString(),
@@ -201,7 +216,7 @@ const availableIcons = [
 // localStorage 键名
 const MENU_STORAGE_KEY = "mock_menus_data";
 const MENU_VERSION_KEY = "mock_menus_version";
-const CURRENT_MENU_VERSION = "2.0"; // 路径格式版本
+const CURRENT_MENU_VERSION = "2.1"; // 添加图标库页面
 
 // 修复子菜单的 parentId（数据迁移）
 const fixMenuParentIds = (menus: any[]): any[] => {

@@ -10,6 +10,7 @@ import {
   message,
   Row,
   Col,
+  Segmented,
 } from 'antd';
 import {
   BgColorsOutlined,
@@ -18,11 +19,16 @@ import {
   MoonOutlined,
   ReloadOutlined,
   SunOutlined,
+  LayoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../store';
-import { updateTheme, resetSettings } from '../../store/slices/settingsSlice';
+import { updateTheme, resetSettings, updateLayout } from '../../store/slices/settingsSlice';
 import { PRESET_COLORS, getPresetThemes } from '../../constants/theme';
+import { LayoutMode } from '../../types';
 import styles from './index.module.less';
 
 const { Title, Text } = Typography;
@@ -30,10 +36,17 @@ const { Title, Text } = Typography;
 const ThemeSettings: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { theme } = useAppSelector((state) => state.settings);
+  const { theme, layout } = useAppSelector((state) => state.settings);
   const [customColor, setCustomColor] = useState(theme.primaryColor);
 
   const PRESET_THEMES = getPresetThemes(t);
+
+  // 布局模式选项
+  const layoutModeOptions = [
+    { label: t('settings.sideMenu'), value: 'side' as LayoutMode, icon: <MenuFoldOutlined /> },
+    { label: t('settings.topMenu'), value: 'top' as LayoutMode, icon: <MenuUnfoldOutlined /> },
+    { label: t('settings.mixMenu'), value: 'mix' as LayoutMode, icon: <AppstoreOutlined /> },
+  ];
 
   const handleModeChange = useCallback((mode: 'light' | 'dark') => {
     dispatch(updateTheme({ mode }));
@@ -48,6 +61,37 @@ const ThemeSettings: React.FC = () => {
 
   const handleBorderRadiusChange = useCallback((value: number) => {
     dispatch(updateTheme({ borderRadius: value }));
+  }, [dispatch]);
+
+  // 布局模式切换
+  const handleLayoutModeChange = useCallback((mode: LayoutMode) => {
+    dispatch(updateLayout({ mode }));
+    message.success(t('settings.layoutUpdateSuccess'));
+  }, [dispatch, t]);
+
+  // 固定头部切换
+  const handleFixedHeaderChange = useCallback((checked: boolean) => {
+    dispatch(updateLayout({ fixedHeader: checked }));
+  }, [dispatch]);
+
+  // 显示标签页切换
+  const handleShowTabsChange = useCallback((checked: boolean) => {
+    dispatch(updateLayout({ showTabs: checked }));
+  }, [dispatch]);
+
+  // 侧边栏宽度变更
+  const handleSidebarWidthChange = useCallback((value: number) => {
+    dispatch(updateLayout({ sidebarWidth: value }));
+  }, [dispatch]);
+
+  // 侧边栏主题切换
+  const handleSidebarThemeChange = useCallback((value: 'light' | 'dark') => {
+    dispatch(updateLayout({ sidebarTheme: value }));
+  }, [dispatch]);
+
+  // 内容区域宽度切换
+  const handleContentWidthChange = useCallback((value: 'fluid' | 'fixed') => {
+    dispatch(updateLayout({ contentWidth: value }));
   }, [dispatch]);
 
   const handlePresetTheme = useCallback((preset: ReturnType<typeof getPresetThemes>[0]) => {
@@ -210,17 +254,103 @@ const ThemeSettings: React.FC = () => {
       {/* 布局设置 */}
       <Card className={styles.themeCard} bordered={false}>
         <div className={styles.cardTitle}>
-          <BgColorsOutlined className={styles.titleIcon} />
+          <LayoutOutlined className={styles.titleIcon} />
           {t('settings.layoutSettings')}
         </div>
         <div className={styles.cardContent}>
           <div className={styles.layoutSettings}>
+            {/* 布局模式 */}
+            <div className={styles.settingItem}>
+              <div className={styles.settingLabel}>
+                <div className={styles.labelText}>{t('settings.layoutMode')}</div>
+                <div className={styles.labelDesc}>{t('settings.layoutModeDesc')}</div>
+              </div>
+              <div className={styles.settingControl}>
+                <Segmented
+                  value={layout.mode}
+                  onChange={(value) => handleLayoutModeChange(value as LayoutMode)}
+                  options={layoutModeOptions.map(opt => ({
+                    label: opt.label,
+                    value: opt.value,
+                  }))}
+                />
+              </div>
+            </div>
+
+            {/* 固定头部 */}
+            <div className={styles.settingItem}>
+              <div className={styles.settingLabel}>
+                <div className={styles.labelText}>{t('settings.fixedHeader')}</div>
+                <div className={styles.labelDesc}>{t('settings.fixedHeaderDesc')}</div>
+              </div>
+              <div className={styles.settingControl}>
+                <Switch
+                  checked={layout.fixedHeader}
+                  onChange={handleFixedHeaderChange}
+                />
+              </div>
+            </div>
+
+            {/* 显示标签页 */}
+            <div className={styles.settingItem}>
+              <div className={styles.settingLabel}>
+                <div className={styles.labelText}>{t('settings.showTabs')}</div>
+                <div className={styles.labelDesc}>{t('settings.showTabsDesc')}</div>
+              </div>
+              <div className={styles.settingControl}>
+                <Switch
+                  checked={layout.showTabs}
+                  onChange={handleShowTabsChange}
+                />
+              </div>
+            </div>
+
+            {/* 侧边栏宽度 - 仅在 side 或 mix 模式下显示 */}
+            {layout.mode !== 'top' && (
+              <div className={styles.settingItem}>
+                <div className={styles.settingLabel}>
+                  <div className={styles.labelText}>{t('settings.sidebarWidth')}</div>
+                  <div className={styles.labelDesc}>{t('settings.sidebarWidthDesc')}</div>
+                </div>
+                <div className={styles.settingControl}>
+                  <div className={styles.sliderWrapper}>
+                    <Slider
+                      min={180}
+                      max={300}
+                      value={layout.sidebarWidth}
+                      onChange={handleSidebarWidthChange}
+                    />
+                    <div className={styles.sliderValue}>{layout.sidebarWidth}px</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 侧边栏主题 - 仅在 side 或 mix 模式下显示 */}
+            {layout.mode !== 'top' && (
+              <div className={styles.settingItem}>
+                <div className={styles.settingLabel}>
+                  <div className={styles.labelText}>{t('settings.sidebarTheme')}</div>
+                  <div className={styles.labelDesc}>{t('settings.sidebarThemeDesc')}</div>
+                </div>
+                <div className={styles.settingControl}>
+                  <Segmented
+                    value={layout.sidebarTheme}
+                    onChange={(value) => handleSidebarThemeChange(value as 'light' | 'dark')}
+                    options={[
+                      { label: t('settings.sidebarLight'), value: 'light' },
+                      { label: t('settings.sidebarDark'), value: 'dark' },
+                    ]}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* 圆角大小 */}
             <div className={styles.settingItem}>
               <div className={styles.settingLabel}>
                 <div className={styles.labelText}>{t('settings.borderRadius')}</div>
-                <div className={styles.labelDesc}>
-                  {t('settings.borderRadiusDesc')}
-                </div>
+                <div className={styles.labelDesc}>{t('settings.borderRadiusDesc')}</div>
               </div>
               <div className={styles.settingControl}>
                 <div className={styles.sliderWrapper}>

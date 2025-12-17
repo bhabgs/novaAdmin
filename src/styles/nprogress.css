@@ -1,0 +1,74 @@
+/* NProgress 自定义样式 */
+
+/* 进度条背景 */
+#nprogress {
+  pointer-events: none;
+}
+
+/* 进度条本体 */
+#nprogress .bar {
+  background: var(--primary-color, #1890ff);
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+}
+
+/* 进度条发光效果 */
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px var(--primary-color, #1890ff), 0 0 5px var(--primary-color, #1890ff);
+  opacity: 1.0;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* 加载动画（右上角的圆圈，可以选择隐藏） */
+#nprogress .spinner {
+  display: block;
+  position: fixed;
+  z-index: 9999;
+  top: 15px;
+  right: 15px;
+}
+
+#nprogress .spinner-icon {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: solid 2px transparent;
+  border-top-color: var(--primary-color, #1890ff);
+  border-left-color: var(--primary-color, #1890ff);
+  border-radius: 50%;
+  animation: nprogress-spinner 400ms linear infinite;
+}
+
+@keyframes nprogress-spinner {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 移除进度条的淡入淡出动画，使其更流畅 */
+#nprogress .bar,
+#nprogress .spinner {
+  transition: none;
+}
+
+/* 暗色主题适配 */
+[data-theme="dark"] #nprogress .bar {
+  background: var(--primary-color, #1890ff);
+}
+
+[data-theme="dark"] #nprogress .peg {
+  box-shadow: 0 0 10px var(--primary-color, #1890ff), 0 0 5px var(--primary-color, #1890ff);
+}
+
+[data-theme="dark"] #nprogress .spinner-icon {
+  border-top-color: var(--primary-color, #1890ff);
+  border-left-color: var(--primary-color, #1890ff);
+}

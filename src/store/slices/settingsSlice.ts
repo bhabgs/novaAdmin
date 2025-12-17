@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SystemSettings, ThemeConfig, Language } from '../../types';
+import { SystemSettings, ThemeConfig, Language, LayoutConfig } from '../../types';
 import i18n from '../../i18n';
 
 const SETTINGS_KEY = 'nova_admin_settings';
@@ -13,9 +13,15 @@ const defaultSettings: SystemSettings = {
   },
   language: 'zh-CN',
   layout: {
+    mode: 'side',
     sidebarCollapsed: false,
-    sidebarWidth: 240,
+    sidebarWidth: 220,
+    sidebarTheme: 'dark',
     headerHeight: 64,
+    fixedHeader: true,
+    showTabs: true,
+    contentWidth: 'fluid',
+    showFooter: false,
   },
 };
 

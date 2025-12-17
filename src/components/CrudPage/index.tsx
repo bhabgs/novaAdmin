@@ -46,6 +46,7 @@ export interface ToolbarButton {
   type?: "primary" | "default" | "dashed" | "link" | "text";
   danger?: boolean;
   disabled?: boolean;
+  tooltip?: string;
   onClick: () => void;
 }
 
@@ -301,18 +302,27 @@ function CrudPage<T extends { id: string }>({
             )}
 
             {/* 自定义工具栏按钮 */}
-            {toolbarButtons.map((btn) => (
-              <Button
-                key={btn.key}
-                type={btn.type}
-                danger={btn.danger}
-                disabled={btn.disabled}
-                icon={btn.icon}
-                onClick={btn.onClick}
-              >
-                {btn.label}
-              </Button>
-            ))}
+            {toolbarButtons.map((btn) => {
+              const button = (
+                <Button
+                  key={btn.key}
+                  type={btn.type}
+                  danger={btn.danger}
+                  disabled={btn.disabled}
+                  icon={btn.icon}
+                  onClick={btn.onClick}
+                >
+                  {btn.label}
+                </Button>
+              );
+              return btn.tooltip ? (
+                <Tooltip key={btn.key} title={btn.tooltip}>
+                  {button}
+                </Tooltip>
+              ) : (
+                button
+              );
+            })}
 
             {/* 刷新按钮 */}
             {showRefreshButton && onRefresh && (

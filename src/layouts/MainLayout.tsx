@@ -35,7 +35,7 @@ const MainLayout: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { userMenus } = useAppSelector((state) => state.menu);
   const { layout } = useAppSelector((state) => state.settings);
-  const sidebarCollapsed = layout.sidebarCollapsed;
+  const { sidebarCollapsed, sidebarWidth, sidebarTheme, fixedHeader, showTabs } = layout;
 
   const [mobileDrawerVisible, setMobileDrawerVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -203,8 +203,9 @@ const MainLayout: React.FC = () => {
           trigger={null}
           collapsible
           collapsed={sidebarCollapsed}
-          width={200}
-          className={styles.sider}
+          width={sidebarWidth}
+          className={`${styles.sider} ${sidebarTheme === 'light' ? styles.siderLight : ''}`}
+          theme={sidebarTheme}
         >
           {sidebarContent}
         </Sider>
@@ -225,16 +226,14 @@ const MainLayout: React.FC = () => {
       )}
 
       <Layout
-        className={`${styles.layout} ${
-          !isMobile
-            ? sidebarCollapsed
-              ? styles.collapsed
-              : styles.withSider
-            : ""
-        }`}
+        className={styles.layout}
+        style={{
+          marginLeft: !isMobile ? (sidebarCollapsed ? 80 : sidebarWidth) : 0,
+          transition: 'margin-left 0.2s ease',
+        }}
       >
         {/* 顶部导航 */}
-        <Header className={styles.header}>
+        <Header className={`${styles.header} ${fixedHeader ? styles.fixedHeader : ''}`}>
           <div className={styles.headerLeft}>
             <Button
               type="text"
@@ -287,7 +286,7 @@ const MainLayout: React.FC = () => {
           </div>
         </Header>
         {/* 标签页 */}
-        <PageTabs />
+        {showTabs && <PageTabs />}
         {/* 主内容区域 */}
         <div className={styles.content}>
           <Outlet />

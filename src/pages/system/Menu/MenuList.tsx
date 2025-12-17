@@ -1,20 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Button, Space, Select, message, Popconfirm, Tag, Tooltip } from "antd";
 import {
-  Table,
-  Button,
-  Space,
-  Input,
-  Select,
-  message,
-  Popconfirm,
-  Tag,
-  Card,
-  Row,
-  Col,
-  Tooltip,
-} from "antd";
-import {
-  PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   ReloadOutlined,
@@ -33,9 +19,8 @@ import {
 } from "@/store/slices/menuSlice";
 import { Menu } from "@/types/menu";
 import MenuForm from "./MenuForm";
-import PageContainer from "@/components/PageContainer";
+import CrudPage, { FilterConfig, ToolbarButton } from "@/components/CrudPage";
 
-const { Search } = Input;
 const { Option } = Select;
 
 const MenuList: React.FC = () => {
@@ -98,26 +83,30 @@ const MenuList: React.FC = () => {
   const filteredMenus = filterMenus(menus);
   const treeData = buildMenuTree(filteredMenus);
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     setEditingMenu(null);
     setIsFormVisible(true);
-  };
+  }, []);
 
-  const handleEdit = (record: Menu) => {
+  const handleEdit = useCallback((record: Menu) => {
     setEditingMenu(record);
     setIsFormVisible(true);
-  };
+  }, []);
 
-  const handleDelete = async (id: string) => {
-    try {
-      await dispatch(deleteMenu(id)).unwrap();
-      message.success(t("menu.deleteSuccess"));
-    } catch {
-      message.error(t("message.error"));
-    }
-  };
+  const handleDelete = useCallback(
+    async (id: string) => {
+      try {
+        await dispatch(deleteMenu(id)).unwrap();
+        message.success(t("menu.deleteSuccess"));
+        dispatch(fetchMenus());
+      } catch {
+        message.error(t("message.error"));
+      }
+    },
+    [dispatch, t]
+  );
 
-  const handleBatchDelete = async () => {
+  const handleBatchDelete = useCallback(async () => {
     if (selectedRowKeys.length === 0) {
       message.warning(t("menu.selectMenus"));
       return;
@@ -127,21 +116,32 @@ const MenuList: React.FC = () => {
       await dispatch(batchDeleteMenus(selectedRowKeys as string[])).unwrap();
       message.success(t("menu.deleteSuccess"));
       setSelectedRowKeys([]);
+      dispatch(fetchMenus());
     } catch {
       message.error(t("message.error"));
     }
-  };
+  }, [dispatch, selectedRowKeys, t]);
 
-  const handleFormSubmit = () => {
+  const handleRefresh = useCallback(() => {
+    dispatch(fetchMenus());
+  }, [dispatch]);
+
+  const handleRefreshRoutes = useCallback(() => {
+    dispatch(fetchMenus());
+    dispatch(fetchUserMenus());
+    message.success(t("menu.refreshRoutesSuccess"));
+  }, [dispatch, t]);
+
+  const handleFormSubmit = useCallback(() => {
     setIsFormVisible(false);
     setEditingMenu(null);
     dispatch(fetchMenus());
-  };
+  }, [dispatch]);
 
-  const handleFormCancel = () => {
+  const handleFormCancel = useCallback(() => {
     setIsFormVisible(false);
     setEditingMenu(null);
-  };
+  }, []);
 
   const getMenuIcon = (type: string) => {
     switch (type) {
@@ -156,212 +156,213 @@ const MenuList: React.FC = () => {
     }
   };
 
-  const getStatusTag = (status: string) => {
-    return status === "active" ? (
-      <Tag color="success">{t("common.active")}</Tag>
-    ) : (
-      <Tag color="error">{t("common.inactive")}</Tag>
-    );
-  };
-
-  const getTypeTag = (type: string) => {
-    const typeMap = {
-      directory: { color: "blue", text: t("menu.directory") },
-      page: { color: "green", text: t("menu.page") },
-      button: { color: "orange", text: t("menu.button") },
+  const columns = useMemo(() => {
+    const getStatusTag = (status: string) => {
+      return status === "active" ? (
+        <Tag color="success">{t("common.active")}</Tag>
+      ) : (
+        <Tag color="error">{t("common.inactive")}</Tag>
+      );
     };
-    const config = typeMap[type as keyof typeof typeMap];
-    return <Tag color={config.color}>{config.text}</Tag>;
-  };
 
-  const columns = [
-    {
-      title: t("menu.menuName"),
-      dataIndex: "name",
-      key: "name",
-      render: (text: string, record: Menu) => (
-        <Space>
-          {getMenuIcon(record.type)}
-          <span>{text}</span>
-        </Space>
-      ),
-    },
-    {
-      title: t("menu.menuPath"),
-      dataIndex: "path",
-      key: "path",
-      render: (text: string) => (
-        <code
-          style={{
-            background: "#f5f5f5",
-            padding: "2px 6px",
-            borderRadius: "3px",
-          }}
-        >
-          {text || "-"}
-        </code>
-      ),
-    },
-    {
-      title: t("menu.menuType"),
-      dataIndex: "type",
-      key: "type",
-      render: (type: string) => getTypeTag(type),
-    },
-    {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => getStatusTag(status),
-    },
-    {
-      title: t("menu.sortOrder"),
-      dataIndex: "sortOrder",
-      key: "sortOrder",
-      width: 100,
-      sorter: (a: Menu, b: Menu) => a.sortOrder - b.sortOrder,
-    },
-    {
-      title: t("common.createTime"),
-      dataIndex: "createTime",
-      key: "createTime",
-      width: 180,
-      render: (text: string) => (text ? new Date(text).toLocaleString() : "-"),
-    },
-    {
-      title: t("common.operation"),
-      key: "operation",
-      width: 200,
-      render: (_: unknown, record: Menu) => (
-        <Space size="small">
-          <Tooltip title={t("common.edit")}>
-            <Button
-              type="link"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            />
-          </Tooltip>
-          <Popconfirm
-            title={t("menu.confirmDelete")}
-            onConfirm={() => handleDelete(record.id)}
-            okText={t("common.confirm")}
-            cancelText={t("common.cancel")}
+    const getTypeTag = (type: string) => {
+      const typeMap = {
+        directory: { color: "blue", text: t("menu.directory") },
+        page: { color: "green", text: t("menu.page") },
+        button: { color: "orange", text: t("menu.button") },
+      };
+      const config = typeMap[type as keyof typeof typeMap];
+      return <Tag color={config.color}>{config.text}</Tag>;
+    };
+
+    return [
+      {
+        title: t("menu.menuName"),
+        dataIndex: "name",
+        key: "name",
+        render: (text: string, record: Menu) => (
+          <Space>
+            {getMenuIcon(record.type)}
+            <span>{text}</span>
+          </Space>
+        ),
+      },
+      {
+        title: t("menu.menuPath"),
+        dataIndex: "path",
+        key: "path",
+        render: (text: string) => (
+          <code
+            style={{
+              background: "#f5f5f5",
+              padding: "2px 6px",
+              borderRadius: "3px",
+            }}
           >
-            <Tooltip title={t("common.delete")}>
-              <Button
-                type="link"
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-              />
-            </Tooltip>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
+            {text || "-"}
+          </code>
+        ),
+      },
+      {
+        title: t("menu.menuType"),
+        dataIndex: "type",
+        key: "type",
+        render: (type: string) => getTypeTag(type),
+      },
+      {
+        title: t("common.status"),
+        dataIndex: "status",
+        key: "status",
+        render: (status: string) => getStatusTag(status),
+      },
+      {
+        title: t("menu.sortOrder"),
+        dataIndex: "sortOrder",
+        key: "sortOrder",
+        width: 100,
+        sorter: (a: Menu, b: Menu) => a.sortOrder - b.sortOrder,
+      },
+      {
+        title: t("common.createTime"),
+        dataIndex: "createTime",
+        key: "createTime",
+        width: 180,
+        render: (text: string) =>
+          text ? new Date(text).toLocaleString() : "-",
+      },
+    ];
+  }, [t]);
 
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (newSelectedRowKeys: React.Key[]) => {
-      setSelectedRowKeys(newSelectedRowKeys);
-    },
-  };
+  // 自定义操作列渲染
+  const operationColumnRender = useCallback(
+    (record: Menu) => (
+      <Space size="small">
+        <Tooltip title={t("common.edit")}>
+          <Button
+            type="link"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+          />
+        </Tooltip>
+        <Popconfirm
+          title={t("menu.confirmDelete")}
+          onConfirm={() => handleDelete(record.id)}
+          okText={t("common.confirm")}
+          cancelText={t("common.cancel")}
+        >
+          <Tooltip title={t("common.delete")}>
+            <Button type="link" size="small" danger icon={<DeleteOutlined />} />
+          </Tooltip>
+        </Popconfirm>
+      </Space>
+    ),
+    [handleEdit, handleDelete, t]
+  );
+
+  const rowSelection = useMemo(
+    () => ({
+      selectedRowKeys,
+      onChange: (newSelectedRowKeys: React.Key[]) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+      },
+    }),
+    [selectedRowKeys]
+  );
+
+  // 过滤器配置
+  const filters: FilterConfig[] = useMemo(
+    () => [
+      {
+        key: "type",
+        span: 4,
+        component: (
+          <Select
+            placeholder={t("menu.filterByType")}
+            allowClear
+            style={{ width: "100%" }}
+            value={typeFilter || undefined}
+            onChange={setTypeFilter}
+          >
+            <Option value="directory">{t("menu.directory")}</Option>
+            <Option value="page">{t("menu.page")}</Option>
+            <Option value="button">{t("menu.button")}</Option>
+          </Select>
+        ),
+      },
+      {
+        key: "status",
+        span: 4,
+        component: (
+          <Select
+            placeholder={t("common.filterByStatus")}
+            allowClear
+            style={{ width: "100%" }}
+            value={statusFilter || undefined}
+            onChange={setStatusFilter}
+          >
+            <Option value="active">{t("common.active")}</Option>
+            <Option value="inactive">{t("common.inactive")}</Option>
+          </Select>
+        ),
+      },
+    ],
+    [typeFilter, statusFilter, t]
+  );
+
+  // 工具栏按钮配置
+  const toolbarButtons: ToolbarButton[] = useMemo(
+    () => [
+      {
+        key: "refreshRoutes",
+        label: t("menu.refreshRoutes"),
+        icon: <ReloadOutlined />,
+        type: "primary",
+        tooltip: t("menu.refreshRoutesTooltip"),
+        onClick: handleRefreshRoutes,
+      },
+    ],
+    [handleRefreshRoutes, t]
+  );
+
+  // 处理搜索
+  const handleSearch = useCallback((value: string) => {
+    setSearchText(value);
+  }, []);
 
   return (
-    <PageContainer title={t("menu.title")} ghost>
-      <Card bordered={false}>
-        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
-          <Col span={6}>
-            <Search
-              placeholder={t("menu.searchPlaceholder")}
-              allowClear
-              onSearch={setSearchText}
-              onChange={(e) => setSearchText(e.target.value)}
-            />
-          </Col>
-          <Col span={4}>
-            <Select
-              placeholder={t("menu.filterByType")}
-              allowClear
-              style={{ width: "100%" }}
-              value={typeFilter}
-              onChange={setTypeFilter}
-            >
-              <Option value="directory">{t("menu.directory")}</Option>
-              <Option value="page">{t("menu.page")}</Option>
-              <Option value="button">{t("menu.button")}</Option>
-            </Select>
-          </Col>
-          <Col span={4}>
-            <Select
-              placeholder={t("common.filterByStatus")}
-              allowClear
-              style={{ width: "100%" }}
-              value={statusFilter}
-              onChange={setStatusFilter}
-            >
-              <Option value="active">{t("common.active")}</Option>
-              <Option value="inactive">{t("common.inactive")}</Option>
-            </Select>
-          </Col>
-          <Col span={10}>
-            <Space>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={handleAdd}
-              >
-                {t("menu.addMenu")}
-              </Button>
-              <Button
-                danger
-                icon={<DeleteOutlined />}
-                disabled={selectedRowKeys.length === 0}
-                onClick={handleBatchDelete}
-              >
-                {t("common.batchDelete")}
-              </Button>
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={() => dispatch(fetchMenus())}
-              >
-                {t("common.refresh")}
-              </Button>
-              <Tooltip title={t("menu.refreshRoutesTooltip")}>
-                <Button
-                  type="primary"
-                  ghost
-                  icon={<ReloadOutlined />}
-                  onClick={() => {
-                    dispatch(fetchMenus());
-                    dispatch(fetchUserMenus());
-                    message.success(t("menu.refreshRoutesSuccess"));
-                  }}
-                >
-                  {t("menu.refreshRoutes")}
-                </Button>
-              </Tooltip>
-            </Space>
-          </Col>
-        </Row>
-
-        <Table
-          rowSelection={rowSelection}
-          columns={columns}
-          dataSource={treeData}
-          loading={loading}
-          rowKey="id"
-          pagination={false}
-          expandable={{
+    <>
+      <CrudPage<Menu>
+        title={t("menu.title")}
+        dataSource={treeData}
+        columns={columns}
+        loading={loading}
+        rowSelection={rowSelection}
+        selectedRowKeys={selectedRowKeys}
+        pagination={false}
+        searchPlaceholder={t("menu.searchPlaceholder")}
+        onSearch={handleSearch}
+        filters={filters}
+        toolbarButtons={toolbarButtons}
+        addButtonText={t("menu.addMenu")}
+        batchDeleteButtonText={t("common.batchDelete")}
+        onAdd={handleAdd}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onBatchDelete={handleBatchDelete}
+        onRefresh={handleRefresh}
+        deleteConfirmTitle={t("menu.confirmDelete")}
+        operationColumnWidth={200}
+        operationColumnRender={operationColumnRender}
+        tableProps={{
+          expandable: {
             expandedRowKeys: expandedKeys,
             onExpandedRowsChange: (keys) => setExpandedKeys([...keys]),
             defaultExpandAllRows: true,
-          }}
-          size="middle"
-        />
-      </Card>
+          },
+          size: "middle",
+        }}
+      />
 
       <MenuForm
         visible={isFormVisible}
@@ -369,7 +370,7 @@ const MenuList: React.FC = () => {
         onSubmit={handleFormSubmit}
         onCancel={handleFormCancel}
       />
-    </PageContainer>
+    </>
   );
 };
 

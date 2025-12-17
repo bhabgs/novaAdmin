@@ -65,15 +65,33 @@ export interface ThemeConfig {
   borderRadius: number;
 }
 
+// 布局模式类型
+export type LayoutMode = 'side' | 'top' | 'mix';
+
+// 布局配置类型
+export interface LayoutConfig {
+  // 布局模式：side=侧边菜单, top=顶部菜单, mix=混合模式
+  mode: LayoutMode;
+  // 侧边栏配置
+  sidebarCollapsed: boolean;
+  sidebarWidth: number;
+  sidebarTheme: 'light' | 'dark';
+  // 头部配置
+  headerHeight: number;
+  fixedHeader: boolean;
+  // 标签页配置
+  showTabs: boolean;
+  // 内容区域配置
+  contentWidth: 'fluid' | 'fixed';
+  // 页脚配置
+  showFooter: boolean;
+}
+
 // 系统设置类型
 export interface SystemSettings {
   theme: ThemeConfig;
   language: Language;
-  layout: {
-    sidebarCollapsed: boolean;
-    sidebarWidth: number;
-    headerHeight: number;
-  };
+  layout: LayoutConfig;
 }
 
 // 统计数据类型

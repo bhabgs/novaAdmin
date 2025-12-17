@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchUserMenus } from '@/store/slices/menuSlice';
 import { generateAppRoutes } from './generateRoutes';
 import { Spin } from 'antd';
+import { useNProgress } from '@/hooks/useNProgress';
 
 // 布局组件
 import MainLayout from '@/layouts/MainLayout';
@@ -20,6 +21,9 @@ import PublicRoute from './PublicRoute';
  * 根据用户菜单权限动态生成路由
  */
 const DynamicRoutes: React.FC = () => {
+  // 启用路由切换进度条
+  useNProgress();
+
   const dispatch = useAppDispatch();
   const { userMenus, loading } = useAppSelector((state) => state.menu);
   const { isAuthenticated } = useAppSelector((state) => state.auth);

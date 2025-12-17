@@ -348,7 +348,7 @@ function CrudPage<T extends { id: string }>({
         onCancel={onModalCancel}
         onOk={onModalOk}
         confirmLoading={modalLoading}
-        destroyOnClose
+        destroyOnHidden
       >
         {formInstance ? (
           <Form form={formInstance} layout="vertical">
@@ -363,7 +363,7 @@ function CrudPage<T extends { id: string }>({
 
   return (
     <PageContainer title={title} ghost>
-      <Card bordered={false}>
+      <Card variant="borderless">
         {renderSearchBar()}
 
         {extraContent}

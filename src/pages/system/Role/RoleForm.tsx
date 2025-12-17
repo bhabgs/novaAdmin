@@ -72,7 +72,7 @@ const RoleForm: React.FC<RoleFormProps> = ({
       onCancel={onCancel}
       confirmLoading={loading}
       width={600}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}

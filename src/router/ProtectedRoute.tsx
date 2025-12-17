@@ -30,16 +30,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // 如果正在加载用户信息，显示加载状态
   if (loading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
-      }}>
-        <Spin size="large" tip="加载中..." />
-      </div>
-    );
+    return <Spin fullscreen size="large" tip="加载中..." />;
   }
 
   // 如果未登录，重定向到登录页

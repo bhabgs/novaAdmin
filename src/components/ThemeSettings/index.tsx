@@ -126,7 +126,7 @@ const ThemeSettings: React.FC = () => {
   return (
     <div className={styles.themeSettings}>
       {/* 主题模式 */}
-      <Card className={styles.themeCard} bordered={false}>
+      <Card className={styles.themeCard} variant="borderless">
         <div className={styles.cardTitle}>
           <BgColorsOutlined className={styles.titleIcon} />
           {t('settings.themeMode')}
@@ -166,7 +166,7 @@ const ThemeSettings: React.FC = () => {
       </Card>
 
       {/* 主题色设置 */}
-      <Card className={styles.themeCard} bordered={false}>
+      <Card className={styles.themeCard} variant="borderless">
         <div className={styles.cardTitle}>
           <BgColorsOutlined className={styles.titleIcon} />
           {t('settings.themeColors')}
@@ -214,7 +214,7 @@ const ThemeSettings: React.FC = () => {
       </Card>
 
       {/* 预设主题 */}
-      <Card className={styles.themeCard} bordered={false}>
+      <Card className={styles.themeCard} variant="borderless">
         <div className={styles.cardTitle}>
           <BgColorsOutlined className={styles.titleIcon} />
           {t('settings.presetThemes')}
@@ -252,7 +252,7 @@ const ThemeSettings: React.FC = () => {
       </Card>
 
       {/* 布局设置 */}
-      <Card className={styles.themeCard} bordered={false}>
+      <Card className={styles.themeCard} variant="borderless">
         <div className={styles.cardTitle}>
           <LayoutOutlined className={styles.titleIcon} />
           {t('settings.layoutSettings')}

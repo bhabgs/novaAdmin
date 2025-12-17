@@ -1,20 +1,20 @@
-import React, { useEffect, useMemo } from 'react';
-import { useRoutes, RouteObject, Navigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { fetchUserMenus } from '@/store/slices/menuSlice';
-import { generateAppRoutes } from './generateRoutes';
-import { Spin } from 'antd';
-import { useNProgress } from '@/hooks/useNProgress';
+import React, { useEffect, useMemo } from "react";
+import { useRoutes, RouteObject, Navigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { fetchUserMenus } from "@/store/slices/menuSlice";
+import { generateAppRoutes } from "./generateRoutes";
+import { Spin } from "antd";
+import { useNProgress } from "@/hooks/useNProgress";
 
 // 布局组件
-import MainLayout from '@/layouts/MainLayout';
-import Login from '@/pages/base/Login';
-import Home from '@/pages/base/Home';
-import NotFound from '@/components/NotFound';
+import MainLayout from "@/layouts/MainLayout/index";
+import Login from "@/pages/base/Login";
+import Home from "@/pages/base/Home";
+import NotFound from "@/components/NotFound";
 
 // 路由守卫
-import ProtectedRoute from './ProtectedRoute';
-import PublicRoute from './PublicRoute';
+import ProtectedRoute from "./ProtectedRoute";
+import PublicRoute from "./PublicRoute";
 
 /**
  * 动态路由组件
@@ -37,20 +37,20 @@ const DynamicRoutes: React.FC = () => {
 
   // 生成路由配置
   const routes: RouteObject[] = useMemo(() => {
-    console.log('[DynamicRoutes] Generating routes, userMenus:', userMenus);
+    console.log("[DynamicRoutes] Generating routes, userMenus:", userMenus);
 
     // 固定的公共路由（不需要权限）
     const publicRoutes: RouteObject[] = [
       {
-        path: '/',
+        path: "/",
         element: <Home />,
       },
       {
-        path: '/home',
+        path: "/home",
         element: <Home />,
       },
       {
-        path: '/login',
+        path: "/login",
         element: (
           <PublicRoute>
             <Login />
@@ -58,7 +58,7 @@ const DynamicRoutes: React.FC = () => {
         ),
       },
       {
-        path: '/auth/login',
+        path: "/auth/login",
         element: (
           <PublicRoute>
             <Login />
@@ -68,19 +68,20 @@ const DynamicRoutes: React.FC = () => {
     ];
 
     // 受保护的动态路由（根据用户菜单生成）
-    const dynamicChildren = isAuthenticated && userMenus.length > 0
-      ? generateAppRoutes(userMenus)
-      : [
-          {
-            index: true,
-            element: <Navigate to="/dashboard" replace />,
-          },
-        ];
+    const dynamicChildren =
+      isAuthenticated && userMenus.length > 0
+        ? generateAppRoutes(userMenus)
+        : [
+            {
+              index: true,
+              element: <Navigate to="/dashboard" replace />,
+            },
+          ];
 
-    console.log('[DynamicRoutes] Generated dynamic children:', dynamicChildren);
+    console.log("[DynamicRoutes] Generated dynamic children:", dynamicChildren);
 
     const protectedRoutes: RouteObject = {
-      path: '/',
+      path: "/",
       element: (
         <ProtectedRoute>
           <MainLayout />
@@ -91,7 +92,7 @@ const DynamicRoutes: React.FC = () => {
 
     // 404 路由
     const notFoundRoute: RouteObject = {
-      path: '*',
+      path: "*",
       element: <NotFound />,
     };
 
@@ -102,18 +103,7 @@ const DynamicRoutes: React.FC = () => {
 
   // 加载中状态
   if (isAuthenticated && loading && userMenus.length === 0) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-        }}
-      >
-        <Spin size="large" tip="加载菜单中..." />
-      </div>
-    );
+    return <Spin fullscreen size="large" tip="加载菜单中..." />;
   }
 
   return <>{element}</>;

@@ -232,16 +232,9 @@ const IconList: React.FC = () => {
     return (
       <PageContainer title={t("icons.title")} ghost>
         <Card>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              minHeight: "400px",
-            }}
-          >
-            <Spin size="large" tip="加载图标中..." />
-          </div>
+          <Spin spinning={true} size="large" tip="加载图标中...">
+            <div style={{ minHeight: "400px" }} />
+          </Spin>
         </Card>
       </PageContainer>
     );

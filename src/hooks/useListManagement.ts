@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { message, Modal } from 'antd';
-import { useTranslation } from 'react-i18next';
-import type { AppDispatch } from '../store';
+import { useState, useEffect, useCallback } from "react";
+import { message, Modal } from "antd";
+import { useTranslation } from "react-i18next";
+import type { AsyncThunk } from "@reduxjs/toolkit";
+import type { AppDispatch } from "../store";
 
 interface ListParams {
   page: number;
@@ -10,10 +11,10 @@ interface ListParams {
   [key: string]: unknown;
 }
 
-interface UseListManagementOptions<T> {
+interface UseListManagementOptions {
   dispatch: AppDispatch;
-  fetchAction: (params: ListParams) => any;
-  deleteAction: (id: string) => any;
+  fetchAction: AsyncThunk<unknown, ListParams, Record<string, never>>;
+  deleteAction: AsyncThunk<unknown, string, Record<string, never>>;
   loadingSelector: boolean;
   totalSelector: number;
   initialPageSize?: number;
@@ -68,27 +69,26 @@ interface UseListManagementReturn<T> {
 }
 
 export function useListManagement<T extends { id: string }>(
-  options: UseListManagementOptions<T>
+  options: UseListManagementOptions
 ): UseListManagementReturn<T> {
   const {
     dispatch,
     fetchAction,
     deleteAction,
-    loadingSelector,
     totalSelector,
     initialPageSize = 10,
-    deleteSuccessKey = 'message.deleteSuccess',
-    selectWarningKey = 'message.selectWarning',
-    deleteConfirmKey = 'message.deleteConfirm',
-    batchDeleteConfirmKey = 'message.batchDeleteConfirm',
-    errorKey = 'message.error',
+    deleteSuccessKey = "message.deleteSuccess",
+    selectWarningKey = "message.selectWarning",
+    deleteConfirmKey = "message.deleteConfirm",
+    batchDeleteConfirmKey = "message.batchDeleteConfirm",
+    errorKey = "message.error",
   } = options;
 
   const { t } = useTranslation();
 
   // State
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -126,16 +126,19 @@ export function useListManagement<T extends { id: string }>(
     setIsModalVisible(true);
   }, []);
 
-  const handleDelete = useCallback(async (id: string) => {
-    try {
-      await dispatch(deleteAction(id)).unwrap();
-      message.success(t(deleteSuccessKey));
-      loadData();
-    } catch (error) {
-      console.error('Delete error:', error);
-      message.error(t(errorKey));
-    }
-  }, [dispatch, deleteAction, loadData, t, deleteSuccessKey, errorKey]);
+  const handleDelete = useCallback(
+    async (id: string) => {
+      try {
+        await dispatch(deleteAction(id)).unwrap();
+        message.success(t(deleteSuccessKey));
+        loadData();
+      } catch (error) {
+        console.error("Delete error:", error);
+        message.error(t(errorKey));
+      }
+    },
+    [dispatch, deleteAction, loadData, t, deleteSuccessKey, errorKey]
+  );
 
   const handleBatchDelete = useCallback(() => {
     if (selectedRowKeys.length === 0) {
@@ -155,7 +158,7 @@ export function useListManagement<T extends { id: string }>(
           setSelectedRowKeys([]);
           loadData();
         } catch (error) {
-          console.error('Batch delete error:', error);
+          console.error("Batch delete error:", error);
           message.error(t(errorKey));
         }
       },
@@ -197,7 +200,7 @@ export function useListManagement<T extends { id: string }>(
     total: totalSelector,
     showSizeChanger: true,
     showQuickJumper: true,
-    showTotal: (total: number) => t('common.total', { count: total }),
+    showTotal: (total: number) => t("common.total", { count: total }),
     onChange: handlePageChange,
   };
 

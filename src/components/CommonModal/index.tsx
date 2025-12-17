@@ -79,7 +79,7 @@ const CommonModal: React.FC<CommonModalProps> = ({
       {...modalProps}
       onCancel={handleCancel}
       footer={renderFooter()}
-      destroyOnClose
+      destroyOnHidden
     >
       {children}
     </Modal>

@@ -87,7 +87,12 @@ const MainLayout: React.FC = () => {
         icon,
         label,
         onClick: () => {
-          navigate(menu.path || "/");
+          // 如果是 iframe 类型且设置为在新标签页打开
+          if (menu.type === 'iframe' && menu.openInNewTab && menu.externalUrl) {
+            window.open(menu.externalUrl, '_blank', 'noopener,noreferrer');
+          } else {
+            navigate(menu.path || "/");
+          }
           if (isMobile) {
             setMobileDrawerVisible(false);
           }

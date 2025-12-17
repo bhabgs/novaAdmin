@@ -51,10 +51,12 @@ const CommonForm: React.FC<CommonFormProps> = ({
   fields,
   columns = 2,
   loading = false,
+  form: formProp,
   ...formProps
 }) => {
   const { t } = useTranslation();
-  const [form] = Form.useForm();
+  const [formInstance] = Form.useForm();
+  const form = formProp || formInstance;
 
   const renderField = (field: FormFieldConfig, formInstance: any) => {
     if (field.hidden) return null;

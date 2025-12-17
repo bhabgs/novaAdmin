@@ -182,7 +182,7 @@ const generateMockMenus = () => {
           createTime: "2023-01-01T00:00:00.000Z",
           updateTime: new Date().toISOString(),
         },
-        // Ant Design 文档 (iframe 示例)
+        // Ant Design 文档 (iframe 示例 - 项目内嵌入)
         {
           id: "10",
           name: "Ant Design 文档",
@@ -190,6 +190,7 @@ const generateMockMenus = () => {
           type: "iframe" as const,
           path: "/external/antd",
           externalUrl: "https://ant.design/components/overview-cn",
+          openInNewTab: false,
           icon: "LinkOutlined",
           parentId: "600",
           sortOrder: 6,
@@ -232,7 +233,7 @@ const availableIcons = [
 // localStorage 键名
 const MENU_STORAGE_KEY = "mock_menus_data";
 const MENU_VERSION_KEY = "mock_menus_version";
-const CURRENT_MENU_VERSION = "2.1"; // 添加图标库页面
+const CURRENT_MENU_VERSION = "2.3"; // 添加 iframe 打开方式配置
 
 // 修复子菜单的 parentId（数据迁移）
 const fixMenuParentIds = (menus: any[]): any[] => {

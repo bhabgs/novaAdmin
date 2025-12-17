@@ -64,6 +64,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
           type: 'page',
           hideInMenu: false,
           keepAlive: false,
+          openInNewTab: false,
         });
       }
     }
@@ -132,7 +133,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
         </Button>,
       ]}
       width={800}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}
@@ -213,9 +214,28 @@ const MenuForm: React.FC<MenuFormProps> = ({
               name="icon"
               label={t('menu.menuIcon')}
             >
-              <Select placeholder={t('menu.menuIconPlaceholder')} allowClear>
+              <Select
+                placeholder={t('menu.menuIconPlaceholder')}
+                allowClear
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.value as string)?.toLowerCase().includes(input.toLowerCase())
+                }
+                optionLabelProp="label"
+                virtual
+                listHeight={400}
+              >
                 {MENU_ICONS.map(option => (
-                  <Option key={option.value} value={option.value}>
+                  <Option
+                    key={option.value}
+                    value={option.value}
+                    label={
+                      <Space>
+                        {option.icon}
+                        {option.label}
+                      </Space>
+                    }
+                  >
                     <Space>
                       {option.icon}
                       {option.label}
@@ -281,16 +301,29 @@ const MenuForm: React.FC<MenuFormProps> = ({
                   </Col>
                 </Row>
                 {menuType === 'iframe' && (
-                  <Form.Item
-                    name="externalUrl"
-                    label={t('menu.externalUrl')}
-                    rules={[
-                      { required: true, message: t('menu.externalUrlRequired') },
-                      { type: 'url', message: t('menu.externalUrlPattern') },
-                    ]}
-                  >
-                    <Input placeholder={t('menu.externalUrlPlaceholder')} />
-                  </Form.Item>
+                  <>
+                    <Form.Item
+                      name="externalUrl"
+                      label={t('menu.externalUrl')}
+                      rules={[
+                        { required: true, message: t('menu.externalUrlRequired') },
+                        { type: 'url', message: t('menu.externalUrlPattern') },
+                      ]}
+                    >
+                      <Input placeholder={t('menu.externalUrlPlaceholder')} />
+                    </Form.Item>
+                    <Form.Item
+                      name="openInNewTab"
+                      label={t('menu.openInNewTab')}
+                      valuePropName="checked"
+                      tooltip={t('menu.openInNewTabTooltip')}
+                    >
+                      <Switch
+                        checkedChildren={t('menu.openInNewTabYes')}
+                        unCheckedChildren={t('menu.openInNewTabNo')}
+                      />
+                    </Form.Item>
+                  </>
                 )}
               </>
             );

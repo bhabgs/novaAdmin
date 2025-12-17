@@ -169,10 +169,11 @@ const MenuList: React.FC = () => {
       const typeMap = {
         directory: { color: "blue", text: t("menu.directory") },
         page: { color: "green", text: t("menu.page") },
+        iframe: { color: "purple", text: t("menu.iframe") },
         button: { color: "orange", text: t("menu.button") },
       };
       const config = typeMap[type as keyof typeof typeMap];
-      return <Tag color={config.color}>{config.text}</Tag>;
+      return config ? <Tag color={config.color}>{config.text}</Tag> : <Tag>{type}</Tag>;
     };
 
     return [

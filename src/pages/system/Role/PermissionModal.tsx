@@ -241,7 +241,7 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
       onCancel={onCancel}
       confirmLoading={loading}
       width={800}
-      destroyOnClose
+      destroyOnHidden
     >
       <Card size="small" style={{ marginBottom: 16 }}>
         <Space style={{ width: "100%", justifyContent: "space-between" }}>

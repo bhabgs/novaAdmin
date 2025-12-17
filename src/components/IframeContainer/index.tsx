@@ -24,12 +24,7 @@ const IframeContainer: React.FC<IframeContainerProps> = ({ url, title }) => {
   };
 
   return (
-    <>
-      {loading && (
-        <div className="iframe-loading">
-          <Spin size="large" tip="加载中..." />
-        </div>
-      )}
+    <Spin spinning={loading} size="large" tip="加载中...">
       <iframe
         ref={iframeRef}
         src={url}
@@ -40,7 +35,7 @@ const IframeContainer: React.FC<IframeContainerProps> = ({ url, title }) => {
         sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads"
         loading="lazy"
       />
-    </>
+    </Spin>
   );
 };
 

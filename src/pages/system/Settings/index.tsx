@@ -48,7 +48,7 @@ const SystemSettings: React.FC = () => {
 
         {/* 语言设置 */}
         <Col span={24}>
-          <Card bordered={false}>
+          <Card variant="borderless">
             <Title level={4}>
               <GlobalOutlined style={{ marginRight: 8 }} />
               {t("settings.language")}
@@ -79,7 +79,7 @@ const SystemSettings: React.FC = () => {
 
         {/* 布局设置 */}
         <Col span={24}>
-          <Card bordered={false}>
+          <Card variant="borderless">
             <Title level={4}>
               <LayoutOutlined style={{ marginRight: 8 }} />
               {t("settings.layout")}

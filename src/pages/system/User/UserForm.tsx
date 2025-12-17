@@ -100,7 +100,7 @@ const UserForm: React.FC<UserFormProps> = ({
       onCancel={onCancel}
       confirmLoading={loading}
       width={600}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form
         form={form}

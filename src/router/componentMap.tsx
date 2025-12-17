@@ -13,7 +13,7 @@ import { lazy, ComponentType, LazyExoticComponent } from "react";
  */
 export const componentMap: Record<
   string,
-  LazyExoticComponent<ComponentType<any>>
+  LazyExoticComponent<ComponentType<Record<string, never>>>
 > = {
   // ===== 基础模块 (base/) =====
   Home: lazy(() => import("@/pages/base/Home")),
@@ -39,7 +39,7 @@ export const componentMap: Record<
  */
 export function getComponent(
   componentName: string
-): LazyExoticComponent<ComponentType<any>> | null {
+): LazyExoticComponent<ComponentType<Record<string, never>>> | null {
   return componentMap[componentName] || null;
 }
 

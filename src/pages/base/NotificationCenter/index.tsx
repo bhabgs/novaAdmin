@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Card,
   List,
@@ -15,7 +15,7 @@ import {
   Tooltip,
   Row,
   Col,
-} from 'antd';
+} from "antd";
 import {
   BellOutlined,
   CheckOutlined,
@@ -25,9 +25,9 @@ import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   CloseCircleOutlined,
-} from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '@/store';
+} from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import { useAppDispatch, useAppSelector } from "@/store";
 import {
   fetchNotifications,
   fetchUnreadCount,
@@ -35,13 +35,13 @@ import {
   markAllAsRead,
   deleteNotification,
   batchDeleteNotifications,
-} from '@/store/slices/notificationSlice';
-import PageContainer from '@/components/PageContainer';
-import type { Notification, NotificationType } from '@/types/notification';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/zh-cn';
-import 'dayjs/locale/ar';
+} from "@/store/slices/notificationSlice";
+import PageContainer from "@/components/PageContainer";
+import type { Notification, NotificationType } from "@/types/notification";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/zh-cn";
+import "dayjs/locale/ar";
 
 dayjs.extend(relativeTime);
 
@@ -49,20 +49,20 @@ const { Text, Paragraph } = Typography;
 
 // 通知类型图标映射
 const typeIconMap: Record<NotificationType, React.ReactNode> = {
-  info: <InfoCircleOutlined style={{ color: '#1890ff' }} />,
-  success: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-  warning: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
-  error: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
-  system: <BellOutlined style={{ color: '#722ed1' }} />,
+  info: <InfoCircleOutlined style={{ color: "#1890ff" }} />,
+  success: <CheckCircleOutlined style={{ color: "#52c41a" }} />,
+  warning: <ExclamationCircleOutlined style={{ color: "#faad14" }} />,
+  error: <CloseCircleOutlined style={{ color: "#ff4d4f" }} />,
+  system: <BellOutlined style={{ color: "#722ed1" }} />,
 };
 
 // 通知类型标签颜色映射
 const typeColorMap: Record<NotificationType, string> = {
-  info: 'blue',
-  success: 'green',
-  warning: 'orange',
-  error: 'red',
-  system: 'purple',
+  info: "blue",
+  success: "green",
+  warning: "orange",
+  error: "red",
+  system: "purple",
 };
 
 const NotificationCenter: React.FC = () => {
@@ -72,8 +72,8 @@ const NotificationCenter: React.FC = () => {
     (state) => state.notification
   );
 
-  const [filterType, setFilterType] = useState<string>('all');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterType, setFilterType] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // 加载通知列表
@@ -82,11 +82,17 @@ const NotificationCenter: React.FC = () => {
       fetchNotifications({
         page: pagination.page,
         pageSize: pagination.pageSize,
-        type: filterType !== 'all' ? filterType : undefined,
-        status: filterStatus !== 'all' ? filterStatus : undefined,
+        type: filterType !== "all" ? filterType : undefined,
+        status: filterStatus !== "all" ? filterStatus : undefined,
       })
     );
-  }, [dispatch, pagination.page, pagination.pageSize, filterType, filterStatus]);
+  }, [
+    dispatch,
+    pagination.page,
+    pagination.pageSize,
+    filterType,
+    filterStatus,
+  ]);
 
   // 加载未读数量
   useEffect(() => {
@@ -96,7 +102,12 @@ const NotificationCenter: React.FC = () => {
   // 格式化时间
   const formatTime = (timeString: string) => {
     try {
-      const locale = i18n.language === 'zh-CN' ? 'zh-cn' : i18n.language === 'ar-SA' ? 'ar' : 'en';
+      const locale =
+        i18n.language === "zh-CN"
+          ? "zh-cn"
+          : i18n.language === "ar-SA"
+          ? "ar"
+          : "en";
       return dayjs(timeString).locale(locale).fromNow();
     } catch {
       return timeString;
@@ -107,11 +118,11 @@ const NotificationCenter: React.FC = () => {
   const handleMarkAsRead = async (id: string) => {
     try {
       await dispatch(markNotificationAsRead(id)).unwrap();
-      message.success(t('notification.markAsReadSuccess'));
+      message.success(t("notification.markAsReadSuccess"));
       // 刷新未读数量
       dispatch(fetchUnreadCount());
     } catch (error) {
-      message.error(t('notification.markAsReadError'));
+      message.error(t("notification.markAsReadError"));
     }
   };
 
@@ -119,19 +130,19 @@ const NotificationCenter: React.FC = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await dispatch(markAllAsRead()).unwrap();
-      message.success(t('notification.markAllAsReadSuccess'));
+      message.success(t("notification.markAllAsReadSuccess"));
       // 刷新列表和未读数量
       dispatch(fetchUnreadCount());
       dispatch(
         fetchNotifications({
           page: pagination.page,
           pageSize: pagination.pageSize,
-          type: filterType !== 'all' ? filterType : undefined,
-          status: filterStatus !== 'all' ? filterStatus : undefined,
+          type: filterType !== "all" ? filterType : undefined,
+          status: filterStatus !== "all" ? filterStatus : undefined,
         })
       );
     } catch (error) {
-      message.error(t('notification.markAllAsReadError'));
+      message.error(t("notification.markAllAsReadError"));
     }
   };
 
@@ -139,44 +150,44 @@ const NotificationCenter: React.FC = () => {
   const handleDelete = async (id: string) => {
     try {
       await dispatch(deleteNotification(id)).unwrap();
-      message.success(t('notification.deleteSuccess'));
+      message.success(t("notification.deleteSuccess"));
       // 刷新列表
       dispatch(
         fetchNotifications({
           page: pagination.page,
           pageSize: pagination.pageSize,
-          type: filterType !== 'all' ? filterType : undefined,
-          status: filterStatus !== 'all' ? filterStatus : undefined,
+          type: filterType !== "all" ? filterType : undefined,
+          status: filterStatus !== "all" ? filterStatus : undefined,
         })
       );
       dispatch(fetchUnreadCount());
     } catch (error) {
-      message.error(t('notification.deleteError'));
+      message.error(t("notification.deleteError"));
     }
   };
 
   // 批量删除
   const handleBatchDelete = async () => {
     if (selectedIds.length === 0) {
-      message.warning(t('notification.selectWarning'));
+      message.warning(t("notification.selectWarning"));
       return;
     }
     try {
       await dispatch(batchDeleteNotifications(selectedIds)).unwrap();
-      message.success(t('notification.batchDeleteSuccess'));
+      message.success(t("notification.batchDeleteSuccess"));
       setSelectedIds([]);
       // 刷新列表
       dispatch(
         fetchNotifications({
           page: pagination.page,
           pageSize: pagination.pageSize,
-          type: filterType !== 'all' ? filterType : undefined,
-          status: filterStatus !== 'all' ? filterStatus : undefined,
+          type: filterType !== "all" ? filterType : undefined,
+          status: filterStatus !== "all" ? filterStatus : undefined,
         })
       );
       dispatch(fetchUnreadCount());
     } catch (error) {
-      message.error(t('notification.batchDeleteError'));
+      message.error(t("notification.batchDeleteError"));
     }
   };
 
@@ -186,8 +197,8 @@ const NotificationCenter: React.FC = () => {
       fetchNotifications({
         page: pagination.page,
         pageSize: pagination.pageSize,
-        type: filterType !== 'all' ? filterType : undefined,
-        status: filterStatus !== 'all' ? filterStatus : undefined,
+        type: filterType !== "all" ? filterType : undefined,
+        status: filterStatus !== "all" ? filterStatus : undefined,
       })
     );
     dispatch(fetchUnreadCount());
@@ -217,8 +228,8 @@ const NotificationCenter: React.FC = () => {
       fetchNotifications({
         page,
         pageSize: pageSize || pagination.pageSize,
-        type: filterType !== 'all' ? filterType : undefined,
-        status: filterStatus !== 'all' ? filterStatus : undefined,
+        type: filterType !== "all" ? filterType : undefined,
+        status: filterStatus !== "all" ? filterStatus : undefined,
       })
     );
   };
@@ -229,41 +240,45 @@ const NotificationCenter: React.FC = () => {
   }, [notifications]);
 
   return (
-    <PageContainer title={t('notification.title')} ghost>
+    <PageContainer title={t("notification.title")} ghost>
       <Card variant="borderless">
         {/* 工具栏 */}
         <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
           {/* 筛选器 */}
           <Col flex="auto">
-            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Space direction="vertical" size="middle" style={{ width: "100%" }}>
               <Space wrap>
-                <Text strong>{t('notification.filterByType')}:</Text>
+                <Text strong>{t("notification.filterByType")}:</Text>
                 <Segmented
                   value={filterType}
                   onChange={setFilterType}
                   options={[
-                    { label: t('notification.all'), value: 'all' },
-                    { label: t('notification.typeInfo'), value: 'info' },
-                    { label: t('notification.typeSuccess'), value: 'success' },
-                    { label: t('notification.typeWarning'), value: 'warning' },
-                    { label: t('notification.typeError'), value: 'error' },
-                    { label: t('notification.typeSystem'), value: 'system' },
+                    { label: t("notification.all"), value: "all" },
+                    { label: t("notification.typeInfo"), value: "info" },
+                    { label: t("notification.typeSuccess"), value: "success" },
+                    { label: t("notification.typeWarning"), value: "warning" },
+                    { label: t("notification.typeError"), value: "error" },
+                    { label: t("notification.typeSystem"), value: "system" },
                   ]}
                 />
               </Space>
               <Space wrap>
-                <Text strong>{t('notification.filterByStatus')}:</Text>
+                <Text strong>{t("notification.filterByStatus")}:</Text>
                 <Segmented
                   value={filterStatus}
                   onChange={setFilterStatus}
                   options={[
-                    { label: t('notification.all'), value: 'all' },
-                    { label: t('notification.unread'), value: 'unread' },
-                    { label: t('notification.read'), value: 'read' },
+                    { label: t("notification.all"), value: "all" },
+                    { label: t("notification.unread"), value: "unread" },
+                    { label: t("notification.read"), value: "read" },
                   ]}
                 />
                 {unreadCount > 0 && (
-                  <Badge count={unreadCount} size="small" style={{ marginLeft: 8 }} />
+                  <Badge
+                    count={unreadCount}
+                    size="small"
+                    style={{ marginLeft: 8 }}
+                  />
                 )}
               </Space>
             </Space>
@@ -271,34 +286,40 @@ const NotificationCenter: React.FC = () => {
 
           {/* 操作按钮 */}
           <Col>
-            <Space style={{ float: 'right' }}>
+            <Space style={{ float: "right" }}>
               {unreadCount > 0 && (
                 <Popconfirm
-                  title={t('notification.markAllAsReadConfirm')}
+                  title={t("notification.markAllAsReadConfirm")}
                   onConfirm={handleMarkAllAsRead}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
+                  okText={t("common.confirm")}
+                  cancelText={t("common.cancel")}
                 >
                   <Button icon={<CheckOutlined />} type="primary">
-                    {t('notification.markAllAsRead')}
+                    {t("notification.markAllAsRead")}
                   </Button>
                 </Popconfirm>
               )}
               {selectedIds.length > 0 && (
                 <Popconfirm
-                  title={t('notification.batchDeleteConfirm', { count: selectedIds.length })}
+                  title={t("notification.batchDeleteConfirm", {
+                    count: selectedIds.length,
+                  })}
                   onConfirm={handleBatchDelete}
-                  okText={t('common.confirm')}
-                  cancelText={t('common.cancel')}
+                  okText={t("common.confirm")}
+                  cancelText={t("common.cancel")}
                 >
                   <Button icon={<DeleteOutlined />} danger>
-                    {t('notification.batchDelete')} ({selectedIds.length})
+                    {t("notification.batchDelete")} ({selectedIds.length})
                   </Button>
                 </Popconfirm>
               )}
-              <Tooltip title={t('notification.refresh')}>
-                <Button icon={<ReloadOutlined />} onClick={handleRefresh} loading={loading}>
-                  {t('common.refresh')}
+              <Tooltip title={t("notification.refresh")}>
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={handleRefresh}
+                  loading={loading}
+                >
+                  {t("common.refresh")}
                 </Button>
               </Tooltip>
             </Space>
@@ -308,7 +329,7 @@ const NotificationCenter: React.FC = () => {
         {/* 通知列表 */}
         <Spin spinning={loading}>
           {filteredNotifications.length === 0 ? (
-            <Empty description={t('notification.noNotifications')} />
+            <Empty description={t("notification.noNotifications")} />
           ) : (
             <List
               itemLayout="horizontal"
@@ -319,23 +340,29 @@ const NotificationCenter: React.FC = () => {
                 total: pagination.total,
                 showSizeChanger: true,
                 showQuickJumper: true,
-                showTotal: (total) => t('notification.total', { total }),
+                showTotal: (total) => t("notification.total", { total }),
                 onChange: handlePageChange,
                 onShowSizeChange: handlePageChange,
               }}
               renderItem={(item: Notification) => (
                 <List.Item
                   style={{
-                    backgroundColor: item.status === 'unread' ? 'var(--ant-color-primary-bg)' : 'transparent',
-                    padding: '16px',
-                    borderRadius: '8px',
-                    marginBottom: '8px',
-                    border: item.status === 'unread' ? '1px solid var(--ant-color-primary-border)' : '1px solid var(--ant-color-border)',
+                    backgroundColor:
+                      item.status === "unread"
+                        ? "var(--ant-color-primary-bg)"
+                        : "transparent",
+                    padding: "16px",
+                    borderRadius: "8px",
+                    marginBottom: "8px",
+                    border:
+                      item.status === "unread"
+                        ? "1px solid var(--ant-color-primary-border)"
+                        : "1px solid var(--ant-color-border)",
                   }}
                   actions={[
                     <Space key="actions">
-                      {item.status === 'unread' && (
-                        <Tooltip title={t('notification.markAsRead')}>
+                      {item.status === "unread" && (
+                        <Tooltip title={t("notification.markAsRead")}>
                           <Button
                             type="text"
                             icon={<CheckOutlined />}
@@ -345,13 +372,17 @@ const NotificationCenter: React.FC = () => {
                       )}
                       <Popconfirm
                         key="delete"
-                        title={t('notification.deleteConfirm')}
+                        title={t("notification.deleteConfirm")}
                         onConfirm={() => handleDelete(item.id)}
-                        okText={t('common.confirm')}
-                        cancelText={t('common.cancel')}
+                        okText={t("common.confirm")}
+                        cancelText={t("common.cancel")}
                       >
-                        <Tooltip title={t('notification.delete')}>
-                          <Button type="text" danger icon={<DeleteOutlined />} />
+                        <Tooltip title={t("notification.delete")}>
+                          <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                          />
                         </Tooltip>
                       </Popconfirm>
                     </Space>,
@@ -359,38 +390,54 @@ const NotificationCenter: React.FC = () => {
                 >
                   <List.Item.Meta
                     avatar={
-                      <Badge dot={item.status === 'unread'}>
-                        <div style={{ fontSize: '24px' }}>{typeIconMap[item.type]}</div>
+                      <Badge dot={item.status === "unread"}>
+                        <div style={{ fontSize: "24px" }}>
+                          {typeIconMap[item.type]}
+                        </div>
                       </Badge>
                     }
                     title={
                       <Space>
-                        <Text strong={item.status === 'unread'}>{item.title}</Text>
+                        <Text strong={item.status === "unread"}>
+                          {item.title}
+                        </Text>
                         <Tag color={typeColorMap[item.type]}>
-                          {t(`notification.type${item.type.charAt(0).toUpperCase() + item.type.slice(1)}`)}
+                          {t(
+                            `notification.type${
+                              item.type.charAt(0).toUpperCase() +
+                              item.type.slice(1)
+                            }`
+                          )}
                         </Tag>
-                        {item.status === 'unread' && (
-                          <Tag color="blue">{t('notification.unread')}</Tag>
+                        {item.status === "unread" && (
+                          <Tag color="blue">{t("notification.unread")}</Tag>
                         )}
                       </Space>
                     }
                     description={
                       <div>
                         <Paragraph
-                          ellipsis={{ rows: 2, expandable: true, symbol: t('notification.more') }}
-                          style={{ marginBottom: '8px' }}
+                          ellipsis={{
+                            rows: 2,
+                            expandable: true,
+                            symbol: t("notification.more"),
+                          }}
+                          style={{ marginBottom: "8px" }}
                         >
                           {item.content}
                         </Paragraph>
                         <Space size="small">
-                          <Text type="secondary" style={{ fontSize: '12px' }}>
+                          <Text type="secondary" style={{ fontSize: "12px" }}>
                             {formatTime(item.createTime)}
                           </Text>
                           {item.sender && (
                             <>
                               <Text type="secondary">•</Text>
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
-                                {t('notification.sender')}: {item.sender}
+                              <Text
+                                type="secondary"
+                                style={{ fontSize: "12px" }}
+                              >
+                                {t("notification.sender")}: {item.sender}
                               </Text>
                             </>
                           )}
@@ -409,4 +456,3 @@ const NotificationCenter: React.FC = () => {
 };
 
 export default NotificationCenter;
-

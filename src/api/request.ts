@@ -3,9 +3,20 @@ import { message } from 'antd';
 import { tokenUtils } from '../utils/auth';
 import i18n from '../i18n';
 
+// 根据 Mock 模式动态设置 API 前缀
+// Mock 模式：使用 /mock-api（避免被服务器代理拦截）
+// 真实 API：使用 /api（被服务器代理到后端）
+const getBaseURL = () => {
+  const useMock = import.meta.env.VITE_USE_MOCK === 'true';
+  if (useMock) {
+    return import.meta.env.VITE_API_BASE_URL || '/mock-api';
+  }
+  return import.meta.env.VITE_REAL_API_BASE_URL || '/api';
+};
+
 // 创建axios实例
 const request: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: getBaseURL(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

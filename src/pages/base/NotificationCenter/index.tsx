@@ -204,24 +204,6 @@ const NotificationCenter: React.FC = () => {
     dispatch(fetchUnreadCount());
   };
 
-  // 切换选择
-  const handleSelect = (id: string, checked: boolean) => {
-    if (checked) {
-      setSelectedIds([...selectedIds, id]);
-    } else {
-      setSelectedIds(selectedIds.filter((item) => item !== id));
-    }
-  };
-
-  // 全选/取消全选
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedIds(notifications.map((n) => n.id));
-    } else {
-      setSelectedIds([]);
-    }
-  };
-
   // 分页变化
   const handlePageChange = (page: number, pageSize?: number) => {
     dispatch(
@@ -354,10 +336,7 @@ const NotificationCenter: React.FC = () => {
                     padding: "16px",
                     borderRadius: "8px",
                     marginBottom: "8px",
-                    border:
-                      item.status === "unread"
-                        ? "1px solid var(--ant-color-primary-border)"
-                        : "1px solid var(--ant-color-border)",
+                    border: "1px solid #ccc",
                   }}
                   actions={[
                     <Space key="actions">

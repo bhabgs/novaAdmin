@@ -77,7 +77,7 @@ import { http, HttpResponse } from "msw";
 import { delay, createSuccessResponse } from "./utils";
 
 export const exampleHandlers = [
-  http.get("/api/examples", async () => {
+  http.get("/mock-api/examples", async () => {
     await delay();
     return HttpResponse.json(createSuccessResponse({ list: [], pagination: {} }));
   }),
@@ -85,7 +85,9 @@ export const exampleHandlers = [
 // 在 src/api/mock/index.ts 注册
 ```
 
-启用 Mock：`.env` 中 `VITE_USE_MOCK=true/false`
+**Mock 模式配置：**
+- `.env` 中设置 `VITE_USE_MOCK=true` 启用 Mock（使用 `/mock-api` 前缀，避免被服务器代理拦截）
+- 设置 `VITE_USE_MOCK=false` 使用真实后端（使用 `/api` 前缀，被 Nginx 代理到后端）
 
 ## 动态路由
 
@@ -255,9 +257,14 @@ const handleDelete = useCallback(async (id: string) => {
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| VITE_USE_MOCK | 启用 Mock | true (dev) |
-| VITE_API_BASE_URL | API 前缀 | /api |
+| VITE_USE_MOCK | 启用 Mock 模式 | true (dev/prod) |
+| VITE_API_BASE_URL | Mock 模式 API 前缀 | /mock-api |
+| VITE_REAL_API_BASE_URL | 真实 API 前缀（被 Nginx 代理） | /api |
 | VITE_APP_TITLE | 应用标题 | NovaAdmin |
+
+**API 前缀说明：**
+- Mock 模式（`VITE_USE_MOCK=true`）：使用 `/mock-api`，MSW 拦截，不被服务器代理
+- 真实 API（`VITE_USE_MOCK=false`）：使用 `/api`，Nginx 代理到后端服务器
 
 配置文件：`.env.development` | `.env.preview` | `.env.production`
 

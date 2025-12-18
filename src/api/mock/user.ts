@@ -47,7 +47,7 @@ let mockUsers = generateMockUsers();
 
 export const userHandlers = [
   // 获取用户列表
-  http.get('/api/users', async ({ request }) => {
+  http.get('/mock-api/users', async ({ request }) => {
     await delay();
     
     const url = new URL(request.url);
@@ -78,7 +78,7 @@ export const userHandlers = [
   }),
 
   // 获取用户详情
-  http.get('/api/users/:id', async ({ params }) => {
+  http.get('/mock-api/users/:id', async ({ params }) => {
     await delay();
     
     const { id } = params;
@@ -92,7 +92,7 @@ export const userHandlers = [
   }),
 
   // 创建用户
-  http.post('/api/users', async ({ request }) => {
+  http.post('/mock-api/users', async ({ request }) => {
     await delay();
     
     const body = await request.json() as any;
@@ -127,7 +127,7 @@ export const userHandlers = [
   }),
 
   // 更新用户
-  http.put('/api/users/:id', async ({ params, request }) => {
+  http.put('/mock-api/users/:id', async ({ params, request }) => {
     await delay();
     
     const { id } = params;
@@ -161,7 +161,7 @@ export const userHandlers = [
   }),
 
   // 删除用户
-  http.delete('/api/users/:id', async ({ params }) => {
+  http.delete('/mock-api/users/:id', async ({ params }) => {
     await delay();
     
     const { id } = params;
@@ -182,7 +182,7 @@ export const userHandlers = [
   }),
 
   // 批量删除用户
-  http.post('/api/users/batch-delete', async ({ request }) => {
+  http.post('/mock-api/users/batch-delete', async ({ request }) => {
     await delay();
     
     const body = await request.json() as any;
@@ -198,7 +198,7 @@ export const userHandlers = [
   }),
 
   // 重置用户密码
-  http.post('/api/users/:id/reset-password', async ({ params }) => {
+  http.post('/mock-api/users/:id/reset-password', async ({ params }) => {
     await delay();
     
     const { id } = params;
@@ -216,7 +216,7 @@ export const userHandlers = [
   }),
 
   // 切换用户状态
-  http.put('/api/users/:id/status', async ({ params, request }) => {
+  http.put('/mock-api/users/:id/status', async ({ params, request }) => {
     await delay();
     
     const { id } = params;
@@ -239,7 +239,7 @@ export const userHandlers = [
   }),
 
   // 分配角色
-  http.post('/api/users/:id/roles', async ({ params, request }) => {
+  http.post('/mock-api/users/:id/roles', async ({ params, request }) => {
     await delay();
     
     const { id } = params;
@@ -258,7 +258,7 @@ export const userHandlers = [
   }),
 
   // 获取用户权限
-  http.get('/api/users/:id/permissions', async ({ params }) => {
+  http.get('/mock-api/users/:id/permissions', async ({ params }) => {
     await delay();
     
     const { id } = params;

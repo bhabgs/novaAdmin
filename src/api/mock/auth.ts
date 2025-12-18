@@ -37,7 +37,7 @@ let currentUser: any = null;
 
 export const authHandlers = [
   // 登录
-  http.post('/api/auth/login', async ({ request }) => {
+  http.post('/mock-api/auth/login', async ({ request }) => {
     await delay();
     
     const body = await request.json() as any;
@@ -75,7 +75,7 @@ export const authHandlers = [
   }),
 
   // 登出
-  http.post('/api/auth/logout', async () => {
+  http.post('/mock-api/auth/logout', async () => {
     await delay();
     
     currentToken = null;
@@ -85,7 +85,7 @@ export const authHandlers = [
   }),
 
   // 获取用户信息
-  http.get('/api/auth/userinfo', async ({ request }) => {
+  http.get('/mock-api/auth/userinfo', async ({ request }) => {
     await delay();
     
     const authHeader = request.headers.get('Authorization');
@@ -103,7 +103,7 @@ export const authHandlers = [
   }),
 
   // 刷新token
-  http.post('/api/auth/refresh', async ({ request }) => {
+  http.post('/mock-api/auth/refresh', async ({ request }) => {
     await delay();
     
     const authHeader = request.headers.get('Authorization');
@@ -127,7 +127,7 @@ export const authHandlers = [
   }),
 
   // 修改密码
-  http.post('/api/auth/change-password', async ({ request }) => {
+  http.post('/mock-api/auth/change-password', async ({ request }) => {
     await delay();
     
     const authHeader = request.headers.get('Authorization');
@@ -156,7 +156,7 @@ export const authHandlers = [
   }),
 
   // 重置密码
-  http.post('/api/auth/reset-password', async ({ request }) => {
+  http.post('/mock-api/auth/reset-password', async ({ request }) => {
     await delay();
     
     const body = await request.json() as any;
@@ -172,7 +172,7 @@ export const authHandlers = [
   }),
 
   // 验证token
-  http.get('/api/auth/verify', async ({ request }) => {
+  http.get('/mock-api/auth/verify', async ({ request }) => {
     await delay();
     
     const authHeader = request.headers.get('Authorization');

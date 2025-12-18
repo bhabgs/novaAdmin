@@ -68,7 +68,7 @@ const getUnreadCount = (): number => {
 
 export const notificationHandlers = [
   // 获取通知列表
-  http.get("/api/notifications", async ({ request }) => {
+  http.get("/mock-api/notifications", async ({ request }) => {
     await delay();
 
     const url = new URL(request.url);
@@ -107,7 +107,7 @@ export const notificationHandlers = [
   }),
 
   // 获取未读通知数量
-  http.get("/api/notifications/unread-count", async () => {
+  http.get("/mock-api/notifications/unread-count", async () => {
     await delay();
 
     return HttpResponse.json(
@@ -118,7 +118,7 @@ export const notificationHandlers = [
   }),
 
   // 标记通知为已读
-  http.put("/api/notifications/:id/read", async ({ params }) => {
+  http.put("/mock-api/notifications/:id/read", async ({ params }) => {
     await delay();
 
     const { id } = params;
@@ -137,7 +137,7 @@ export const notificationHandlers = [
   }),
 
   // 批量标记为已读
-  http.post("/api/notifications/mark-all-read", async () => {
+  http.post("/mock-api/notifications/mark-all-read", async () => {
     await delay();
 
     const now = new Date().toISOString();
@@ -152,7 +152,7 @@ export const notificationHandlers = [
   }),
 
   // 删除通知
-  http.delete("/api/notifications/:id", async ({ params }) => {
+  http.delete("/mock-api/notifications/:id", async ({ params }) => {
     await delay();
 
     const { id } = params;
@@ -168,7 +168,7 @@ export const notificationHandlers = [
   }),
 
   // 批量删除通知
-  http.post("/api/notifications/batch-delete", async ({ request }) => {
+  http.post("/mock-api/notifications/batch-delete", async ({ request }) => {
     await delay();
 
     const body = (await request.json()) as { ids: string[] };

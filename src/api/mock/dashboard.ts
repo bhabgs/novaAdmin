@@ -142,7 +142,7 @@ const generateSystemInfo = () => {
 
 export const dashboardHandlers = [
   // 获取统计数据
-  http.get('/api/dashboard/statistics', async () => {
+  http.get('/mock-api/dashboard/statistics', async () => {
     await delay();
     
     const statistics = generateStatistics();
@@ -150,7 +150,7 @@ export const dashboardHandlers = [
   }),
 
   // 获取用户增长数据
-  http.get('/api/dashboard/user-growth', async ({ request }) => {
+  http.get('/mock-api/dashboard/user-growth', async ({ request }) => {
     await delay();
     
     const url = new URL(request.url);
@@ -163,7 +163,7 @@ export const dashboardHandlers = [
   }),
 
   // 获取订单趋势数据
-  http.get('/api/dashboard/order-trend', async ({ request }) => {
+  http.get('/mock-api/dashboard/order-trend', async ({ request }) => {
     await delay();
     
     const url = new URL(request.url);
@@ -176,7 +176,7 @@ export const dashboardHandlers = [
   }),
 
   // 获取收入图表数据
-  http.get('/api/dashboard/revenue-chart', async ({ request }) => {
+  http.get('/mock-api/dashboard/revenue-chart', async ({ request }) => {
     await delay();
     
     const url = new URL(request.url);
@@ -194,7 +194,7 @@ export const dashboardHandlers = [
   }),
 
   // 获取分类分布数据
-  http.get('/api/dashboard/category-distribution', async () => {
+  http.get('/mock-api/dashboard/category-distribution', async () => {
     await delay();
     
     const data = generateCategoryDistribution();
@@ -202,7 +202,7 @@ export const dashboardHandlers = [
   }),
 
   // 获取实时数据
-  http.get('/api/dashboard/realtime', async () => {
+  http.get('/mock-api/dashboard/realtime', async () => {
     await delay(500); // 实时数据延迟较短
     
     const data = generateRealTimeData();
@@ -210,7 +210,7 @@ export const dashboardHandlers = [
   }),
 
   // 获取最近活动
-  http.get('/api/dashboard/recent-activities', async ({ request }) => {
+  http.get('/mock-api/dashboard/recent-activities', async ({ request }) => {
     await delay();
     
     const url = new URL(request.url);
@@ -223,7 +223,7 @@ export const dashboardHandlers = [
   }),
 
   // 获取系统信息
-  http.get('/api/dashboard/system-info', async () => {
+  http.get('/mock-api/dashboard/system-info', async () => {
     await delay();
     
     const data = generateSystemInfo();
@@ -231,7 +231,7 @@ export const dashboardHandlers = [
   }),
 
   // 刷新所有数据
-  http.post('/api/dashboard/refresh', async () => {
+  http.post('/mock-api/dashboard/refresh', async () => {
     await delay();
     
     const data = {
@@ -249,7 +249,7 @@ export const dashboardHandlers = [
   }),
 
   // 导出数据
-  http.get('/api/dashboard/export', async ({ request }) => {
+  http.get('/mock-api/dashboard/export', async ({ request }) => {
     await delay(2000); // 导出需要更长时间
     
     const url = new URL(request.url);

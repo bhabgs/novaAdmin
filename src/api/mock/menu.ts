@@ -35,21 +35,6 @@ const generateMockMenus = () => {
       createTime: "2023-01-01T00:00:00.000Z",
       updateTime: new Date().toISOString(),
     },
-    {
-      id: "12",
-      name: "通知中心",
-      i18nKey: "menu.notificationCenter",
-      type: "page" as const,
-      path: "/notification-center",
-      component: "base/NotificationCenter",
-      icon: "BellOutlined",
-      sortOrder: 2,
-      status: "active" as const,
-      parentId: undefined,
-      children: [],
-      createTime: "2023-01-01T00:00:00.000Z",
-      updateTime: new Date().toISOString(),
-    },
 
     {
       id: "100",
@@ -149,6 +134,22 @@ const generateMockMenus = () => {
           parentId: "100",
           sortOrder: 5,
           status: "active" as const,
+          children: [],
+          createTime: "2023-01-01T00:00:00.000Z",
+          updateTime: new Date().toISOString(),
+        },
+        {
+          id: "12",
+          name: "通知中心",
+          i18nKey: "menu.notificationCenter",
+          type: "page" as const,
+          path: "/notification-center",
+          component: "base/NotificationCenter",
+          icon: "BellOutlined",
+          sortOrder: 2,
+          status: "active" as const,
+          parentId: "100",
+          hideInMenu: true,
           children: [],
           createTime: "2023-01-01T00:00:00.000Z",
           updateTime: new Date().toISOString(),
@@ -390,7 +391,7 @@ const filterMenusByPermissions = (
 
 export const menuHandlers = [
   // 获取菜单列表（扁平结构，用于菜单管理页面）
-  http.get("/api/menus", async () => {
+  http.get("/mock-api/menus", async () => {
     await delay();
 
     // 返回扁平化的菜单列表，以便前端可以根据 parentId 构建树
@@ -399,7 +400,7 @@ export const menuHandlers = [
   }),
 
   // 获取用户菜单（根据权限过滤）
-  http.get("/api/menus/user", async () => {
+  http.get("/mock-api/menus/user", async () => {
     await delay();
 
     // 这里应该根据用户的权限来过滤菜单
@@ -411,7 +412,7 @@ export const menuHandlers = [
   }),
 
   // 获取菜单详情
-  http.get("/api/menus/:id", async ({ params }) => {
+  http.get("/mock-api/menus/:id", async ({ params }) => {
     await delay();
 
     const { id } = params;
@@ -426,7 +427,7 @@ export const menuHandlers = [
   }),
 
   // 创建菜单
-  http.post("/api/menus", async ({ request }) => {
+  http.post("/mock-api/menus", async ({ request }) => {
     await delay();
 
     const body = (await request.json()) as MenuFormData & { i18nKey?: string };
@@ -472,7 +473,7 @@ export const menuHandlers = [
   }),
 
   // 更新菜单
-  http.put("/api/menus/:id", async ({ params, request }) => {
+  http.put("/mock-api/menus/:id", async ({ params, request }) => {
     await delay();
 
     const { id } = params;
@@ -511,7 +512,7 @@ export const menuHandlers = [
   }),
 
   // 删除菜单
-  http.delete("/api/menus/:id", async ({ params }) => {
+  http.delete("/mock-api/menus/:id", async ({ params }) => {
     await delay();
 
     const { id } = params;
@@ -547,7 +548,7 @@ export const menuHandlers = [
   }),
 
   // 更新菜单排序
-  http.post("/api/menus/sort", async ({ request }) => {
+  http.post("/mock-api/menus/sort", async ({ request }) => {
     await delay();
 
     const body = (await request.json()) as { menus: Menu[] };
@@ -563,14 +564,14 @@ export const menuHandlers = [
   }),
 
   // 获取菜单图标列表
-  http.get("/api/menus/icons", async () => {
+  http.get("/mock-api/menus/icons", async () => {
     await delay();
 
     return HttpResponse.json(createSuccessResponse(availableIcons));
   }),
 
   // 批量删除菜单
-  http.post("/api/menus/batch-delete", async ({ request }) => {
+  http.post("/mock-api/menus/batch-delete", async ({ request }) => {
     await delay();
 
     const body = (await request.json()) as { ids: string[] };
@@ -610,7 +611,7 @@ export const menuHandlers = [
   }),
 
   // 复制菜单
-  http.post("/api/menus/:id/copy", async ({ params, request }) => {
+  http.post("/mock-api/menus/:id/copy", async ({ params, request }) => {
     await delay();
 
     const { id } = params;
@@ -656,7 +657,7 @@ export const menuHandlers = [
   }),
 
   // 移动菜单
-  http.post("/api/menus/:id/move", async ({ params }) => {
+  http.post("/mock-api/menus/:id/move", async ({ params }) => {
     await delay();
 
     const { id } = params;

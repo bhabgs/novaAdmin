@@ -122,7 +122,7 @@ const mockPermissions = generateMockPermissions();
 
 export const roleHandlers = [
   // 获取角色列表
-  http.get('/api/roles', async ({ request }) => {
+  http.get('/mock-api/roles', async ({ request }) => {
     await delay();
     
     const url = new URL(request.url);
@@ -141,14 +141,14 @@ export const roleHandlers = [
   }),
 
   // 获取所有角色（不分页）
-  http.get('/api/roles/all', async () => {
+  http.get('/mock-api/roles/all', async () => {
     await delay();
     
     return HttpResponse.json(createSuccessResponse(mockRoles));
   }),
 
   // 获取角色详情
-  http.get('/api/roles/:id', async ({ params }) => {
+  http.get('/mock-api/roles/:id', async ({ params }) => {
     await delay();
     
     const { id } = params;
@@ -162,7 +162,7 @@ export const roleHandlers = [
   }),
 
   // 创建角色
-  http.post('/api/roles', async ({ request }) => {
+  http.post('/mock-api/roles', async ({ request }) => {
     await delay();
     
     const body = await request.json() as any;
@@ -194,7 +194,7 @@ export const roleHandlers = [
   }),
 
   // 更新角色
-  http.put('/api/roles/:id', async ({ params, request }) => {
+  http.put('/mock-api/roles/:id', async ({ params, request }) => {
     await delay();
     
     const { id } = params;
@@ -228,7 +228,7 @@ export const roleHandlers = [
   }),
 
   // 删除角色
-  http.delete('/api/roles/:id', async ({ params }) => {
+  http.delete('/mock-api/roles/:id', async ({ params }) => {
     await delay();
     
     const { id } = params;
@@ -249,7 +249,7 @@ export const roleHandlers = [
   }),
 
   // 分配权限
-  http.post('/api/roles/:id/permissions', async ({ params, request }) => {
+  http.post('/mock-api/roles/:id/permissions', async ({ params, request }) => {
     await delay();
     
     const { id } = params;
@@ -268,7 +268,7 @@ export const roleHandlers = [
   }),
 
   // 获取角色权限
-  http.get('/api/roles/:id/permissions', async ({ params }) => {
+  http.get('/mock-api/roles/:id/permissions', async ({ params }) => {
     await delay();
     
     const { id } = params;
@@ -286,14 +286,14 @@ export const roleHandlers = [
   }),
 
   // 获取权限列表
-  http.get('/api/permissions', async () => {
+  http.get('/mock-api/permissions', async () => {
     await delay();
     
     return HttpResponse.json(createSuccessResponse(mockPermissions));
   }),
 
   // 获取权限树
-  http.get('/api/permissions/tree', async () => {
+  http.get('/mock-api/permissions/tree', async () => {
     await delay();
     
     // 按模块分组权限
@@ -314,7 +314,7 @@ export const roleHandlers = [
   }),
 
   // 复制角色
-  http.post('/api/roles/:id/copy', async ({ params, request }) => {
+  http.post('/mock-api/roles/:id/copy', async ({ params, request }) => {
     await delay();
     
     const { id } = params;
@@ -348,7 +348,7 @@ export const roleHandlers = [
   }),
 
   // 批量删除角色
-  http.post('/api/roles/batch-delete', async ({ request }) => {
+  http.post('/mock-api/roles/batch-delete', async ({ request }) => {
     await delay();
     
     const body = await request.json() as any;

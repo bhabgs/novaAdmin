@@ -68,6 +68,7 @@ const MainLayout: React.FC = () => {
 
   // 生成菜单项
   const generateMenuItems = (menuData: MenuType[]) => {
+    console.log(menuData);
     return menuData.map((menu) => {
       const icon = getMenuIcon(menu.icon);
       // 使用 i18nKey 或回退到 name
@@ -270,7 +271,6 @@ const MainLayout: React.FC = () => {
               }}
               className={styles.trigger}
             />
-
             <CustomBreadcrumb />
           </div>
 
@@ -282,6 +282,7 @@ const MainLayout: React.FC = () => {
                   type="text"
                   icon={<BellOutlined />}
                   className={styles.actionButton}
+                  onClick={() => navigate("/notification-center")}
                 />
               </Badge>
             </div>

@@ -86,8 +86,8 @@ export const exampleHandlers = [
 ```
 
 **Mock 模式配置：**
-- `.env` 中设置 `VITE_USE_MOCK=true` 启用 Mock（使用 `/mock-api` 前缀，避免被服务器代理拦截）
-- 设置 `VITE_USE_MOCK=false` 使用真实后端（使用 `/api` 前缀，被 Nginx 代理到后端）
+- `.env` 中设置 `VITE_USE_MOCK=true` 启用 Mock（默认配置）
+- 项目使用 `/mock-api` 前缀，避免被 Nginx 等服务器代理拦截，确保 MSW 能够正常工作
 
 ## 动态路由
 
@@ -257,14 +257,13 @@ const handleDelete = useCallback(async (id: string) => {
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| VITE_USE_MOCK | 启用 Mock 模式 | true (dev/prod) |
-| VITE_API_BASE_URL | Mock 模式 API 前缀 | /mock-api |
-| VITE_REAL_API_BASE_URL | 真实 API 前缀（被 Nginx 代理） | /api |
+| VITE_USE_MOCK | 启用 Mock 模式 | true |
+| VITE_API_BASE_URL | API 前缀 | /mock-api |
 | VITE_APP_TITLE | 应用标题 | NovaAdmin |
 
 **API 前缀说明：**
-- Mock 模式（`VITE_USE_MOCK=true`）：使用 `/mock-api`，MSW 拦截，不被服务器代理
-- 真实 API（`VITE_USE_MOCK=false`）：使用 `/api`，Nginx 代理到后端服务器
+- 项目使用 `/mock-api` 前缀（而非 `/api`），避免被 Nginx 等服务器代理配置拦截
+- 这样部署后 MSW 仍能正常拦截请求，实现纯前端 Mock 演示
 
 配置文件：`.env.development` | `.env.preview` | `.env.production`
 

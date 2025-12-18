@@ -119,11 +119,11 @@ export const refreshDashboardData = createAsyncThunk(
   async (_, { dispatch }) => {
     try {
       await Promise.all([
-        dispatch(fetchDashboardStats()),
-        dispatch(fetchUserGrowthData()),
-        dispatch(fetchOrderTrendData()),
-        dispatch(fetchRevenueChartData()),
-        dispatch(fetchCategoryDistributionData()),
+        dispatch(fetchDashboardStats(undefined)),
+        dispatch(fetchUserGrowthData({})),
+        dispatch(fetchOrderTrendData({})),
+        dispatch(fetchRevenueChartData({})),
+        dispatch(fetchCategoryDistributionData(undefined)),
       ]);
       return new Date().toLocaleString();
     } catch (error: any) {

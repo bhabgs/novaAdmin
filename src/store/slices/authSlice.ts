@@ -70,7 +70,7 @@ export const refreshToken = createAsyncThunk(
         throw new Error('No refresh token available');
       }
       
-      const response = await authApi.refreshToken(refreshTokenValue);
+      const response = await authApi.refreshToken();
       if (response.success) {
         const { token } = response.data;
         tokenUtils.setToken(token);

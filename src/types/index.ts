@@ -1,3 +1,5 @@
+import type { User } from './user';
+
 // 语言类型定义
 export type Language = 'zh-CN' | 'en-US' | 'ar-SA';
 
@@ -30,14 +32,11 @@ export interface LoginRequest {
   password: string;
 }
 
+// 登录成功后返回的数据结构（对应 API 响应中的 data 字段）
 export interface LoginResponse {
-  success: boolean;
-  data: {
-    user: User;
-    token: string;
-    refreshToken: string;
-  };
-  message: string;
+  user: User;
+  token: string;
+  refreshToken: string;
 }
 
 // API响应类型

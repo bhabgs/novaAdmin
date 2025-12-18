@@ -36,7 +36,8 @@ export class TransformControls extends EventEmitter {
   private transforming: boolean = false;
   private activeHandle: HandleType | null = null;
   private startPoint: Point = { x: 0, y: 0 };
-  private startBounds: PIXI.Rectangle | null = null;
+  // PixiJS v8 中 getBounds 返回 Bounds 类型
+  private startBounds: PIXI.Bounds | null = null;
 
   constructor() {
     super();
@@ -160,7 +161,7 @@ export class TransformControls extends EventEmitter {
   /**
    * 更新手柄位置
    */
-  private updateHandles(bounds: PIXI.Rectangle): void {
+  private updateHandles(bounds: PIXI.Bounds): void {
     const { x, y, width, height } = bounds;
     const halfSize = TRANSFORM_HANDLE_SIZE / 2;
 

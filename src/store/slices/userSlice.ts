@@ -76,7 +76,7 @@ export const createUser = createAsyncThunk(
       const response = await userApi.createUser(userData);
       if (response.success) {
         // 创建成功后刷新列表
-        dispatch(fetchUsers());
+        dispatch(fetchUsers({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
@@ -95,7 +95,7 @@ export const updateUser = createAsyncThunk(
       const response = await userApi.updateUser(id, userData);
       if (response.success) {
         // 更新成功后刷新列表
-        dispatch(fetchUsers());
+        dispatch(fetchUsers({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
@@ -114,7 +114,7 @@ export const deleteUser = createAsyncThunk(
       const response = await userApi.deleteUser(id);
       if (response.success) {
         // 删除成功后刷新列表
-        dispatch(fetchUsers());
+        dispatch(fetchUsers({}));
         return id;
       } else {
         return rejectWithValue(response.message);
@@ -133,7 +133,7 @@ export const batchDeleteUsers = createAsyncThunk(
       const response = await userApi.batchDeleteUsers(ids);
       if (response.success) {
         // 删除成功后刷新列表
-        dispatch(fetchUsers());
+        dispatch(fetchUsers({}));
         return ids;
       } else {
         return rejectWithValue(response.message);
@@ -164,12 +164,15 @@ export const resetUserPassword = createAsyncThunk(
 // 更新用户状态
 export const updateUserStatus = createAsyncThunk(
   'user/updateUserStatus',
-  async ({ id, status }: { id: string; status: string }, { rejectWithValue, dispatch }) => {
+  async (
+    { id, status }: { id: string; status: 'active' | 'inactive' | 'banned' },
+    { rejectWithValue, dispatch },
+  ) => {
     try {
       const response = await userApi.updateUser(id, { status });
       if (response.success) {
         // 更新成功后刷新列表
-        dispatch(fetchUsers());
+        dispatch(fetchUsers({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);

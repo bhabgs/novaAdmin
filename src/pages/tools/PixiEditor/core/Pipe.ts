@@ -84,9 +84,9 @@ export class Pipe extends EventEmitter {
 
     this.graphics.clear();
 
-    // 设置线条样式
+    // 设置线条样式（Pixi v8 中 Graphics 的类型定义与实际实现存在差异，这里使用 any 兼容）
     const strokeColor = colorStringToHex(this.style.strokeColor);
-    this.graphics.lineStyle({
+    (this.graphics as any).lineStyle({
       width: this.style.strokeWidth,
       color: strokeColor,
       alpha: this.style.strokeAlpha || 1,

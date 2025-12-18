@@ -125,8 +125,9 @@ export function rotatePoint(point: Point, center: Point, angle: number): Point {
 
 /**
  * 获取对象的世界坐标
+ * 在 PixiJS v8 中不再从主包导出 DisplayObject，这里使用 Container 以保持兼容
  */
-export function getWorldPosition(obj: PIXI.DisplayObject): Point {
+export function getWorldPosition(obj: PIXI.Container): Point {
   const worldTransform = obj.worldTransform;
   return {
     x: worldTransform.tx,

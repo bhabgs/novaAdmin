@@ -89,7 +89,7 @@ export const createRole = createAsyncThunk(
       const response = await roleApi.createRole(roleData);
       if (response.success) {
         // 创建成功后刷新列表
-        dispatch(fetchRoles());
+        dispatch(fetchRoles({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
@@ -108,7 +108,7 @@ export const updateRole = createAsyncThunk(
       const response = await roleApi.updateRole(id, roleData);
       if (response.success) {
         // 更新成功后刷新列表
-        dispatch(fetchRoles());
+        dispatch(fetchRoles({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
@@ -127,7 +127,7 @@ export const deleteRole = createAsyncThunk(
       const response = await roleApi.deleteRole(id);
       if (response.success) {
         // 删除成功后刷新列表
-        dispatch(fetchRoles());
+        dispatch(fetchRoles({}));
         return id;
       } else {
         return rejectWithValue(response.message);

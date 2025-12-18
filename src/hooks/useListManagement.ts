@@ -11,10 +11,14 @@ interface ListParams {
   [key: string]: unknown;
 }
 
+// 为了兼容不同 slice 中定义的 AsyncThunk（参数类型不完全一致），
+// 这里对 AsyncThunk 的类型做一层统一封装，避免泛型过于严格导致无法复用。
+type GenericAsyncThunk = AsyncThunk<unknown, any, any>;
+
 interface UseListManagementOptions {
   dispatch: AppDispatch;
-  fetchAction: AsyncThunk<unknown, ListParams, Record<string, never>>;
-  deleteAction: AsyncThunk<unknown, string, Record<string, never>>;
+  fetchAction: GenericAsyncThunk;
+  deleteAction: GenericAsyncThunk;
   loadingSelector: boolean;
   totalSelector: number;
   initialPageSize?: number;

@@ -48,7 +48,10 @@ const UserList: React.FC = () => {
   });
 
   const handleStatusChange = useCallback(
-    async (id: string, status: string) => {
+    async (
+      id: string,
+      status: "active" | "inactive" | "banned",
+    ) => {
       try {
         await dispatch(updateUserStatus({ id, status })).unwrap();
         message.success(t("user.saveSuccess"));
@@ -111,11 +114,13 @@ const UserList: React.FC = () => {
       title: t("user.status"),
       dataIndex: "status",
       key: "status",
-      render: (status: string, record: User) => (
+      render: (status: User["status"], record: User) => (
         <Select
           value={status}
           style={{ width: 100 }}
-          onChange={(value) => handleStatusChange(record.id, value)}
+          onChange={(value: "active" | "inactive" | "banned") =>
+            handleStatusChange(record.id, value)
+          }
         >
           <Option value="active">
             <Tag color="green">{t("user.active")}</Tag>

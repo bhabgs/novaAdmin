@@ -165,7 +165,8 @@ export abstract class GraphicObject extends EventEmitter {
   /**
    * 获取边界框
    */
-  public getBounds(): PIXI.Rectangle {
+  public getBounds(): PIXI.Bounds {
+    // PixiJS v8 中 getBounds 返回 Bounds 类型，这里直接透传
     return this.displayObject.getBounds();
   }
 

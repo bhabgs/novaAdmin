@@ -1,80 +1,95 @@
-import { get } from './request';
-import { DashboardStats, ChartData, ApiResponse } from '../types';
+import { ApiResponse } from '../types';
+import {
+  generateStatistics,
+  generateUserGrowthData,
+  generateOrderTrendData,
+  generateRevenueChartData,
+  generateCategoryDistribution,
+  generateRealTimeData,
+  generateRecentActivities,
+  generateSystemInfo,
+} from '@/data/dashboard';
 
-// Dashboard相关API
+// 仪表盘相关API - 使用本地假数据
 export const dashboardApi = {
   // 获取统计数据
-  getStats: (): Promise<ApiResponse<DashboardStats>> => {
-    return get('/dashboard/statistics');
+  getStatistics: (): Promise<ApiResponse<ReturnType<typeof generateStatistics>>> => {
+    return Promise.resolve({
+      success: true,
+      data: generateStatistics(),
+      message: '获取成功',
+    });
   },
 
   // 获取用户增长数据
-  getUserGrowthData: (params?: {
-    period?: string; // 'week' | 'month' | 'year'
-  }): Promise<ApiResponse<ChartData[]>> => {
-    return get('/dashboard/user-growth', { params });
+  getUserGrowthData: (): Promise<ApiResponse<ReturnType<typeof generateUserGrowthData>>> => {
+    return Promise.resolve({
+      success: true,
+      data: generateUserGrowthData(),
+      message: '获取成功',
+    });
   },
 
   // 获取订单趋势数据
-  getOrderTrendData: (params?: {
-    period?: string;
-  }): Promise<ApiResponse<ChartData[]>> => {
-    return get('/dashboard/order-trend', { params });
+  getOrderTrendData: (): Promise<ApiResponse<ReturnType<typeof generateOrderTrendData>>> => {
+    return Promise.resolve({
+      success: true,
+      data: generateOrderTrendData(),
+      message: '获取成功',
+    });
   },
 
   // 获取收入图表数据
-  getRevenueChartData: (params?: {
-    period?: string;
-  }): Promise<ApiResponse<ChartData[]>> => {
-    return get('/dashboard/revenue-chart', { params });
+  getRevenueChartData: (): Promise<ApiResponse<ReturnType<typeof generateRevenueChartData>>> => {
+    return Promise.resolve({
+      success: true,
+      data: generateRevenueChartData(),
+      message: '获取成功',
+    });
   },
 
   // 获取分类分布数据
-  getCategoryDistributionData: (): Promise<ApiResponse<ChartData[]>> => {
-    return get('/dashboard/category-distribution');
+  getCategoryDistribution: (): Promise<ApiResponse<ReturnType<typeof generateCategoryDistribution>>> => {
+    return Promise.resolve({
+      success: true,
+      data: generateCategoryDistribution(),
+      message: '获取成功',
+    });
   },
 
   // 获取实时数据
-  getRealTimeData: (): Promise<ApiResponse<{
-    onlineUsers: number;
-    todayOrders: number;
-    todayRevenue: number;
-    systemLoad: number;
-  }>> => {
-    return get('/dashboard/realtime');
+  getRealTimeData: (): Promise<ApiResponse<ReturnType<typeof generateRealTimeData>>> => {
+    return Promise.resolve({
+      success: true,
+      data: generateRealTimeData(),
+      message: '获取成功',
+    });
   },
 
   // 获取最近活动
-  getRecentActivities: (params?: {
-    limit?: number;
-  }): Promise<ApiResponse<Array<{
-    id: string;
-    type: string;
-    title: string;
-    description: string;
-    time: string;
-    user: string;
-  }>>> => {
-    return get('/dashboard/recent-activities', { params });
+  getRecentActivities: (): Promise<ApiResponse<ReturnType<typeof generateRecentActivities>>> => {
+    return Promise.resolve({
+      success: true,
+      data: generateRecentActivities(),
+      message: '获取成功',
+    });
   },
 
   // 获取系统信息
-  getSystemInfo: (): Promise<ApiResponse<{
-    version: string;
-    uptime: string;
-    memory: {
-      used: number;
-      total: number;
-    };
-    cpu: {
-      usage: number;
-      cores: number;
-    };
-    disk: {
-      used: number;
-      total: number;
-    };
-  }>> => {
-    return get('/dashboard/system-info');
+  getSystemInfo: (): Promise<ApiResponse<ReturnType<typeof generateSystemInfo>>> => {
+    return Promise.resolve({
+      success: true,
+      data: generateSystemInfo(),
+      message: '获取成功',
+    });
+  },
+
+  // 刷新所有数据
+  refreshAll: (): Promise<ApiResponse<null>> => {
+    return Promise.resolve({
+      success: true,
+      data: null,
+      message: '数据已刷新',
+    });
   },
 };

@@ -9,7 +9,6 @@ import { store } from './store';
 import { initializeSettings } from './store/slices/settingsSlice';
 import { useAppSelector } from './store';
 import Router from './router';
-import { startMockService } from './api/mock';
 import { Language } from './types';
 import { isRTL } from './i18n';
 
@@ -80,9 +79,6 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  // 如果不启用 Mock，则默认 ready；启用时等待初始化完成
-  const shouldUseMock = import.meta.env.VITE_USE_MOCK === 'true';
-  const [mockServiceReady, setMockServiceReady] = useState(!shouldUseMock);
   const [settingsInitialized, setSettingsInitialized] = useState(false);
 
   useEffect(() => {
@@ -94,29 +90,16 @@ const App: React.FC = () => {
     if (import.meta.env.DEV) {
       (window as any).__REDUX_STORE__ = store;
     }
-
-    // 根据环境变量决定是否启动 Mock
-    if (shouldUseMock) {
-      startMockService()
-        .then(() => {
-          console.log('✅ Mock service initialized successfully');
-          setMockServiceReady(true);
-        })
-        .catch((error) => {
-          console.error('❌ Failed to initialize mock service:', error);
-          setMockServiceReady(true); // 即使失败也继续，避免无限加载
-        });
-    }
   }, []);
 
-  // 如果设置未初始化或Mock服务还未准备好，显示加载状态
-  if (!settingsInitialized || !mockServiceReady) {
+  // 如果设置未初始化，显示加载状态
+  if (!settingsInitialized) {
     return (
-      <div 
-        style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '100vh',
           flexDirection: 'column',
           gap: '16px'

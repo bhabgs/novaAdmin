@@ -42,7 +42,7 @@ const MenuList: React.FC = () => {
   }, [dispatch]);
 
   // 将菜单数据转换为树形结构
-  const buildMenuTree = (menus: Menu[]): Menu[] => {
+  const buildMenuTree = useCallback((menus: Menu[]): Menu[] => {
     const menuMap = new Map<string, Menu>();
     const rootMenus: Menu[] = [];
 
@@ -64,10 +64,10 @@ const MenuList: React.FC = () => {
     });
 
     return rootMenus;
-  };
+  }, []);
 
   // 过滤菜单数据
-  const filterMenus = (menus: Menu[]): Menu[] => {
+  const filterMenus = useCallback((menus: Menu[]): Menu[] => {
     return menus.filter((menu) => {
       const matchesSearch =
         !searchText ||
@@ -79,10 +79,17 @@ const MenuList: React.FC = () => {
 
       return matchesSearch && matchesStatus && matchesType;
     });
-  };
+  }, [searchText, statusFilter, typeFilter]);
 
-  const filteredMenus = filterMenus(menus);
-  const treeData = buildMenuTree(filteredMenus);
+  const filteredMenus = useMemo(
+    () => filterMenus(menus),
+    [filterMenus, menus]
+  );
+
+  const treeData = useMemo(
+    () => buildMenuTree(filteredMenus),
+    [buildMenuTree, filteredMenus]
+  );
 
   const handleAdd = useCallback(() => {
     setEditingMenu(null);
@@ -136,7 +143,7 @@ const MenuList: React.FC = () => {
   const handleExport = useCallback(() => {
     try {
       // 导出树形结构，保留层级关系
-      const dataStr = JSON.stringify(treeData, null, 2);
+      const dataStr = JSON.stringify(menus, null, 2);
       const blob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -150,7 +157,11 @@ const MenuList: React.FC = () => {
     } catch {
       message.error(t("message.error"));
     }
-  }, [treeData, t]);
+  }, [menus, t]);
+
+  const handleExpandedRowsChange = useCallback((keys: React.Key[]) => {
+    setExpandedKeys(keys);
+  }, []);
 
   const handleFormSubmit = useCallback(() => {
     setIsFormVisible(false);
@@ -385,7 +396,7 @@ const MenuList: React.FC = () => {
         tableProps={{
           expandable: {
             expandedRowKeys: expandedKeys,
-            onExpandedRowsChange: (keys) => setExpandedKeys([...keys]),
+            onExpandedRowsChange: handleExpandedRowsChange,
             defaultExpandAllRows: true,
           },
           size: "middle",

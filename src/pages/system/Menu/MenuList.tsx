@@ -8,6 +8,7 @@ import {
   FolderOutlined,
   FileOutlined,
   AppstoreOutlined,
+  ExportOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
@@ -131,6 +132,25 @@ const MenuList: React.FC = () => {
     dispatch(fetchUserMenus());
     message.success(t("menu.refreshRoutesSuccess"));
   }, [dispatch, t]);
+
+  const handleExport = useCallback(() => {
+    try {
+      // 导出树形结构，保留层级关系
+      const dataStr = JSON.stringify(treeData, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `menus-${new Date().toISOString().split("T")[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      message.success(t("menu.exportSuccess"));
+    } catch {
+      message.error(t("message.error"));
+    }
+  }, [treeData, t]);
 
   const handleFormSubmit = useCallback(() => {
     setIsFormVisible(false);
@@ -322,8 +342,15 @@ const MenuList: React.FC = () => {
         tooltip: t("menu.refreshRoutesTooltip"),
         onClick: handleRefreshRoutes,
       },
+      {
+        key: "export",
+        label: t("menu.exportJson"),
+        icon: <ExportOutlined />,
+        tooltip: t("menu.exportJsonTooltip"),
+        onClick: handleExport,
+      },
     ],
-    [handleRefreshRoutes, t]
+    [handleRefreshRoutes, handleExport, t]
   );
 
   // 处理搜索

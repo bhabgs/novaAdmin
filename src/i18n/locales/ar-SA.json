@@ -96,7 +96,10 @@
     "remarkPlaceholder": "الرجاء إدخال الملاحظة",
     "refreshRoutes": "تحديث المسارات",
     "refreshRoutesTooltip": "تحديث القائمة والمسارات (انقر على هذا الزر إذا لم تعمل المسارات بعد تغيير القائمة)",
-    "refreshRoutesSuccess": "تم تحديث المسارات، الرجاء الانتظار..."
+    "refreshRoutesSuccess": "تم تحديث المسارات، الرجاء الانتظار...",
+    "exportJson": "تصدير JSON",
+    "exportJsonTooltip": "تصدير بيانات القائمة كملف JSON",
+    "exportSuccess": "تم التصدير بنجاح"
   },
   "tabs": {
     "refresh": "تحديث الصفحة",

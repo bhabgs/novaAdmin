@@ -115,7 +115,10 @@
     "remarkPlaceholder": "请输入备注信息",
     "refreshRoutes": "刷新路由",
     "refreshRoutesTooltip": "刷新菜单和路由（如果菜单修改后路由未生效，点击此按钮）",
-    "refreshRoutesSuccess": "路由已刷新，请稍等..."
+    "refreshRoutesSuccess": "路由已刷新，请稍等...",
+    "exportJson": "导出JSON",
+    "exportJsonTooltip": "将菜单数据导出为JSON文件",
+    "exportSuccess": "导出成功"
   },
   "tabs": {
     "refresh": "刷新页面",

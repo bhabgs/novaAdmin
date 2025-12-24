@@ -115,7 +115,10 @@
     "remarkPlaceholder": "Please enter remark",
     "refreshRoutes": "Refresh Routes",
     "refreshRoutesTooltip": "Refresh menu and routes (click this button if routes don't work after menu changes)",
-    "refreshRoutesSuccess": "Routes refreshed, please wait..."
+    "refreshRoutesSuccess": "Routes refreshed, please wait...",
+    "exportJson": "Export JSON",
+    "exportJsonTooltip": "Export menu data as JSON file",
+    "exportSuccess": "Export successful"
   },
   "tabs": {
     "refresh": "Refresh",

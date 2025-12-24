@@ -2,45 +2,135 @@
 
 ## 项目概述
 
-React 18 + TypeScript + Ant Design 5 后台管理系统，支持动态路由、国际化、主题切换。
+Monorepo 后台管理系统，包含前端（React）和后端（NestJS）。
 
-**访问地址**：http://localhost:5173/（不需要启动服务，直接访问）
+- **前端**：React 18 + TypeScript + Ant Design 5，支持动态路由、国际化、主题切换
+- **后端**：NestJS + TypeORM + MySQL，JWT 认证
 
-## 技术栈
+## 项目结构
 
-React 18.3 | TypeScript 5.8 | Vite 6.3 | Ant Design 5.22 | React Router 7.3 | Redux Toolkit 2.5 | Axios 1.7 | i18next 24.2 | MSW 2.11 | Less + Tailwind CSS
+```
+NovaAdmin/
+├── apps/
+│   ├── web/                    # 前端 React 应用
+│   │   ├── src/
+│   │   ├── public/
+│   │   └── package.json
+│   └── server/                 # 后端 NestJS 服务
+│       ├── src/
+│       │   ├── auth/           # 认证模块
+│       │   ├── users/          # 用户模块
+│       │   ├── roles/          # 角色模块
+│       │   ├── menus/          # 菜单模块
+│       │   └── common/         # 公共模块
+│       └── package.json
+├── pnpm-workspace.yaml
+└── package.json
+```
 
 ## 常用命令
 
 ```bash
-pnpm dev          # 开发服务器
-pnpm build        # 生产构建
-pnpm lint         # ESLint 检查
-pnpm check        # TypeScript 类型检查
+# 根目录运行
+pnpm install          # 安装所有依赖
+pnpm dev              # 同时启动前端和后端
+pnpm dev:web          # 仅启动前端 (http://localhost:5173)
+pnpm dev:server       # 仅启动后端 (http://localhost:3000)
+pnpm build            # 构建所有项目
+pnpm lint             # ESLint 检查
+pnpm check            # TypeScript 类型检查
 ```
 
-## 目录结构
+## 前端开发
+
+### 访问地址
+
+- 开发模式：http://localhost:5173
+- API 文档：http://localhost:3000/api/docs（需启动后端）
+
+### 技术栈
+
+React 18.3 | TypeScript 5.8 | Vite 6.3 | Ant Design 5.22 | React Router 7.3 | Redux Toolkit 2.5 | Axios 1.7 | i18next 24.2
+
+### 前端目录结构
 
 ```
-src/
-├── api/              # API 请求 (request.ts, auth.ts, user.ts, role.ts, menu.ts, mock/)
-├── components/       # 通用组件 (CrudPage, PageContainer, CommonTable, CommonForm, CommonModal)
+apps/web/src/
+├── api/              # API 请求
+├── components/       # 通用组件 (CrudPage, PageContainer, CommonTable)
 ├── pages/            # 业务页面
-│   ├── base/         # Dashboard, Home, Login, Profile, TemplateIntroduction
+│   ├── base/         # Dashboard, Home, Login, Profile
 │   ├── system/       # User, Role, Menu, Icons, Settings
-│   └── tools/        # Utils (RichTextEditor, PixiEditor), MarkdownViewer
-├── router/           # 动态路由 (componentMap.tsx, generateRoutes.tsx, DynamicRoutes.tsx)
-├── store/slices/     # Redux (auth, settings, menu, user, role, dashboard, tabs)
+│   └── tools/        # Utils, MarkdownViewer
+├── router/           # 动态路由
+├── store/slices/     # Redux 状态管理
 ├── i18n/locales/     # 语言文件 (zh-CN, en-US, ar-SA)
 ├── types/            # TypeScript 类型
-├── utils/            # 工具函数
-├── hooks/            # 自定义 Hooks
+├── data/             # 本地假数据
 └── layouts/          # 布局组件
 ```
 
-## API 开发
+## 后端开发
 
-### 响应格式
+### 启动后端
+
+```bash
+# 1. 配置数据库
+cp apps/server/.env.example apps/server/.env
+# 编辑 .env 配置 MySQL 连接
+
+# 2. 创建数据库
+mysql -u root -p -e "CREATE DATABASE nova_admin"
+
+# 3. 初始化数据
+pnpm --filter @nova-admin/server seed
+
+# 4. 启动服务
+pnpm dev:server
+```
+
+### 默认账号
+
+- 管理员：`admin` / `123456`
+- 普通用户：`user` / `123456`
+
+### API 端点
+
+| 模块 | 前缀 | 说明 |
+|------|------|------|
+| 认证 | `/api/auth` | 登录、登出、Token 刷新 |
+| 用户 | `/api/users` | 用户 CRUD、角色分配 |
+| 角色 | `/api/roles` | 角色 CRUD、权限管理 |
+| 菜单 | `/api/menus` | 菜单 CRUD、树形结构 |
+
+### 后端目录结构
+
+```
+apps/server/src/
+├── main.ts               # 入口文件
+├── app.module.ts         # 根模块
+├── auth/                 # 认证模块
+│   ├── auth.controller.ts
+│   ├── auth.service.ts
+│   ├── strategies/       # JWT 策略
+│   └── guards/           # 认证守卫
+├── users/                # 用户模块
+│   ├── entities/         # 用户实体
+│   ├── dto/              # 数据传输对象
+│   ├── users.controller.ts
+│   └── users.service.ts
+├── roles/                # 角色模块
+├── menus/                # 菜单模块
+├── common/               # 公共模块
+│   ├── decorators/       # 自定义装饰器
+│   ├── filters/          # 异常过滤器
+│   └── interceptors/     # 响应拦截器
+└── database/
+    └── seeds/            # 种子数据
+```
+
+## API 响应格式
+
 ```typescript
 interface ApiResponse<T> {
   success: boolean;
@@ -49,188 +139,50 @@ interface ApiResponse<T> {
   code?: number;
 }
 
-// 分页
 interface ListResponse<T> {
   list: T[];
   pagination: { page: number; pageSize: number; total: number; };
 }
 ```
 
-### 创建 API
+## 切换到后端 API
+
+前端默认使用本地假数据。要连接后端 API：
+
 ```typescript
-// src/api/example.ts
-import request from "./request";
-
-export const exampleApi = {
-  getList: (params?) => request.get<ListResponse<Example>>("/examples", { params }),
-  getById: (id: string) => request.get<Example>(`/examples/${id}`),
-  create: (data) => request.post<Example>("/examples", data),
-  update: (id, data) => request.put<Example>(`/examples/${id}`, data),
-  delete: (id: string) => request.del<void>(`/examples/${id}`),
-};
+// apps/web/src/api/request.ts
+const request = axios.create({
+  baseURL: 'http://localhost:3000/api',  // 改为后端地址
+  timeout: 10000,
+});
 ```
-
-### Mock 数据
-```typescript
-// src/api/mock/example.ts
-import { http, HttpResponse } from "msw";
-import { delay, createSuccessResponse } from "./utils";
-
-export const exampleHandlers = [
-  http.get("/mock-api/examples", async () => {
-    await delay();
-    return HttpResponse.json(createSuccessResponse({ list: [], pagination: {} }));
-  }),
-];
-// 在 src/api/mock/index.ts 注册
-```
-
-**Mock 模式配置：**
-- `.env` 中设置 `VITE_USE_MOCK=true` 启用 Mock（默认配置）
-- 项目使用 `/mock-api` 前缀，避免被 Nginx 等服务器代理拦截，确保 MSW 能够正常工作
 
 ## 动态路由
 
-### 添加新页面（2步）
+### 添加新页面
 
-**Step 1**: 创建组件 `src/pages/system/Example/index.tsx`
-
-**Step 2**: 菜单管理中配置
+1. 创建组件：`apps/web/src/pages/system/Example/index.tsx`
+2. 菜单管理中配置：
 ```typescript
 {
-  id: "new-id",
   name: "示例页面",
-  i18nKey: "menu.example",
-  type: "page",           // directory | page | button | iframe
+  type: "page",
   path: "/example",
-  component: "system/Example",  // pages/ 下的相对路径
+  component: "system/Example",
   icon: "AppstoreOutlined",
-  sortOrder: 10,
-  status: "active",
-  parentId: undefined,
 }
 ```
-
-路径格式：`"base/Dashboard"` → `src/pages/base/Dashboard.tsx`
-
-### Iframe 外部页面
-
-菜单支持 iframe 加载外部页面：
-```typescript
-{
-  id: "external-1",
-  name: "外部文档",
-  type: "iframe",
-  path: "/external/docs",
-  externalUrl: "https://ant.design/components/overview-cn",
-  icon: "LinkOutlined",
-  sortOrder: 20,
-  status: "active",
-}
-```
-
-- `type: "iframe"` - 标记为 iframe 类型
-- `externalUrl` - 外部页面 URL
-- 自动使用 `IframeContainer` 组件加载
 
 ## 国际化
 
-支持：zh-CN (LTR) | en-US (LTR) | ar-SA (RTL)
+支持：zh-CN | en-US | ar-SA (RTL)
 
 ```typescript
-// 使用
 const { t } = useTranslation();
 <h1>{t("example.title")}</h1>
-
-// 切换语言
-import { changeLanguage } from "@/i18n";
-changeLanguage("en-US");
 ```
 
-翻译文件：`src/i18n/locales/{zh-CN,en-US,ar-SA}.json`
-
-## 状态管理
-
-### 创建 Slice
-```typescript
-// src/store/slices/exampleSlice.ts
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
-export const fetchExamples = createAsyncThunk("example/fetchList", async (_, { rejectWithValue }) => {
-  try {
-    const response = await exampleApi.getList();
-    return response.success ? response.data.list : rejectWithValue(response.message);
-  } catch (error: any) {
-    return rejectWithValue(error.message);
-  }
-});
-
-const exampleSlice = createSlice({
-  name: "example",
-  initialState: { list: [], loading: false, error: null },
-  reducers: { clearError: (state) => { state.error = null; } },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchExamples.pending, (state) => { state.loading = true; })
-      .addCase(fetchExamples.fulfilled, (state, action) => { state.loading = false; state.list = action.payload; })
-      .addCase(fetchExamples.rejected, (state, action) => { state.loading = false; state.error = action.payload; });
-  },
-});
-```
-
-在 `src/store/index.ts` 注册 reducer。
-
-### 使用
-```typescript
-const dispatch = useAppDispatch();
-const { list, loading } = useAppSelector((state) => state.example);
-useEffect(() => { dispatch(fetchExamples()); }, [dispatch]);
-```
-
-## CrudPage 组件
-
-```typescript
-import CrudPage, { FilterConfig } from "@/components/CrudPage";
-import { useListManagement } from "@/hooks/useListManagement";
-
-const UserList: React.FC = () => {
-  const { users, loading, total } = useAppSelector((state) => state.user);
-  const listMgmt = useListManagement<User>({
-    dispatch, fetchAction: fetchUsers, deleteAction: deleteUser, loadingSelector: loading, totalSelector: total,
-  });
-
-  const columns = [{ title: t("user.name"), dataIndex: "name", key: "name" }];
-  const filters: FilterConfig[] = [{ key: "status", span: 4, component: <Select>...</Select> }];
-
-  return (
-    <CrudPage<User>
-      title={t("user.title")} dataSource={users} columns={columns} loading={loading}
-      pagination={listMgmt.paginationConfig} rowSelection={listMgmt.rowSelection}
-      onSearch={listMgmt.handleSearch} filters={filters}
-      onAdd={listMgmt.handleAdd} onEdit={listMgmt.handleEdit}
-      onDelete={listMgmt.handleDelete} onBatchDelete={listMgmt.handleBatchDelete}
-    />
-  );
-};
-```
-
-## 图标使用
-
-图标库页面：**系统管理 → 图标库**（点击复制图标名）
-
-```typescript
-// 按需导入
-import { UserOutlined, DeleteOutlined } from "@ant-design/icons";
-<UserOutlined style={{ fontSize: 24, color: "#1890ff" }} />
-
-// 动态图标（菜单等）
-import * as AntdIcons from "@ant-design/icons";
-const IconComponent = (AntdIcons as any)["UserOutlined"];
-```
-
-菜单配置使用图标名字符串：`icon: "UserOutlined"`
-
-主题：Outlined（线性）| Filled（实心）| TwoTone（双色）
+翻译文件：`apps/web/src/i18n/locales/`
 
 ## 代码规范
 
@@ -240,36 +192,30 @@ const IconComponent = (AntdIcons as any)["UserOutlined"];
 | Hook/工具 | camelCase | `useTheme.ts` |
 | 常量 | UPPER_SNAKE | `API_BASE_URL` |
 
-```typescript
-// import 顺序：React → React hooks → 第三方库 → 内部模块 → 类型 → 样式
-
-// 事件处理用 useCallback
-const handleDelete = useCallback(async (id: string) => {
-  await dispatch(deleteUser(id)).unwrap();
-  message.success(t("common.deleteSuccess"));
-}, [dispatch, t]);
-
-// 避免：any、内联函数、硬编码文本
-// 使用：具体类型、useCallback、t() 国际化
-```
-
 ## 环境变量
+
+### 前端 (apps/web/.env)
 
 | 变量 | 说明 | 默认值 |
 |------|------|--------|
-| VITE_USE_MOCK | 启用 Mock 模式 | true |
-| VITE_API_BASE_URL | API 前缀 | /mock-api |
 | VITE_APP_TITLE | 应用标题 | NovaAdmin |
+| VITE_API_BASE_URL | API 地址 | http://localhost:3000/api |
 
-**API 前缀说明：**
-- 项目使用 `/mock-api` 前缀（而非 `/api`），避免被 Nginx 等服务器代理配置拦截
-- 这样部署后 MSW 仍能正常拦截请求，实现纯前端 Mock 演示
+### 后端 (apps/server/.env)
 
-配置文件：`.env.development` | `.env.preview` | `.env.production`
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| DB_HOST | 数据库主机 | localhost |
+| DB_PORT | 数据库端口 | 3306 |
+| DB_USERNAME | 数据库用户 | root |
+| DB_PASSWORD | 数据库密码 | - |
+| DB_DATABASE | 数据库名 | nova_admin |
+| JWT_SECRET | JWT 密钥 | - |
+| PORT | 服务端口 | 3000 |
 
 ## 常见问题
 
-1. **路由不生效**：点击菜单管理「刷新路由」或 `dispatch(fetchUserMenus())`
-2. **组件找不到**：检查 `componentMap.tsx` 注册，名称区分大小写
-3. **Mock 重置**：`localStorage.removeItem("mock_menus_data"); location.reload()`
+1. **依赖安装失败**：使用 `pnpm install` 安装
+2. **后端连接失败**：检查 MySQL 是否启动，`.env` 配置是否正确
+3. **路由不生效**：菜单管理中点击「刷新路由」
 4. **类型检查**：`pnpm check`

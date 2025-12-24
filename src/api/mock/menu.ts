@@ -237,6 +237,65 @@ const generateMockMenus = () => {
       createTime: "2023-01-01T00:00:00.000Z",
       updateTime: new Date().toISOString(),
     },
+    {
+      id: "700",
+      name: "小游戏",
+      i18nKey: "menu.games",
+      type: "directory" as const,
+      icon: "RocketOutlined",
+      sortOrder: 4,
+      status: "active" as const,
+      parentId: undefined,
+      children: [
+        {
+          id: "701",
+          name: "2048",
+          i18nKey: "menu.game2048",
+          type: "page" as const,
+          path: "/games/2048",
+          component: "games/Game2048",
+          icon: "AppstoreOutlined",
+          parentId: "700",
+          sortOrder: 1,
+          status: "active" as const,
+          children: [],
+          createTime: "2023-01-01T00:00:00.000Z",
+          updateTime: new Date().toISOString(),
+        },
+        {
+          id: "702",
+          name: "贪吃蛇",
+          i18nKey: "menu.snake",
+          type: "page" as const,
+          path: "/games/snake",
+          component: "games/Snake",
+          icon: "BugOutlined",
+          parentId: "700",
+          sortOrder: 2,
+          status: "active" as const,
+          children: [],
+          createTime: "2023-01-01T00:00:00.000Z",
+          updateTime: new Date().toISOString(),
+        },
+        {
+          id: "703",
+          name: "扫雷",
+          i18nKey: "menu.minesweeper",
+          type: "page" as const,
+          path: "/games/minesweeper",
+          component: "games/Minesweeper",
+          icon: "FlagOutlined",
+          parentId: "700",
+          sortOrder: 3,
+          status: "active" as const,
+          children: [],
+          createTime: "2023-01-01T00:00:00.000Z",
+          updateTime: new Date().toISOString(),
+        },
+      ],
+      createTime: "2023-01-01T00:00:00.000Z",
+      updateTime: new Date().toISOString(),
+    },
   ];
 };
 
@@ -267,7 +326,7 @@ const availableIcons = [
 // localStorage 键名
 const MENU_STORAGE_KEY = "mock_menus_data";
 const MENU_VERSION_KEY = "mock_menus_version";
-const CURRENT_MENU_VERSION = "2.3"; // 添加 iframe 打开方式配置
+const CURRENT_MENU_VERSION = "2.4"; // 添加小游戏菜单
 
 // 修复子菜单的 parentId（数据迁移）
 const fixMenuParentIds = (menus: Menu[]): Menu[] => {

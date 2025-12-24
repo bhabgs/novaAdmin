@@ -9,7 +9,8 @@ import { lazy, ComponentType, LazyExoticComponent } from "react";
  * 目录结构:
  * - base/: 基础模块 (Dashboard, Home, Login, Profile, TemplateIntroduction, NotificationCenter)
  * - system/: 系统管理 (User, Role, Menu, Settings)
- * - tools/: 工具模块 (MarkdownViewer, RichTextEditor, PixiEditor)
+ * - tools/: 工具模块 (MarkdownViewer, RichTextEditor)
+ * - games/: 小游戏 (Game2048, Snake, Minesweeper)
  */
 export const componentMap: Record<
   string,
@@ -31,6 +32,11 @@ export const componentMap: Record<
 
   // ===== 工具模块 (tools/) =====
   MarkdownViewer: lazy(() => import("@/pages/tools/MarkdownViewer")),
+
+  // ===== 小游戏 (games/) =====
+  Game2048: lazy(() => import("@/pages/games/Game2048")),
+  Snake: lazy(() => import("@/pages/games/Snake")),
+  Minesweeper: lazy(() => import("@/pages/games/Minesweeper")),
 };
 
 /**

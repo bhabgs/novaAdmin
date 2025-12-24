@@ -45,6 +45,10 @@
   "menu": {
     "dashboard": "Dashboard",
     "templateIntroduction": "Template Introduction",
+    "games": "Games",
+    "game2048": "2048",
+    "snake": "Snake",
+    "minesweeper": "Minesweeper",
     "userManagement": "User Management",
     "roleManagement": "Role Management",
     "menuManagement": "Menu Management",
@@ -446,6 +450,44 @@
     "sender": "Sender",
     "more": "More",
     "timeAgo": "{{time}} ago"
+  },
+  "games": {
+    "title": "Games",
+    "game2048": "2048",
+    "snake": "Snake",
+    "minesweeper": "Minesweeper",
+    "score": "Score",
+    "best": "Best",
+    "newGame": "New Game",
+    "reset": "Reset",
+    "start": "Start",
+    "pause": "Pause",
+    "gameOver": "Game Over!",
+    "youWon": "You Won!",
+    "playAgain": "Play Again",
+    "finalScore": "Final Score",
+    "time": "Time",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "slow": "Slow",
+    "normal": "Normal",
+    "fast": "Fast",
+    "veryFast": "Very Fast",
+    "2048": {
+      "title": "2048",
+      "instructions": "Use arrow keys to move tiles. Tiles with the same number merge! Goal is to reach 2048!"
+    },
+    "snake": {
+      "title": "Snake",
+      "instructions": "Use arrow keys or WASD to control the snake. Eat food to grow!"
+    },
+    "minesweeper": {
+      "title": "Minesweeper",
+      "instructions": "Left click to reveal, right click to flag. Find all mines without hitting them!",
+      "hitMine": "You hit a mine!",
+      "won": "Congratulations! You won!"
+    }
   },
   "api": {
     "requestFailed": "Request failed",

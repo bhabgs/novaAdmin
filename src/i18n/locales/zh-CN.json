@@ -45,6 +45,10 @@
   "menu": {
     "dashboard": "仪表盘",
     "templateIntroduction": "模板介绍",
+    "games": "小游戏",
+    "game2048": "2048",
+    "snake": "贪吃蛇",
+    "minesweeper": "扫雷",
     "userManagement": "用户管理",
     "roleManagement": "角色管理",
     "menuManagement": "菜单管理",
@@ -446,6 +450,44 @@
     "sender": "发送者",
     "more": "展开",
     "timeAgo": "{{time}}前"
+  },
+  "games": {
+    "title": "小游戏",
+    "game2048": "2048",
+    "snake": "贪吃蛇",
+    "minesweeper": "扫雷",
+    "score": "分数",
+    "best": "最高分",
+    "newGame": "新游戏",
+    "reset": "重置",
+    "start": "开始",
+    "pause": "暂停",
+    "gameOver": "游戏结束！",
+    "youWon": "你赢了！",
+    "playAgain": "再玩一次",
+    "finalScore": "最终分数",
+    "time": "时间",
+    "easy": "简单",
+    "medium": "中等",
+    "hard": "困难",
+    "slow": "慢速",
+    "normal": "正常",
+    "fast": "快速",
+    "veryFast": "极速",
+    "2048": {
+      "title": "2048",
+      "instructions": "使用方向键移动方块。相同数字的方块会合并！目标是合成 2048！"
+    },
+    "snake": {
+      "title": "贪吃蛇",
+      "instructions": "使用方向键或 WASD 控制蛇的移动。吃食物来成长！"
+    },
+    "minesweeper": {
+      "title": "扫雷",
+      "instructions": "左键点击揭开格子，右键点击标记地雷。找出所有地雷而不触雷！",
+      "hitMine": "你触雷了！",
+      "won": "恭喜你赢了！"
+    }
   },
   "api": {
     "requestFailed": "请求失败",

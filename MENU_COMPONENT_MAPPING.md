@@ -27,7 +27,6 @@ lazy(() => import('@/pages/system/User/UserList'))
 | 图标库 | `system/Icons` | `pages/system/Icons/` |
 | Markdown查看器 | `tools/MarkdownViewer` | `pages/tools/MarkdownViewer/` |
 | 富文本编辑器 | `tools/RichTextEditor` | `pages/tools/RichTextEditor/` |
-| Pixi编辑器 | `tools/PixiEditor` | `pages/tools/PixiEditor/` |
 
 ## 目录结构
 
@@ -47,8 +46,7 @@ src/pages/
 │   └── Icons/
 └── tools/             # 工具模块
     ├── MarkdownViewer/
-    ├── RichTextEditor/
-    └── PixiEditor/
+    └── RichTextEditor/
 ```
 
 ## 添加新页面

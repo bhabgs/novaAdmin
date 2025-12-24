@@ -92,11 +92,18 @@ export const permissionUtils = {
   }
 };
 
+// Mock 菜单数据键名
+const MENU_STORAGE_KEY = 'mock_menus_data';
+const MENU_VERSION_KEY = 'mock_menus_version';
+
 // 清除所有认证信息
 export const clearAuth = (): void => {
   tokenUtils.removeToken();
   tokenUtils.removeRefreshToken();
   userUtils.removeUser();
+  // 清除菜单缓存，确保下次登录使用最新菜单数据
+  localStorage.removeItem(MENU_STORAGE_KEY);
+  localStorage.removeItem(MENU_VERSION_KEY);
 };
 
 // 检查是否已登录

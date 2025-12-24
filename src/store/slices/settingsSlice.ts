@@ -1,26 +1,26 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SystemSettings, ThemeConfig, Language, LayoutConfig } from '../../types';
-import i18n from '../../i18n';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { SystemSettings, ThemeConfig, Language } from "../../types";
+import i18n from "../../i18n";
 
-const SETTINGS_KEY = 'nova_admin_settings';
+const SETTINGS_KEY = "nova_admin_settings";
 
 // 默认设置
 const defaultSettings: SystemSettings = {
   theme: {
-    mode: 'light',
-    primaryColor: '#1890ff',
+    mode: "light",
+    primaryColor: "#1890ff",
     borderRadius: 6,
   },
-  language: 'zh-CN',
+  language: "zh-CN",
   layout: {
-    mode: 'side',
+    mode: "side",
     sidebarCollapsed: false,
     sidebarWidth: 220,
-    sidebarTheme: 'dark',
+    sidebarTheme: "dark",
     headerHeight: 64,
     fixedHeader: true,
     showTabs: true,
-    contentWidth: 'fluid',
+    contentWidth: "fluid",
     showFooter: false,
   },
 };
@@ -33,7 +33,7 @@ const getStoredSettings = (): SystemSettings => {
       return { ...defaultSettings, ...JSON.parse(stored) };
     }
   } catch (error) {
-    console.error('Failed to parse stored settings:', error);
+    console.error("Failed to parse stored settings:", error);
   }
   return defaultSettings;
 };
@@ -43,7 +43,7 @@ const saveSettings = (settings: SystemSettings) => {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   } catch (error) {
-    console.error('Failed to save settings:', error);
+    console.error("Failed to save settings:", error);
   }
 };
 
@@ -57,7 +57,7 @@ const initialState: SettingsState = {
 };
 
 const settingsSlice = createSlice({
-  name: 'settings',
+  name: "settings",
   initialState,
   reducers: {
     // 更新主题设置
@@ -68,7 +68,7 @@ const settingsSlice = createSlice({
 
     // 切换主题模式
     toggleThemeMode: (state) => {
-      state.theme.mode = state.theme.mode === 'light' ? 'dark' : 'light';
+      state.theme.mode = state.theme.mode === "light" ? "dark" : "light";
       saveSettings(state);
     },
 
@@ -93,7 +93,10 @@ const settingsSlice = createSlice({
     },
 
     // 更新布局设置
-    updateLayout: (state, action: PayloadAction<Partial<SystemSettings['layout']>>) => {
+    updateLayout: (
+      state,
+      action: PayloadAction<Partial<SystemSettings["layout"]>>
+    ) => {
       state.layout = { ...state.layout, ...action.payload };
       saveSettings(state);
     },

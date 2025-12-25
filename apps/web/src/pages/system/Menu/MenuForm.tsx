@@ -161,6 +161,21 @@ const MenuForm: React.FC<MenuFormProps> = ({
           </Col>
           <Col span={12}>
             <Form.Item
+              name="i18nKey"
+              label={t('menu.i18nKey')}
+              tooltip={t('menu.i18nKeyTooltip')}
+              rules={[
+                { pattern: /^[a-zA-Z][a-zA-Z0-9_.]*$/, message: t('menu.i18nKeyPattern') },
+              ]}
+            >
+              <Input placeholder={t('menu.i18nKeyPlaceholder')} />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
               name="type"
               label={t('menu.menuType')}
               rules={[{ required: true, message: t('menu.menuTypeRequired') }]}

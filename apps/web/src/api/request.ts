@@ -7,7 +7,7 @@ import i18n from '../i18n';
 const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // 创建axios实例
-const request: AxiosInstance = axios.create({
+const axiosInstance: AxiosInstance = axios.create({
   baseURL,
   timeout: 10000,
   headers: {
@@ -16,7 +16,7 @@ const request: AxiosInstance = axios.create({
 });
 
 // 请求拦截器
-request.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // 添加token到请求头
     const token = tokenUtils.getToken();
@@ -41,7 +41,7 @@ request.interceptors.request.use(
 );
 
 // 响应拦截器
-request.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
     const { data } = response;
 
@@ -100,30 +100,35 @@ request.interceptors.response.use(
   }
 );
 
+// orval mutator - 用于自动生成的 API 代码
+export const request = <T = any>(config: AxiosRequestConfig): Promise<T> => {
+  return axiosInstance.request(config);
+};
+
 // 导出请求方法
 export const get = <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-  return request.get(url, config);
+  return axiosInstance.get(url, config);
 };
 
 export const post = <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
-  return request.post(url, data, config);
+  return axiosInstance.post(url, data, config);
 };
 
 export const put = <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
-  return request.put(url, data, config);
+  return axiosInstance.put(url, data, config);
 };
 
 export const del = <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-  return request.delete(url, config);
+  return axiosInstance.delete(url, config);
 };
 
 export const patch = <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
-  return request.patch(url, data, config);
+  return axiosInstance.patch(url, data, config);
 };
 
 // 文件上传
 export const upload = <T = any>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<T> => {
-  return request.post(url, formData, {
+  return axiosInstance.post(url, formData, {
     ...config,
     headers: {
       'Content-Type': 'multipart/form-data',
@@ -134,7 +139,7 @@ export const upload = <T = any>(url: string, formData: FormData, config?: AxiosR
 
 // 文件下载
 export const download = (url: string, filename?: string, config?: AxiosRequestConfig): Promise<void> => {
-  return request.get(url, {
+  return axiosInstance.get(url, {
     ...config,
     responseType: 'blob',
   }).then((response: AxiosResponse) => {
@@ -150,4 +155,4 @@ export const download = (url: string, filename?: string, config?: AxiosRequestCo
   });
 };
 
-export default request;
+export default axiosInstance;

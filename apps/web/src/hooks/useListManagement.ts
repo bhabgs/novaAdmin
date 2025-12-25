@@ -7,7 +7,7 @@ import type { AppDispatch } from "../store";
 interface ListParams {
   page: number;
   pageSize: number;
-  search?: string;
+  keyword?: string;
   [key: string]: unknown;
 }
 
@@ -104,7 +104,7 @@ export function useListManagement<T extends { id: string }>(
       fetchAction({
         page: currentPage,
         pageSize,
-        search: searchText,
+        keyword: searchText,
       })
     );
   }, [dispatch, fetchAction, currentPage, pageSize, searchText]);

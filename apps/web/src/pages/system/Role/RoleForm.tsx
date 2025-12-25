@@ -49,15 +49,15 @@ const RoleForm: React.FC<RoleFormProps> = ({
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (role) {
-        await dispatch(updateRole({ id: role.id, ...values })).unwrap();
+        await dispatch(updateRole({ id: role.id, roleData: values })).unwrap();
         message.success(t('role.updateSuccess'));
       } else {
         await dispatch(createRole(values)).unwrap();
         message.success(t('role.createSuccess'));
       }
-      
+
       onSuccess();
     } catch (error) {
       message.error(t('message.error'));
@@ -137,14 +137,14 @@ const RoleForm: React.FC<RoleFormProps> = ({
           </Col>
           <Col span={12}>
             <Form.Item
-              name="sort"
+              name="sortOrder"
               label={t('role.sortOrder')}
               rules={[
                 { type: 'number', message: t('role.sortOrderNumber') },
               ]}
             >
-              <Input 
-                type="number" 
+              <Input
+                type="number"
                 placeholder={t('role.sortOrderPlaceholder')}
                 min={0}
                 max={999}

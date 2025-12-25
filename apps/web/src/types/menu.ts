@@ -26,6 +26,7 @@ export interface Menu {
 
 export interface MenuFormData {
   name: string;
+  i18nKey?: string; // 国际化键名
   type: 'directory' | 'page' | 'button' | 'iframe';
   parentId?: string;
   icon?: string;

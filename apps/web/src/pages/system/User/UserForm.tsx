@@ -46,7 +46,8 @@ const UserForm: React.FC<UserFormProps> = ({
       if (user) {
         form.setFieldsValue({
           ...user,
-          roles: user.roles || [],
+          // 将 roles 对象数组转换为 roleIds 字符串数组
+          roleIds: user.roles?.map((role) => role.id) || [],
         });
       } else {
         form.resetFields();
@@ -57,12 +58,14 @@ const UserForm: React.FC<UserFormProps> = ({
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      // 移除 confirmPassword 字段，后端不需要
+      const { confirmPassword, ...userData } = values;
 
       if (user) {
-        await dispatch(updateUser({ id: user.id, ...values })).unwrap();
+        await dispatch(updateUser({ id: user.id, userData })).unwrap();
         message.success(t("user.updateSuccess"));
       } else {
-        await dispatch(createUser(values)).unwrap();
+        await dispatch(createUser(userData)).unwrap();
         message.success(t("user.createSuccess"));
       }
 
@@ -235,7 +238,7 @@ const UserForm: React.FC<UserFormProps> = ({
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item
-              name="roles"
+              name="roleIds"
               label={t("user.roles")}
               rules={[{ required: true, message: t("user.rolesRequired") }]}
             >
@@ -245,7 +248,7 @@ const UserForm: React.FC<UserFormProps> = ({
                 allowClear
               >
                 {roles.map((role) => (
-                  <Option key={role.id} value={role.code}>
+                  <Option key={role.id} value={role.id}>
                     {role.name}
                   </Option>
                 ))}

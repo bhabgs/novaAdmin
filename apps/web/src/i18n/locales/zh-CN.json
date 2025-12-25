@@ -43,6 +43,7 @@
     "deleteConfirm": "确定要删除吗？"
   },
   "menu": {
+    "home": "首页",
     "dashboard": "仪表盘",
     "templateIntroduction": "模板介绍",
     "games": "小游戏",
@@ -81,6 +82,10 @@
     "createSuccess": "创建成功",
     "menuNameRequired": "请输入菜单名称",
     "menuNamePlaceholder": "请输入菜单名称",
+    "i18nKey": "国际化键名",
+    "i18nKeyPlaceholder": "如 menu.dashboard",
+    "i18nKeyTooltip": "用于菜单名称的国际化，留空则使用菜单名称",
+    "i18nKeyPattern": "键名必须以字母开头，只能包含字母、数字、下划线和点",
     "menuTypeRequired": "请选择菜单类型",
     "menuTypePlaceholder": "请选择菜单类型",
     "parentMenu": "父级菜单",

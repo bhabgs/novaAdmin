@@ -47,6 +47,7 @@ pnpm check            # TypeScript 类型检查
 
 - 开发模式：http://localhost:5173
 - API 文档：http://localhost:3000/api/docs（需启动后端）
+- 启动服务前先查看当前服务是否启动，如果启动了就不需要在启动了，避免启动多个重复服务。
 
 ### 技术栈
 
@@ -96,12 +97,12 @@ pnpm dev:server
 
 ### API 端点
 
-| 模块 | 前缀 | 说明 |
-|------|------|------|
-| 认证 | `/api/auth` | 登录、登出、Token 刷新 |
-| 用户 | `/api/users` | 用户 CRUD、角色分配 |
-| 角色 | `/api/roles` | 角色 CRUD、权限管理 |
-| 菜单 | `/api/menus` | 菜单 CRUD、树形结构 |
+| 模块 | 前缀         | 说明                   |
+| ---- | ------------ | ---------------------- |
+| 认证 | `/api/auth`  | 登录、登出、Token 刷新 |
+| 用户 | `/api/users` | 用户 CRUD、角色分配    |
+| 角色 | `/api/roles` | 角色 CRUD、权限管理    |
+| 菜单 | `/api/menus` | 菜单 CRUD、树形结构    |
 
 ### 后端目录结构
 
@@ -141,7 +142,7 @@ interface ApiResponse<T> {
 
 interface ListResponse<T> {
   list: T[];
-  pagination: { page: number; pageSize: number; total: number; };
+  pagination: { page: number; pageSize: number; total: number };
 }
 ```
 
@@ -152,7 +153,7 @@ interface ListResponse<T> {
 ```typescript
 // apps/web/src/api/request.ts
 const request = axios.create({
-  baseURL: 'http://localhost:3000/api',  // 改为后端地址
+  baseURL: "http://localhost:3000/api", // 改为后端地址
   timeout: 10000,
 });
 ```
@@ -163,6 +164,7 @@ const request = axios.create({
 
 1. 创建组件：`apps/web/src/pages/system/Example/index.tsx`
 2. 菜单管理中配置：
+
 ```typescript
 {
   name: "示例页面",
@@ -179,39 +181,39 @@ const request = axios.create({
 
 ```typescript
 const { t } = useTranslation();
-<h1>{t("example.title")}</h1>
+<h1>{t("example.title")}</h1>;
 ```
 
 翻译文件：`apps/web/src/i18n/locales/`
 
 ## 代码规范
 
-| 类型 | 规范 | 示例 |
-|------|------|------|
-| 组件文件 | PascalCase | `UserList.tsx` |
-| Hook/工具 | camelCase | `useTheme.ts` |
-| 常量 | UPPER_SNAKE | `API_BASE_URL` |
+| 类型      | 规范        | 示例           |
+| --------- | ----------- | -------------- |
+| 组件文件  | PascalCase  | `UserList.tsx` |
+| Hook/工具 | camelCase   | `useTheme.ts`  |
+| 常量      | UPPER_SNAKE | `API_BASE_URL` |
 
 ## 环境变量
 
 ### 前端 (apps/web/.env)
 
-| 变量 | 说明 | 默认值 |
-|------|------|--------|
-| VITE_APP_TITLE | 应用标题 | NovaAdmin |
+| 变量              | 说明     | 默认值                    |
+| ----------------- | -------- | ------------------------- |
+| VITE_APP_TITLE    | 应用标题 | NovaAdmin                 |
 | VITE_API_BASE_URL | API 地址 | http://localhost:3000/api |
 
 ### 后端 (apps/server/.env)
 
-| 变量 | 说明 | 默认值 |
-|------|------|--------|
-| DB_HOST | 数据库主机 | localhost |
-| DB_PORT | 数据库端口 | 3306 |
-| DB_USERNAME | 数据库用户 | root |
-| DB_PASSWORD | 数据库密码 | - |
-| DB_DATABASE | 数据库名 | nova_admin |
-| JWT_SECRET | JWT 密钥 | - |
-| PORT | 服务端口 | 3000 |
+| 变量        | 说明       | 默认值     |
+| ----------- | ---------- | ---------- |
+| DB_HOST     | 数据库主机 | localhost  |
+| DB_PORT     | 数据库端口 | 3306       |
+| DB_USERNAME | 数据库用户 | root       |
+| DB_PASSWORD | 数据库密码 | -          |
+| DB_DATABASE | 数据库名   | nova_admin |
+| JWT_SECRET  | JWT 密钥   | -          |
+| PORT        | 服务端口   | 3000       |
 
 ## 常见问题
 

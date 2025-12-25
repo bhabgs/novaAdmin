@@ -398,6 +398,8 @@ const MenuList: React.FC = () => {
             expandedRowKeys: expandedKeys,
             onExpandedRowsChange: handleExpandedRowsChange,
             defaultExpandAllRows: true,
+            rowExpandable: (record: Menu) =>
+              record.type === "directory" || record.type === "iframe",
           },
           size: "middle",
         }}

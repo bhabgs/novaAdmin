@@ -82,11 +82,16 @@ export const fetchOrderTrendData = createAsyncThunk(
 // 获取收入图表数据
 export const fetchRevenueChartData = createAsyncThunk(
   'dashboard/fetchRevenueChartData',
-  async (params: { period?: string } = {}, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await dashboardApi.getRevenueChartData(params);
+      const response = await dashboardApi.getRevenueChartData();
       if (response.success) {
-        return response.data;
+        // Map category to name for ChartData compatibility
+        return response.data.map((item) => ({
+          name: item.category,
+          value: item.value,
+          percentage: item.percentage,
+        }));
       } else {
         return rejectWithValue(response.message);
       }
@@ -101,7 +106,7 @@ export const fetchCategoryDistributionData = createAsyncThunk(
   'dashboard/fetchCategoryDistributionData',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await dashboardApi.getCategoryDistributionData();
+      const response = await dashboardApi.getCategoryDistribution();
       if (response.success) {
         return response.data;
       } else {
@@ -119,11 +124,11 @@ export const refreshDashboardData = createAsyncThunk(
   async (_, { dispatch }) => {
     try {
       await Promise.all([
-        dispatch(fetchDashboardStats(undefined)),
-        dispatch(fetchUserGrowthData({})),
-        dispatch(fetchOrderTrendData({})),
-        dispatch(fetchRevenueChartData({})),
-        dispatch(fetchCategoryDistributionData(undefined)),
+        dispatch(fetchDashboardStats()),
+        dispatch(fetchUserGrowthData()),
+        dispatch(fetchOrderTrendData()),
+        dispatch(fetchRevenueChartData()),
+        dispatch(fetchCategoryDistributionData()),
       ]);
       return new Date().toLocaleString();
     } catch (error: any) {

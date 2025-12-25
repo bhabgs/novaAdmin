@@ -134,7 +134,8 @@ const notificationSlice = createSlice({
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
         state.notifications = action.payload.list;
-        state.unreadCount = action.payload.unreadCount;
+        // Calculate unread count from the list
+        state.unreadCount = action.payload.list.filter((n) => n.status === 'unread').length;
         state.pagination = {
           page: action.payload.pagination.page,
           pageSize: action.payload.pagination.pageSize,

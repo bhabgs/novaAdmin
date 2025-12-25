@@ -31,8 +31,8 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     // 加载所有数据
     dispatch(fetchDashboardStats());
-    dispatch(fetchUserGrowthData({ period: '30d' }));
-    dispatch(fetchOrderTrendData({ period: '12m' }));
+    dispatch(fetchUserGrowthData());
+    dispatch(fetchOrderTrendData());
   }, [dispatch]);
 
   // 刷新所有数据

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import {
   Modal,
   Form,
@@ -22,6 +22,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { createMenu, updateMenu } from '@/store/slices/menuSlice';
+import { fetchI18nTranslations } from '@/store/slices/i18nSlice';
 import type { Menu, MenuFormData } from '@/types/menu';
 import { buildMenuTree } from '@/utils/menuUtils';
 import { MENU_ICONS } from '@/constants/icons';
@@ -46,8 +47,53 @@ const MenuForm: React.FC<MenuFormProps> = ({
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
   const { menus, loading } = useAppSelector((state) => state.menu);
+  const { translations } = useAppSelector((state) => state.i18n);
+  const [i18nKeysLoading, setI18nKeysLoading] = useState(false);
 
   const isEditing = !!menu;
+
+  // 加载 i18n 翻译列表
+  useEffect(() => {
+    if (visible) {
+      const loadI18nKeys = async () => {
+        setI18nKeysLoading(true);
+        try {
+          // 获取所有翻译数据（使用较大的 pageSize 获取所有数据）
+          await dispatch(
+            fetchI18nTranslations({
+              page: 1,
+              pageSize: 10000,
+            })
+          ).unwrap();
+        } catch (error) {
+          console.error('Failed to load i18n keys:', error);
+        } finally {
+          setI18nKeysLoading(false);
+        }
+      };
+      loadI18nKeys();
+    }
+  }, [visible, dispatch]);
+
+  // 生成 i18n 键名选项（label 显示中文翻译，value 为 module.key 格式）
+  const i18nKeyOptions = useMemo(() => {
+    const keyMap = new Map<string, string>(); // key -> zhCN 映射
+    
+    translations.forEach((translation) => {
+      const key = `${translation.module}.${translation.key}`;
+      // 如果还没有这个 key，或者当前翻译有中文内容，则更新
+      if (!keyMap.has(key) || translation.zhCN) {
+        keyMap.set(key, translation.zhCN || key);
+      }
+    });
+    
+    return Array.from(keyMap.entries())
+      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+      .map(([key, zhCN]) => ({
+        label: zhCN || key,
+        value: key,
+      }));
+  }, [translations]);
 
   useEffect(() => {
     if (visible) {
@@ -168,7 +214,17 @@ const MenuForm: React.FC<MenuFormProps> = ({
                 { pattern: /^[a-zA-Z][a-zA-Z0-9_.]*$/, message: t('menu.i18nKeyPattern') },
               ]}
             >
-              <Input placeholder={t('menu.i18nKeyPlaceholder')} />
+              <Select
+                placeholder={t('menu.i18nKeyPlaceholder')}
+                allowClear
+                showSearch
+                loading={i18nKeysLoading}
+                filterOption={(input, option) =>
+                  (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+                }
+                options={i18nKeyOptions}
+                notFoundContent={i18nKeysLoading ? t('common.loading') : t('common.noData')}
+              />
             </Form.Item>
           </Col>
         </Row>

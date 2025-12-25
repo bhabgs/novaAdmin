@@ -67,24 +67,24 @@ const MenuList: React.FC = () => {
   }, []);
 
   // 过滤菜单数据
-  const filterMenus = useCallback((menus: Menu[]): Menu[] => {
-    return menus.filter((menu) => {
-      const matchesSearch =
-        !searchText ||
-        menu.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        (menu.path &&
-          menu.path.toLowerCase().includes(searchText.toLowerCase()));
-      const matchesStatus = !statusFilter || menu.status === statusFilter;
-      const matchesType = !typeFilter || menu.type === typeFilter;
+  const filterMenus = useCallback(
+    (menus: Menu[]): Menu[] => {
+      return menus.filter((menu) => {
+        const matchesSearch =
+          !searchText ||
+          menu.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          (menu.path &&
+            menu.path.toLowerCase().includes(searchText.toLowerCase()));
+        const matchesStatus = !statusFilter || menu.status === statusFilter;
+        const matchesType = !typeFilter || menu.type === typeFilter;
 
-      return matchesSearch && matchesStatus && matchesType;
-    });
-  }, [searchText, statusFilter, typeFilter]);
-
-  const filteredMenus = useMemo(
-    () => filterMenus(menus),
-    [filterMenus, menus]
+        return matchesSearch && matchesStatus && matchesType;
+      });
+    },
+    [searchText, statusFilter, typeFilter]
   );
+
+  const filteredMenus = useMemo(() => filterMenus(menus), [filterMenus, menus]);
 
   const treeData = useMemo(
     () => buildMenuTree(filteredMenus),
@@ -204,7 +204,11 @@ const MenuList: React.FC = () => {
         button: { color: "orange", text: t("menu.button") },
       };
       const config = typeMap[type as keyof typeof typeMap];
-      return config ? <Tag color={config.color}>{config.text}</Tag> : <Tag>{type}</Tag>;
+      return config ? (
+        <Tag color={config.color}>{config.text}</Tag>
+      ) : (
+        <Tag>{type}</Tag>
+      );
     };
 
     return [

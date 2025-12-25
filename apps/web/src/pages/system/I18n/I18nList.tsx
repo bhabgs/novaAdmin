@@ -1,12 +1,31 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Button, Form, Input, Select, Space, message, Modal, Spin, Tooltip, Popconfirm } from 'antd';
-import { PlusOutlined, ReloadOutlined, ImportOutlined, ExportOutlined, CopyOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import type { ColumnsType } from 'antd/es/table';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { useListManagement } from '@/hooks/useListManagement';
-import CrudPage from '@/components/CrudPage';
-import { refreshTranslations } from '@/i18n';
+import React, { useEffect, useState, useRef } from "react";
+import {
+  Button,
+  Form,
+  Input,
+  Select,
+  Space,
+  message,
+  Modal,
+  Spin,
+  Tooltip,
+  Popconfirm,
+} from "antd";
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  ImportOutlined,
+  ExportOutlined,
+  CopyOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import type { ColumnsType } from "antd/es/table";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { useListManagement } from "@/hooks/useListManagement";
+import CrudPage from "@/components/CrudPage";
+import { refreshTranslations } from "@/i18n";
 import {
   fetchI18nTranslations,
   fetchI18nModules,
@@ -14,9 +33,9 @@ import {
   batchDeleteI18nTranslations,
   clearError,
   type I18nTranslation,
-} from '@/store/slices/i18nSlice';
-import I18nForm, { type I18nFormRef } from './I18nForm';
-import ImportExportModal from './ImportExportModal';
+} from "@/store/slices/i18nSlice";
+import I18nForm, { type I18nFormRef } from "./I18nForm";
+import ImportExportModal from "./ImportExportModal";
 
 const I18nList: React.FC = () => {
   const { t } = useTranslation();
@@ -24,7 +43,7 @@ const I18nList: React.FC = () => {
   const formRef = useRef<I18nFormRef>(null);
 
   const { translations, modules, pagination, loading, error } = useAppSelector(
-    state => state.i18n,
+    (state) => state.i18n
   );
 
   const [module, setModule] = useState<string | undefined>();
@@ -70,7 +89,7 @@ const I18nList: React.FC = () => {
         pageSize,
         module,
         keyword: searchText,
-      }),
+      })
     );
   }, [currentPage, pageSize, module, searchText, dispatch]);
 
@@ -90,28 +109,28 @@ const I18nList: React.FC = () => {
   // Handle batch delete with confirmation
   const handleConfirmBatchDelete = () => {
     if (selectedRowKeys.length === 0) {
-      message.warning(t('message.selectWarning'));
+      message.warning(t("message.selectWarning"));
       return;
     }
 
     Modal.confirm({
-      title: t('message.batchDeleteConfirm'),
-      content: t('message.deleteContent', { count: selectedRowKeys.length }),
-      okText: t('common.confirm'),
-      cancelText: t('common.cancel'),
+      title: t("message.batchDeleteConfirm"),
+      content: t("message.deleteContent", { count: selectedRowKeys.length }),
+      okText: t("common.confirm"),
+      cancelText: t("common.cancel"),
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
           await dispatch(
             batchDeleteI18nTranslations({
-              ids: selectedRowKeys.map(key => String(key)),
-            }),
+              ids: selectedRowKeys.map((key) => String(key)),
+            })
           ).unwrap();
-          message.success(t('message.deleteSuccess'));
+          message.success(t("message.deleteSuccess"));
           setSelectedRowKeys([]);
           handleRefresh();
         } catch (err) {
-          message.error(t('message.deleteError'));
+          message.error(t("message.deleteError"));
         }
       },
     });
@@ -122,9 +141,11 @@ const I18nList: React.FC = () => {
     setRefreshingCache(true);
     try {
       await refreshTranslations();
-      message.success(t('i18n.refreshCacheSuccess') || 'Cache refreshed successfully');
+      message.success(
+        t("i18n.refreshCacheSuccess") || "Cache refreshed successfully"
+      );
     } catch (err) {
-      message.error(t('i18n.refreshCacheError') || 'Failed to refresh cache');
+      message.error(t("i18n.refreshCacheError") || "Failed to refresh cache");
     } finally {
       setRefreshingCache(false);
     }
@@ -134,20 +155,20 @@ const I18nList: React.FC = () => {
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      message.success(t('common.copySuccess') || '复制成功');
+      message.success(t("common.copySuccess") || "复制成功");
     } catch (err) {
       // Fallback for older browsers
-      const textArea = document.createElement('textarea');
+      const textArea = document.createElement("textarea");
       textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.opacity = '0';
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
       document.body.appendChild(textArea);
       textArea.select();
       try {
-        document.execCommand('copy');
-        message.success(t('common.copySuccess') || '复制成功');
+        document.execCommand("copy");
+        message.success(t("common.copySuccess") || "复制成功");
       } catch (fallbackErr) {
-        message.error(t('common.copyError') || '复制失败');
+        message.error(t("common.copyError") || "复制失败");
       }
       document.body.removeChild(textArea);
     }
@@ -172,106 +193,102 @@ const I18nList: React.FC = () => {
               setIsModalVisible(true);
             }}
           >
-            {t('common.edit')}
+            {t("common.edit")}
           </Button>
           <Popconfirm
-            title={t('common.deleteConfirm') || '确定要删除吗？'}
+            title={t("common.deleteConfirm") || "确定要删除吗？"}
             onConfirm={() => handleDelete(record.id)}
-            okText={t('common.confirm')}
-            cancelText={t('common.cancel')}
+            okText={t("common.confirm")}
+            cancelText={t("common.cancel")}
           >
-            <Button
-              type="link"
-              danger
-              icon={<DeleteOutlined />}
-            >
-              {t('common.delete')}
+            <Button type="link" danger icon={<DeleteOutlined />}>
+              {t("common.delete")}
             </Button>
           </Popconfirm>
-          <Tooltip title={`${t('common.copy') || '复制'}: ${copyText}`}>
+          <Tooltip title={`${t("common.copy") || "复制"}: ${copyText}`}>
             <Button
               type="link"
               icon={<CopyOutlined />}
               onClick={() => handleCopy(copyText)}
             >
-              {t('common.copy') || '复制'}
+              {t("common.copy") || "复制"}
             </Button>
           </Tooltip>
         </Space>
       );
     },
-    [t, handleCopy, handleDelete]
+    [t, handleCopy, handleDelete, setEditingItem, setIsModalVisible]
   );
 
   // Table columns definition
   const columns: ColumnsType<I18nTranslation> = [
     {
-      title: t('i18n.module'),
-      dataIndex: 'module',
-      key: 'module',
+      title: t("i18n.module"),
+      dataIndex: "module",
+      key: "module",
       width: 120,
-      render: text => <span className="tag-blue">{text}</span>,
+      render: (text) => <span className="tag-blue">{text}</span>,
     },
     {
-      title: t('i18n.key'),
-      dataIndex: 'key',
-      key: 'key',
+      title: t("i18n.key"),
+      dataIndex: "key",
+      key: "key",
       width: 200,
       ellipsis: true,
       render: (text: string) => <code>{text}</code>,
     },
     {
-      title: '中文',
-      dataIndex: 'zhCN',
-      key: 'zhCN',
+      title: "中文",
+      dataIndex: "zhCN",
+      key: "zhCN",
       width: 200,
       ellipsis: true,
       render: (text: string) => (
-        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>{text}</div>
+        <div style={{ maxWidth: 200, wordBreak: "break-word" }}>{text}</div>
       ),
     },
     {
-      title: 'English',
-      dataIndex: 'enUS',
-      key: 'enUS',
+      title: "English",
+      dataIndex: "enUS",
+      key: "enUS",
       width: 200,
       ellipsis: true,
       render: (text: string) => (
-        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>{text}</div>
+        <div style={{ maxWidth: 200, wordBreak: "break-word" }}>{text}</div>
       ),
     },
     {
-      title: 'العربية',
-      dataIndex: 'arSA',
-      key: 'arSA',
+      title: "العربية",
+      dataIndex: "arSA",
+      key: "arSA",
       width: 200,
       ellipsis: true,
       render: (text: string) => (
-        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>{text}</div>
+        <div style={{ maxWidth: 200, wordBreak: "break-word" }}>{text}</div>
       ),
     },
     {
-      title: t('common.remark'),
-      dataIndex: 'remark',
-      key: 'remark',
+      title: t("common.remark"),
+      dataIndex: "remark",
+      key: "remark",
       width: 150,
       ellipsis: true,
-      render: text => text || '-',
+      render: (text) => text || "-",
     },
   ];
 
   // Filter components
   const filters = [
     {
-      key: 'module',
+      key: "module",
       span: 6,
       component: (
         <Select
-          placeholder={t('i18n.selectModule')}
+          placeholder={t("i18n.selectModule")}
           allowClear
           value={module}
           onChange={setModule}
-          options={(modules || []).map(m => ({ label: m, value: m }))}
+          options={(modules || []).map((m) => ({ label: m, value: m }))}
         />
       ),
     },
@@ -280,18 +297,18 @@ const I18nList: React.FC = () => {
   // Toolbar buttons
   const toolbarButtons = [
     {
-      key: 'refresh-cache',
-      label: t('i18n.refreshCache') || 'Refresh Cache',
+      key: "refresh-cache",
+      label: t("i18n.refreshCache") || "Refresh Cache",
       icon: <ReloadOutlined />,
-      type: 'default' as const,
+      type: "default" as const,
       onClick: handleRefreshCache,
       disabled: refreshingCache,
     },
     {
-      key: 'import-export',
-      label: t('i18n.importExport') || 'Import/Export',
+      key: "import-export",
+      label: t("i18n.importExport") || "Import/Export",
       icon: <ImportOutlined />,
-      type: 'default' as const,
+      type: "default" as const,
       onClick: () => setShowImportExport(true),
     },
   ];
@@ -299,24 +316,26 @@ const I18nList: React.FC = () => {
   return (
     <>
       <CrudPage<I18nTranslation>
-        title={t('i18n.title') || 'i18n Management'}
+        title={t("i18n.title") || "i18n Management"}
         dataSource={translations}
         loading={loading || refreshingCache}
         columns={columns}
         pagination={paginationConfig}
         rowSelection={rowSelection}
         selectedRowKeys={selectedRowKeys}
-        searchPlaceholder={t('i18n.searchPlaceholder') || 'Search by key or value...'}
+        searchPlaceholder={
+          t("i18n.searchPlaceholder") || "Search by key or value..."
+        }
         onSearch={handleSearch}
         filters={filters}
         toolbarButtons={toolbarButtons}
         showAddButton={true}
         showBatchDeleteButton={true}
         showRefreshButton={true}
-        addButtonText={t('common.add')}
-        batchDeleteButtonText={t('common.batchDelete')}
+        addButtonText={t("common.add")}
+        batchDeleteButtonText={t("common.batchDelete")}
         onAdd={handleAdd}
-        onEdit={record => {
+        onEdit={(record) => {
           setEditingItem(record);
           setIsModalVisible(true);
         }}
@@ -324,8 +343,12 @@ const I18nList: React.FC = () => {
         onBatchDelete={handleConfirmBatchDelete}
         onRefresh={handleRefresh}
         operationColumnRender={operationColumnRender}
+        operationColumnWidth={200}
+        tableProps={{
+          scroll: { x: "max-content" },
+        }}
         modalVisible={isModalVisible}
-        modalTitle={editingItem ? t('common.edit') : t('common.add')}
+        modalTitle={editingItem ? t("common.edit") : t("common.add")}
         modalWidth={600}
         editingRecord={editingItem}
         onModalCancel={() => {
@@ -353,7 +376,7 @@ const I18nList: React.FC = () => {
         visible={showImportExport}
         onClose={() => setShowImportExport(false)}
         onImportSuccess={() => {
-          message.success(t('i18n.importSuccess') || 'Import successful');
+          message.success(t("i18n.importSuccess") || "Import successful");
           handleRefresh();
         }}
       />

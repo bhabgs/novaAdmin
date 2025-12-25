@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { DashboardStats, ChartData } from '../../types';
-import { dashboardApi } from '../../api/dashboard';
+import {
+  generateStatistics,
+  generateUserGrowthData,
+  generateOrderTrendData,
+  generateRevenueChartData,
+  generateCategoryDistribution,
+} from '../../data/dashboard';
 
 interface DashboardState {
   stats: DashboardStats | null;
@@ -28,93 +34,54 @@ const initialState: DashboardState = {
   refreshTime: null,
 };
 
-// 获取统计数据
+// 获取统计数据（使用本地模拟数据）
 export const fetchDashboardStats = createAsyncThunk(
   'dashboard/fetchStats',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await dashboardApi.getStatistics();
-      if (response.success) {
-        return response.data;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取统计数据失败');
-    }
+  async () => {
+    // 模拟异步操作
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return generateStatistics();
   }
 );
 
 // 获取用户增长数据
 export const fetchUserGrowthData = createAsyncThunk(
   'dashboard/fetchUserGrowthData',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await dashboardApi.getUserGrowthData();
-      if (response.success) {
-        return response.data;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取用户增长数据失败');
-    }
+  async () => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return generateUserGrowthData();
   }
 );
 
 // 获取订单趋势数据
 export const fetchOrderTrendData = createAsyncThunk(
   'dashboard/fetchOrderTrendData',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await dashboardApi.getOrderTrendData();
-      if (response.success) {
-        return response.data;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取订单趋势数据失败');
-    }
+  async () => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return generateOrderTrendData();
   }
 );
 
 // 获取收入图表数据
 export const fetchRevenueChartData = createAsyncThunk(
   'dashboard/fetchRevenueChartData',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await dashboardApi.getRevenueChartData();
-      if (response.success) {
-        // Map category to name for ChartData compatibility
-        return response.data.map((item) => ({
-          name: item.category,
-          value: item.value,
-          percentage: item.percentage,
-        }));
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取收入图表数据失败');
-    }
+  async () => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    const data = generateRevenueChartData();
+    return data.map((item) => ({
+      name: item.category,
+      value: item.value,
+      percentage: item.percentage,
+    }));
   }
 );
 
 // 获取分类分布数据
 export const fetchCategoryDistributionData = createAsyncThunk(
   'dashboard/fetchCategoryDistributionData',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await dashboardApi.getCategoryDistribution();
-      if (response.success) {
-        return response.data;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取分类分布数据失败');
-    }
+  async () => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return generateCategoryDistribution();
   }
 );
 
@@ -122,18 +89,14 @@ export const fetchCategoryDistributionData = createAsyncThunk(
 export const refreshDashboardData = createAsyncThunk(
   'dashboard/refreshAll',
   async (_, { dispatch }) => {
-    try {
-      await Promise.all([
-        dispatch(fetchDashboardStats()),
-        dispatch(fetchUserGrowthData()),
-        dispatch(fetchOrderTrendData()),
-        dispatch(fetchRevenueChartData()),
-        dispatch(fetchCategoryDistributionData()),
-      ]);
-      return new Date().toLocaleString();
-    } catch (error: any) {
-      throw error;
-    }
+    await Promise.all([
+      dispatch(fetchDashboardStats()),
+      dispatch(fetchUserGrowthData()),
+      dispatch(fetchOrderTrendData()),
+      dispatch(fetchRevenueChartData()),
+      dispatch(fetchCategoryDistributionData()),
+    ]);
+    return new Date().toLocaleString();
   }
 );
 
@@ -168,7 +131,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchDashboardStats.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || '获取统计数据失败';
       });
 
     // 获取用户增长数据
@@ -183,7 +146,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchUserGrowthData.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || '获取用户增长数据失败';
       });
 
     // 获取订单趋势数据
@@ -198,7 +161,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchOrderTrendData.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || '获取订单趋势数据失败';
       });
 
     // 获取收入图表数据
@@ -213,7 +176,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchRevenueChartData.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || '获取收入图表数据失败';
       });
 
     // 获取分类分布数据
@@ -228,7 +191,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(fetchCategoryDistributionData.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || '获取分类分布数据失败';
       });
 
     // 刷新所有数据
@@ -243,7 +206,7 @@ const dashboardSlice = createSlice({
       })
       .addCase(refreshDashboardData.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || '刷新数据失败';
       });
   },
 });

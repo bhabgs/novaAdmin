@@ -1,6 +1,18 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { Menu } from "../../types/menu";
-import { menuApi } from "../../api/menu";
+import { ApiResponse } from "../../types";
+import {
+  menusControllerFindAll,
+  menusControllerFindTree,
+  menusControllerFindOne,
+  menusControllerCreate,
+  menusControllerUpdate,
+  menusControllerDelete,
+  menusControllerBatchDelete,
+  menusControllerUpdateSort,
+  type CreateMenuDto,
+  type UpdateMenuDto,
+} from "../../api";
 
 interface MenuState {
   menus: Menu[];
@@ -27,31 +39,33 @@ export const fetchMenus = createAsyncThunk(
   "menu/fetchMenus",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await menuApi.getMenus();
+      const response = await menusControllerFindAll() as unknown as ApiResponse<Menu[]>;
       if (response.success) {
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || "获取菜单列表失败");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "获取菜单列表失败";
+      return rejectWithValue(errorMessage);
     }
   }
 );
 
-// 获取用户菜单（导航用）
+// 获取用户菜单（导航用）- 使用菜单树接口
 export const fetchUserMenus = createAsyncThunk(
   "menu/fetchUserMenus",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await menuApi.getUserMenus();
+      const response = await menusControllerFindTree() as unknown as ApiResponse<Menu[]>;
       if (response.success) {
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || "获取用户菜单失败");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "获取用户菜单失败";
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -61,14 +75,15 @@ export const fetchMenuById = createAsyncThunk(
   "menu/fetchMenuById",
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await menuApi.getMenuById(id);
+      const response = await menusControllerFindOne({ path: { id } }) as unknown as ApiResponse<Menu>;
       if (response.success) {
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || "获取菜单详情失败");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "获取菜单详情失败";
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -78,17 +93,17 @@ export const createMenu = createAsyncThunk(
   "menu/createMenu",
   async (menuData: Partial<Menu>, { rejectWithValue, dispatch }) => {
     try {
-      const response = await menuApi.createMenu(menuData);
+      const response = await menusControllerCreate({ body: menuData as CreateMenuDto }) as unknown as ApiResponse<Menu>;
       if (response.success) {
-        // 创建成功后刷新列表和用户菜单（用于路由更新）
         dispatch(fetchMenus());
         dispatch(fetchUserMenus());
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || "创建菜单失败");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "创建菜单失败";
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -101,17 +116,20 @@ export const updateMenu = createAsyncThunk(
     { rejectWithValue, dispatch }
   ) => {
     try {
-      const response = await menuApi.updateMenu(id, menuData);
+      const response = await menusControllerUpdate({
+        path: { id },
+        body: menuData as UpdateMenuDto
+      }) as unknown as ApiResponse<Menu>;
       if (response.success) {
-        // 更新成功后刷新列表和用户菜单（用于路由更新）
         dispatch(fetchMenus());
         dispatch(fetchUserMenus());
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || "更新菜单失败");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "更新菜单失败";
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -121,17 +139,17 @@ export const deleteMenu = createAsyncThunk(
   "menu/deleteMenu",
   async (id: string, { rejectWithValue, dispatch }) => {
     try {
-      const response = await menuApi.deleteMenu(id);
+      const response = await menusControllerDelete({ path: { id } }) as unknown as ApiResponse<null>;
       if (response.success) {
-        // 删除成功后刷新列表和用户菜单（用于路由更新）
         dispatch(fetchMenus());
         dispatch(fetchUserMenus());
         return id;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || "删除菜单失败");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "删除菜单失败";
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -141,17 +159,17 @@ export const batchDeleteMenus = createAsyncThunk(
   "menu/batchDeleteMenus",
   async (ids: string[], { rejectWithValue, dispatch }) => {
     try {
-      const response = await menuApi.batchDeleteMenus(ids);
+      const response = await menusControllerBatchDelete({ body: { ids } }) as unknown as ApiResponse<null>;
       if (response.success) {
-        // 删除成功后刷新列表和用户菜单（用于路由更新）
         dispatch(fetchMenus());
         dispatch(fetchUserMenus());
         return ids;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || "批量删除菜单失败");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "批量删除菜单失败";
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -161,16 +179,18 @@ export const updateMenuSort = createAsyncThunk(
   "menu/updateMenuSort",
   async (menuList: Menu[], { rejectWithValue, dispatch }) => {
     try {
-      const response = await menuApi.updateMenuSort(menuList);
+      const response = await menusControllerUpdateSort({
+        body: { menus: menuList.map(m => m.id) }
+      }) as unknown as ApiResponse<null>;
       if (response.success) {
-        // 更新成功后刷新列表
         dispatch(fetchMenus());
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || "更新菜单排序失败");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "更新菜单排序失败";
+      return rejectWithValue(errorMessage);
     }
   }
 );

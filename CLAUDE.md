@@ -57,7 +57,7 @@ React 18.3 | TypeScript 5.8 | Vite 6.3 | Ant Design 5.22 | React Router 7.3 | Re
 
 ```
 apps/web/src/
-├── api/              # API 请求
+├── api/              # API 请求 受保护文件夹，由openapi 生成管理
 ├── components/       # 通用组件 (CrudPage, PageContainer, CommonTable)
 ├── pages/            # 业务页面
 │   ├── base/         # Dashboard, Home, Login, Profile
@@ -146,17 +146,9 @@ interface ListResponse<T> {
 }
 ```
 
-## 切换到后端 API
+## 链接后端 API
 
-前端默认使用本地假数据。要连接后端 API：
-
-```typescript
-// apps/web/src/api/request.ts
-const request = axios.create({
-  baseURL: "http://localhost:3000/api", // 改为后端地址
-  timeout: 10000,
-});
-```
+- 禁止更改 src/api 目录下的内容，改目录由 openapi 统一生成管理
 
 ## 动态路由
 

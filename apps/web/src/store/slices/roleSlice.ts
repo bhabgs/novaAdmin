@@ -1,6 +1,16 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Role, Permission, ListResponse, PaginationParams } from '../../types';
-import { roleApi } from '../../api/role';
+import { Role, Permission, ListResponse, PaginationParams, ApiResponse } from '../../types';
+import {
+  rolesControllerFindAll,
+  rolesControllerFindOne,
+  rolesControllerCreate,
+  rolesControllerUpdate,
+  rolesControllerDelete,
+  rolesControllerGetPermissions,
+  rolesControllerAssignPermissions,
+  type CreateRoleDto,
+  type UpdateRoleDto,
+} from '../../api';
 
 interface RoleState {
   roles: Role[];
@@ -35,14 +45,15 @@ export const fetchRoles = createAsyncThunk(
     keyword?: string;
   } = {}, { rejectWithValue }) => {
     try {
-      const response = await roleApi.getRoles(params);
+      const response = await rolesControllerFindAll({ query: params }) as unknown as ApiResponse<ListResponse<Role>>;
       if (response.success) {
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取角色列表失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '获取角色列表失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -52,14 +63,15 @@ export const fetchPermissions = createAsyncThunk(
   'role/fetchPermissions',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await roleApi.getPermissions();
+      const response = await rolesControllerGetPermissions() as unknown as ApiResponse<Permission[]>;
       if (response.success) {
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取权限列表失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '获取权限列表失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -69,14 +81,15 @@ export const fetchRoleById = createAsyncThunk(
   'role/fetchRoleById',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await roleApi.getRoleById(id);
+      const response = await rolesControllerFindOne({ path: { id } }) as unknown as ApiResponse<Role>;
       if (response.success) {
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取角色详情失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '获取角色详情失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -86,16 +99,16 @@ export const createRole = createAsyncThunk(
   'role/createRole',
   async (roleData: Partial<Role>, { rejectWithValue, dispatch }) => {
     try {
-      const response = await roleApi.createRole(roleData);
+      const response = await rolesControllerCreate({ body: roleData as CreateRoleDto }) as unknown as ApiResponse<Role>;
       if (response.success) {
-        // 创建成功后刷新列表
         dispatch(fetchRoles({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '创建角色失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '创建角色失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -105,16 +118,16 @@ export const updateRole = createAsyncThunk(
   'role/updateRole',
   async ({ id, roleData }: { id: string; roleData: Partial<Role> }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await roleApi.updateRole(id, roleData);
+      const response = await rolesControllerUpdate({ path: { id }, body: roleData as UpdateRoleDto }) as unknown as ApiResponse<Role>;
       if (response.success) {
-        // 更新成功后刷新列表
         dispatch(fetchRoles({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '更新角色失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '更新角色失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -124,16 +137,16 @@ export const deleteRole = createAsyncThunk(
   'role/deleteRole',
   async (id: string, { rejectWithValue, dispatch }) => {
     try {
-      const response = await roleApi.deleteRole(id);
+      const response = await rolesControllerDelete({ path: { id } }) as unknown as ApiResponse<null>;
       if (response.success) {
-        // 删除成功后刷新列表
         dispatch(fetchRoles({}));
         return id;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '删除角色失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '删除角色失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -143,16 +156,19 @@ export const assignPermissions = createAsyncThunk(
   'role/assignPermissions',
   async ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await roleApi.assignPermissions(roleId, permissionIds);
+      const response = await rolesControllerAssignPermissions({
+        path: { id: roleId },
+        body: { permissionIds }
+      }) as unknown as ApiResponse<null>;
       if (response.success) {
-        // 分配成功后刷新角色详情
         dispatch(fetchRoleById(roleId));
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '分配权限失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '分配权限失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );

@@ -9,7 +9,7 @@ import { tokenUtils } from "../utils/auth";
 import i18n from "../i18n";
 
 // API 前缀配置（开发环境使用 Vite 代理）
-const baseURL = import.meta.env.VITE_API_BASE_URL || "/api";
+const baseURL = "";
 
 // 创建axios实例
 const axiosInstance: AxiosInstance = axios.create({
@@ -190,13 +190,17 @@ export const download = (
     });
 };
 
-export const createClientConfig = () => {
-  return {
+// @hey-api/openapi-ts 客户端配置
+export const createClientConfig = <T = unknown>(config?: T): T => {
+  const baseConfig = {
     baseURL,
     timeout: 10000,
     headers: {
       "Content-Type": "application/json",
     },
+    // 添加拦截器配置
+    axios: axiosInstance,
   };
+  return { ...baseConfig, ...(config || {}) } as T;
 };
 export default axiosInstance;

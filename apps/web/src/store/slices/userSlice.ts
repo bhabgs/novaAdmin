@@ -1,6 +1,16 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { User, ListResponse, PaginationParams } from '../../types';
-import { userApi } from '../../api/user';
+import { User, ListResponse, PaginationParams, ApiResponse } from '../../types';
+import {
+  usersControllerFindAll,
+  usersControllerFindOne,
+  usersControllerCreate,
+  usersControllerUpdate,
+  usersControllerDelete,
+  usersControllerBatchDelete,
+  usersControllerResetPassword,
+  type CreateUserDto,
+  type UpdateUserDto,
+} from '../../api';
 
 interface UserState {
   users: User[];
@@ -39,14 +49,15 @@ export const fetchUsers = createAsyncThunk(
     filters?: any;
   } = {}, { rejectWithValue }) => {
     try {
-      const response = await userApi.getUsers(params);
+      const response = await usersControllerFindAll({ query: params }) as unknown as ApiResponse<ListResponse<User>>;
       if (response.success) {
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取用户列表失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '获取用户列表失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -56,14 +67,15 @@ export const fetchUserById = createAsyncThunk(
   'user/fetchUserById',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await userApi.getUserById(id);
+      const response = await usersControllerFindOne({ path: { id } }) as unknown as ApiResponse<User>;
       if (response.success) {
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取用户详情失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '获取用户详情失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -73,16 +85,16 @@ export const createUser = createAsyncThunk(
   'user/createUser',
   async (userData: Partial<User>, { rejectWithValue, dispatch }) => {
     try {
-      const response = await userApi.createUser(userData);
+      const response = await usersControllerCreate({ body: userData as CreateUserDto }) as unknown as ApiResponse<User>;
       if (response.success) {
-        // 创建成功后刷新列表
         dispatch(fetchUsers({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '创建用户失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '创建用户失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -92,16 +104,16 @@ export const updateUser = createAsyncThunk(
   'user/updateUser',
   async ({ id, userData }: { id: string; userData: Partial<User> }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await userApi.updateUser(id, userData);
+      const response = await usersControllerUpdate({ path: { id }, body: userData as UpdateUserDto }) as unknown as ApiResponse<User>;
       if (response.success) {
-        // 更新成功后刷新列表
         dispatch(fetchUsers({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '更新用户失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '更新用户失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -111,16 +123,16 @@ export const deleteUser = createAsyncThunk(
   'user/deleteUser',
   async (id: string, { rejectWithValue, dispatch }) => {
     try {
-      const response = await userApi.deleteUser(id);
+      const response = await usersControllerDelete({ path: { id } }) as unknown as ApiResponse<null>;
       if (response.success) {
-        // 删除成功后刷新列表
         dispatch(fetchUsers({}));
         return id;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '删除用户失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '删除用户失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -130,16 +142,16 @@ export const batchDeleteUsers = createAsyncThunk(
   'user/batchDeleteUsers',
   async (ids: string[], { rejectWithValue, dispatch }) => {
     try {
-      const response = await userApi.batchDeleteUsers(ids);
+      const response = await usersControllerBatchDelete({ body: { ids } }) as unknown as ApiResponse<null>;
       if (response.success) {
-        // 删除成功后刷新列表
         dispatch(fetchUsers({}));
         return ids;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '批量删除用户失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '批量删除用户失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -149,14 +161,15 @@ export const resetUserPassword = createAsyncThunk(
   'user/resetUserPassword',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await userApi.resetPassword(id);
+      const response = await usersControllerResetPassword({ path: { id } }) as unknown as ApiResponse<{ password: string }>;
       if (response.success) {
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '重置密码失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '重置密码失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -169,16 +182,16 @@ export const updateUserStatus = createAsyncThunk(
     { rejectWithValue, dispatch },
   ) => {
     try {
-      const response = await userApi.updateUser(id, { status });
+      const response = await usersControllerUpdate({ path: { id }, body: { status } as UpdateUserDto }) as unknown as ApiResponse<User>;
       if (response.success) {
-        // 更新成功后刷新列表
         dispatch(fetchUsers({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '更新用户状态失败');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : '更新用户状态失败';
+      return rejectWithValue(errorMessage);
     }
   }
 );

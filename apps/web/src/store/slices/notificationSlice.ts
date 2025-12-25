@@ -1,6 +1,9 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { notificationApi } from '../../api/notification';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { NotificationState, Notification } from '../../types/notification';
+import { mockNotifications, getUnreadCount } from '../../data/notification';
+
+// 本地数据存储（模拟后端状态）
+let localNotifications = [...mockNotifications];
 
 const initialState: NotificationState = {
   notifications: [],
@@ -14,105 +17,88 @@ const initialState: NotificationState = {
   },
 };
 
-// 获取通知列表
+// 获取通知列表（使用本地模拟数据）
 export const fetchNotifications = createAsyncThunk(
   'notification/fetchNotifications',
-  async (params: { page?: number; pageSize?: number; type?: string; status?: string } = {}, { rejectWithValue }) => {
-    try {
-      const response = await notificationApi.getNotifications(params);
-      if (response.success) {
-        return response.data;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取通知列表失败');
+  async (params: { page?: number; pageSize?: number; type?: string; status?: string } = {}) => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const { page = 1, pageSize = 10, type, status } = params;
+
+    let filtered = [...localNotifications];
+    if (type) {
+      filtered = filtered.filter(n => n.type === type);
     }
+    if (status) {
+      filtered = filtered.filter(n => n.status === status);
+    }
+
+    const total = filtered.length;
+    const start = (page - 1) * pageSize;
+    const list = filtered.slice(start, start + pageSize);
+
+    return {
+      list,
+      pagination: { page, pageSize, total },
+    };
   }
 );
 
 // 获取未读数量
 export const fetchUnreadCount = createAsyncThunk(
   'notification/fetchUnreadCount',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await notificationApi.getUnreadCount();
-      if (response.success) {
-        return response.data.count;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '获取未读数量失败');
-    }
+  async () => {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return localNotifications.filter(n => n.status === 'unread').length;
   }
 );
 
 // 标记为已读
 export const markNotificationAsRead = createAsyncThunk(
   'notification/markAsRead',
-  async (id: string, { rejectWithValue }) => {
-    try {
-      const response = await notificationApi.markAsRead(id);
-      if (response.success) {
-        return id;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '标记失败');
+  async (id: string) => {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const notification = localNotifications.find(n => n.id === id);
+    if (notification) {
+      notification.status = 'read';
+      notification.readTime = new Date().toISOString();
     }
+    return id;
   }
 );
 
 // 全部标记为已读
 export const markAllAsRead = createAsyncThunk(
   'notification/markAllAsRead',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await notificationApi.markAllAsRead();
-      if (response.success) {
-        return true;
-      } else {
-        return rejectWithValue(response.message);
+  async () => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    localNotifications.forEach(n => {
+      if (n.status === 'unread') {
+        n.status = 'read';
+        n.readTime = new Date().toISOString();
       }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '标记失败');
-    }
+    });
+    return true;
   }
 );
 
 // 删除通知
 export const deleteNotification = createAsyncThunk(
   'notification/deleteNotification',
-  async (id: string, { rejectWithValue }) => {
-    try {
-      const response = await notificationApi.deleteNotification(id);
-      if (response.success) {
-        return id;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '删除失败');
-    }
+  async (id: string) => {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    localNotifications = localNotifications.filter(n => n.id !== id);
+    return id;
   }
 );
 
 // 批量删除通知
 export const batchDeleteNotifications = createAsyncThunk(
   'notification/batchDelete',
-  async (ids: string[], { rejectWithValue }) => {
-    try {
-      const response = await notificationApi.batchDeleteNotifications(ids);
-      if (response.success) {
-        return ids;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: any) {
-      return rejectWithValue(error.message || '批量删除失败');
-    }
+  async (ids: string[]) => {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    localNotifications = localNotifications.filter(n => !ids.includes(n.id));
+    return ids;
   }
 );
 
@@ -134,7 +120,6 @@ const notificationSlice = createSlice({
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
         state.notifications = action.payload.list;
-        // Calculate unread count from the list
         state.unreadCount = action.payload.list.filter((n) => n.status === 'unread').length;
         state.pagination = {
           page: action.payload.pagination.page,
@@ -144,7 +129,7 @@ const notificationSlice = createSlice({
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.error.message || '获取通知列表失败';
       });
 
     // 获取未读数量
@@ -204,4 +189,3 @@ const notificationSlice = createSlice({
 
 export const { clearError } = notificationSlice.actions;
 export default notificationSlice.reducer;
-

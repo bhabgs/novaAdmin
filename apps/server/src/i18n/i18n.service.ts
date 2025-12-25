@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, Like } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { I18nTranslation, Language } from './entities/i18n-translation.entity';
 import {
   CreateI18nTranslationDto,
@@ -8,7 +8,6 @@ import {
   QueryI18nTranslationDto,
   BatchImportDto,
 } from './dto';
-import { JsonParser } from './utils/json-parser.util';
 
 export interface PaginationResult<T> {
   list: T[];
@@ -32,14 +31,10 @@ export class I18nService {
   async findAll(
     query: QueryI18nTranslationDto,
   ): Promise<PaginationResult<I18nTranslation>> {
-    const { page = 1, pageSize = 50, language, module, keyword } = query;
+    const { page = 1, pageSize = 50, module, keyword } = query;
     const skip = (page - 1) * pageSize;
 
     const queryBuilder = this.translationRepository.createQueryBuilder('t');
-
-    if (language) {
-      queryBuilder.andWhere('t.language = :language', { language });
-    }
 
     if (module) {
       queryBuilder.andWhere('t.module = :module', { module });
@@ -47,7 +42,7 @@ export class I18nService {
 
     if (keyword) {
       queryBuilder.andWhere(
-        '(t.key LIKE :keyword OR t.value LIKE :keyword)',
+        '(t.key LIKE :keyword OR t.zhCN LIKE :keyword OR t.enUS LIKE :keyword OR t.arSA LIKE :keyword)',
         { keyword: `%${keyword}%` },
       );
     }
@@ -70,11 +65,35 @@ export class I18nService {
    */
   async getNestedTranslations(language: Language): Promise<Record<string, any>> {
     const translations = await this.translationRepository.find({
-      where: { language },
       order: { module: 'ASC', key: 'ASC' },
     });
 
-    return JsonParser.unflattenJson(translations);
+    // 将新格式转换为嵌套对象
+    const result: Record<string, any> = {};
+
+    for (const trans of translations) {
+      const langKey = this.getLanguageField(language);
+      const value = trans[langKey];
+
+      if (!result[trans.module]) {
+        result[trans.module] = {};
+      }
+
+      // 支持嵌套键名（如 user.title）
+      const keys = trans.key.split('.');
+      let current = result[trans.module];
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) {
+          current[keys[i]] = {};
+        }
+        current = current[keys[i]];
+      }
+
+      current[keys[keys.length - 1]] = value;
+    }
+
+    return result;
   }
 
   /**
@@ -110,10 +129,9 @@ export class I18nService {
    * 创建翻译
    */
   async create(dto: CreateI18nTranslationDto): Promise<I18nTranslation> {
-    // 检查是否已存在
+    // 检查是否已存在（只检查 module + key）
     const existing = await this.translationRepository.findOne({
       where: {
-        language: dto.language,
         module: dto.module,
         key: dto.key,
       },
@@ -121,7 +139,7 @@ export class I18nService {
 
     if (existing) {
       throw new BadRequestException(
-        `该翻译已存在 (${dto.language} - ${dto.module}.${dto.key})`,
+        `该翻译已存在 (${dto.module}.${dto.key})`,
       );
     }
 
@@ -138,15 +156,10 @@ export class I18nService {
   ): Promise<I18nTranslation> {
     const translation = await this.findById(id);
 
-    // 如果修改了language/module/key，检查是否重复
-    if (
-      dto.language ||
-      dto.module ||
-      dto.key
-    ) {
+    // 如果修改了 module/key，检查是否重复
+    if (dto.module || dto.key) {
       const conflicting = await this.translationRepository.findOne({
         where: {
-          language: dto.language || translation.language,
           module: dto.module || translation.module,
           key: dto.key || translation.key,
         },
@@ -179,51 +192,56 @@ export class I18nService {
 
   /**
    * 从JSON格式批量导入
+   * 数据格式：{ 'zh-CN': { common: { appName: 'xxx' } }, 'en-US': { ... } }
    */
   async importFromJson(dto: BatchImportDto): Promise<{
     created: number;
     updated: number;
     errors: string[];
   }> {
-    const { language, data, overwrite } = dto;
+    const { data, overwrite } = dto;
 
-    // 验证JSON格式
-    if (!JsonParser.validateJson(data)) {
+    if (!data || typeof data !== 'object') {
       throw new BadRequestException('JSON格式无效');
     }
-
-    // 扁平化JSON
-    const flatData = JsonParser.flattenJson(data, language);
 
     let created = 0;
     let updated = 0;
     const errors: string[] = [];
 
-    for (const item of flatData) {
+    // 按语言分组的数据合并为按 module.key 分组
+    const mergedData = this.mergeTranslationsByKey(data);
+
+    for (const [moduleKey, translations] of Object.entries(mergedData)) {
+      const [module, key] = moduleKey.split(':');
+
       try {
         const existing = await this.translationRepository.findOne({
-          where: {
-            language: item.language,
-            module: item.module,
-            key: item.key,
-          },
+          where: { module, key },
         });
 
         if (existing) {
           if (overwrite) {
             await this.translationRepository.update(existing.id, {
-              value: item.value,
+              zhCN: translations.zhCN || existing.zhCN,
+              enUS: translations.enUS || existing.enUS,
+              arSA: translations.arSA || existing.arSA,
             });
             updated++;
           }
-          // 如果不覆盖，跳过
         } else {
-          await this.translationRepository.save(item);
+          await this.translationRepository.save({
+            module,
+            key,
+            zhCN: translations.zhCN || '',
+            enUS: translations.enUS || '',
+            arSA: translations.arSA || '',
+          });
           created++;
         }
       } catch (error) {
         errors.push(
-          `导入失败 (${item.module}.${item.key}): ${error.message}`,
+          `导入失败 (${module}.${key}): ${error.message}`,
         );
       }
     }
@@ -235,11 +253,7 @@ export class I18nService {
    * 导出为JSON格式
    */
   async exportToJson(language: Language): Promise<Record<string, any>> {
-    const translations = await this.translationRepository.find({
-      where: { language },
-    });
-
-    return JsonParser.unflattenJson(translations);
+    return this.getNestedTranslations(language);
   }
 
   /**
@@ -263,7 +277,7 @@ export class I18nService {
   ): Promise<Record<Language, Record<string, string>>> {
     const translations = await this.translationRepository.find({
       where: { module },
-      order: { language: 'ASC', key: 'ASC' },
+      order: { key: 'ASC' },
     });
 
     const result: Record<Language, Record<string, string>> = {
@@ -273,12 +287,74 @@ export class I18nService {
     };
 
     for (const trans of translations) {
-      if (!result[trans.language]) {
-        result[trans.language] = {};
-      }
-      result[trans.language][trans.key] = trans.value;
+      result[Language.ZH_CN][trans.key] = trans.zhCN;
+      result[Language.EN_US][trans.key] = trans.enUS;
+      result[Language.AR_SA][trans.key] = trans.arSA;
     }
 
     return result;
+  }
+
+  /**
+   * 辅助方法：根据语言获取对应的字段名
+   */
+  private getLanguageField(language: Language): 'zhCN' | 'enUS' | 'arSA' {
+    switch (language) {
+      case Language.ZH_CN:
+        return 'zhCN';
+      case Language.EN_US:
+        return 'enUS';
+      case Language.AR_SA:
+        return 'arSA';
+      default:
+        return 'zhCN';
+    }
+  }
+
+  /**
+   * 辅助方法：将按语言分组的翻译数据合并为按 module:key 分组
+   * 输入：{ 'zh-CN': { common: { appName: 'xxx' } }, 'en-US': { common: { appName: 'yyy' } } }
+   * 输出：{ 'common:appName': { zhCN: 'xxx', enUS: 'yyy' } }
+   */
+  private mergeTranslationsByKey(
+    data: Record<string, Record<string, any>>,
+  ): Record<string, { zhCN?: string; enUS?: string; arSA?: string }> {
+    const result: Record<string, { zhCN?: string; enUS?: string; arSA?: string }> = {};
+
+    for (const [language, modules] of Object.entries(data)) {
+      const langField = this.getLanguageField(language as Language);
+
+      for (const [module, keys] of Object.entries(modules)) {
+        this.flattenObject(keys, module, '', (key, value) => {
+          const mapKey = `${module}:${key}`;
+          if (!result[mapKey]) {
+            result[mapKey] = {};
+          }
+          result[mapKey][langField] = value;
+        });
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * 辅助方法：扁平化嵌套对象
+   */
+  private flattenObject(
+    obj: any,
+    module: string,
+    prefix: string,
+    callback: (key: string, value: string) => void,
+  ): void {
+    for (const [key, value] of Object.entries(obj)) {
+      const fullKey = prefix ? `${prefix}.${key}` : key;
+
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        this.flattenObject(value, module, fullKey, callback);
+      } else {
+        callback(fullKey, String(value));
+      }
+    }
   }
 }

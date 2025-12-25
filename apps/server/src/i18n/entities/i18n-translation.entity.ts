@@ -14,19 +14,11 @@ export enum Language {
 }
 
 @Entity('i18n_translations')
-@Index(['language', 'module', 'key'], { unique: true }) // 复合唯一索引
-@Index(['language']) // 语言索引，加速按语言查询
+@Index(['module', 'key'], { unique: true }) // 复合唯一索引
 @Index(['module']) // 模块索引，加速按模块查询
 export class I18nTranslation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column({
-    type: 'enum',
-    enum: Language,
-    comment: '语言代码',
-  })
-  language: Language;
 
   @Column({
     length: 50,
@@ -42,9 +34,21 @@ export class I18nTranslation {
 
   @Column({
     type: 'text',
-    comment: '翻译文本值，支持插值如 {{count}}',
+    comment: '中文翻译',
   })
-  value: string;
+  zhCN: string;
+
+  @Column({
+    type: 'text',
+    comment: '英文翻译',
+  })
+  enUS: string;
+
+  @Column({
+    type: 'text',
+    comment: '阿拉伯语翻译',
+  })
+  arSA: string;
 
   @Column({
     nullable: true,

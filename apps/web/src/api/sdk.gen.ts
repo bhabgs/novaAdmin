@@ -486,34 +486,14 @@ export const i18nControllerGetAllTranslations = <ThrowOnError extends boolean = 
 });
 
 /**
- * 删除翻译
+ * 获取所有模块名称
+ *
+ * 用于管理界面的模块筛选器
  */
-export const i18nControllerDelete = <ThrowOnError extends boolean = false>(options: Options<I18nControllerDeleteData, ThrowOnError>) => (options.client ?? client).delete<I18nControllerDeleteResponses, unknown, ThrowOnError>({
+export const i18nControllerGetModules = <ThrowOnError extends boolean = false>(options?: Options<I18nControllerGetModulesData, ThrowOnError>) => (options?.client ?? client).get<I18nControllerGetModulesResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/{id}',
+    url: '/api/i18n/modules',
     ...options
-});
-
-/**
- * 获取单个翻译
- */
-export const i18nControllerFindById = <ThrowOnError extends boolean = false>(options: Options<I18nControllerFindByIdData, ThrowOnError>) => (options.client ?? client).get<I18nControllerFindByIdResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/{id}',
-    ...options
-});
-
-/**
- * 更新翻译
- */
-export const i18nControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<I18nControllerUpdateData, ThrowOnError>) => (options.client ?? client).patch<I18nControllerUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/{id}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
 });
 
 /**
@@ -556,12 +536,32 @@ export const i18nControllerExportToJson = <ThrowOnError extends boolean = false>
 });
 
 /**
- * 获取所有模块名称
- *
- * 用于管理界面的模块筛选器
+ * 删除翻译
  */
-export const i18nControllerGetModules = <ThrowOnError extends boolean = false>(options?: Options<I18nControllerGetModulesData, ThrowOnError>) => (options?.client ?? client).get<I18nControllerGetModulesResponses, unknown, ThrowOnError>({
+export const i18nControllerDelete = <ThrowOnError extends boolean = false>(options: Options<I18nControllerDeleteData, ThrowOnError>) => (options.client ?? client).delete<I18nControllerDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/modules',
+    url: '/api/i18n/{id}',
     ...options
+});
+
+/**
+ * 获取单个翻译
+ */
+export const i18nControllerFindById = <ThrowOnError extends boolean = false>(options: Options<I18nControllerFindByIdData, ThrowOnError>) => (options.client ?? client).get<I18nControllerFindByIdResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/i18n/{id}',
+    ...options
+});
+
+/**
+ * 更新翻译
+ */
+export const i18nControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<I18nControllerUpdateData, ThrowOnError>) => (options.client ?? client).patch<I18nControllerUpdateResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/i18n/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });

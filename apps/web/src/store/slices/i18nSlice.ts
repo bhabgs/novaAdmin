@@ -1,15 +1,4 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import {
-  I18nTranslation,
-  I18nTranslationListResponse,
-  CreateI18nTranslationDto,
-  UpdateI18nTranslationDto,
-  QueryI18nTranslationParams,
-  BatchDeleteDto,
-  BatchImportDto,
-  BatchImportResponse,
-  ModuleListResponse,
-} from "../../types/i18n";
 import { ApiResponse } from "../../types";
 import {
   i18nControllerFindAll,
@@ -22,6 +11,49 @@ import {
   i18nControllerExportToJson,
   i18nControllerGetModules,
 } from "../../api";
+import type {
+  CreateI18nTranslationDto,
+  UpdateI18nTranslationDto,
+  BatchDeleteDto,
+  BatchImportDto,
+} from "../../api/types.gen";
+
+// Re-export types for convenience
+export interface I18nTranslation {
+  id: string;
+  module: string;
+  key: string;
+  zhCN: string;
+  enUS: string;
+  arSA: string;
+  remark?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface I18nTranslationListResponse {
+  list: I18nTranslation[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+  };
+}
+
+export interface QueryI18nTranslationParams {
+  page?: number;
+  pageSize?: number;
+  module?: string;
+  keyword?: string;
+}
+
+export interface BatchImportResponse {
+  created: number;
+  updated: number;
+  errors: string[];
+}
+
+export type ModuleListResponse = string[];
 
 // Async Thunks
 export const fetchI18nTranslations = createAsyncThunk(

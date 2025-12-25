@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Form, Input, Select, message, Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -6,15 +6,19 @@ import {
   createI18nTranslation,
   updateI18nTranslation,
   fetchI18nModules,
+  type I18nTranslation,
 } from '@/store/slices/i18nSlice';
-import { I18nTranslation, Language } from '@/types/i18n';
+
+export interface I18nFormRef {
+  submit: () => Promise<void>;
+}
 
 interface I18nFormProps {
   editingItem?: I18nTranslation | null;
   onSuccess?: () => void;
 }
 
-const I18nForm: React.FC<I18nFormProps> = ({ editingItem, onSuccess }) => {
+const I18nForm = forwardRef<I18nFormRef, I18nFormProps>(({ editingItem, onSuccess }, ref) => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const [form] = Form.useForm();
@@ -32,10 +36,11 @@ const I18nForm: React.FC<I18nFormProps> = ({ editingItem, onSuccess }) => {
   useEffect(() => {
     if (editingItem) {
       form.setFieldsValue({
-        language: editingItem.language,
         module: editingItem.module,
         key: editingItem.key,
-        value: editingItem.value,
+        zhCN: editingItem.zhCN,
+        enUS: editingItem.enUS,
+        arSA: editingItem.arSA,
         remark: editingItem.remark,
       });
     } else {
@@ -54,10 +59,11 @@ const I18nForm: React.FC<I18nFormProps> = ({ editingItem, onSuccess }) => {
           updateI18nTranslation({
             id: editingItem.id,
             dto: {
-              language: values.language,
               module: values.module,
               key: values.key,
-              value: values.value,
+              zhCN: values.zhCN,
+              enUS: values.enUS,
+              arSA: values.arSA,
               remark: values.remark,
             },
           }),
@@ -67,10 +73,11 @@ const I18nForm: React.FC<I18nFormProps> = ({ editingItem, onSuccess }) => {
         // Create
         await dispatch(
           createI18nTranslation({
-            language: values.language,
             module: values.module,
             key: values.key,
-            value: values.value,
+            zhCN: values.zhCN,
+            enUS: values.enUS,
+            arSA: values.arSA,
             remark: values.remark,
           }),
         ).unwrap();
@@ -85,14 +92,10 @@ const I18nForm: React.FC<I18nFormProps> = ({ editingItem, onSuccess }) => {
     }
   };
 
-  // Expose submit method via ref-like pattern
-  useEffect(() => {
-    const originalSubmit = form.submit;
-    form.submit = handleSubmit;
-    return () => {
-      form.submit = originalSubmit;
-    };
-  }, [form, handleSubmit]);
+  // Expose submit method via ref
+  useImperativeHandle(ref, () => ({
+    submit: handleSubmit,
+  }));
 
   return (
     <Spin spinning={loading}>
@@ -102,22 +105,6 @@ const I18nForm: React.FC<I18nFormProps> = ({ editingItem, onSuccess }) => {
         onFinish={handleSubmit}
       >
         <Form.Item
-          label={t('i18n.language')}
-          name="language"
-          rules={[{ required: true, message: t('message.required') }]}
-        >
-          <Select
-            placeholder={t('i18n.selectLanguage')}
-            disabled={!!editingItem}
-            options={[
-              { label: '中文 (Chinese)', value: 'zh-CN' as Language },
-              { label: 'English', value: 'en-US' as Language },
-              { label: 'العربية (Arabic)', value: 'ar-SA' as Language },
-            ]}
-          />
-        </Form.Item>
-
-        <Form.Item
           label={t('i18n.module')}
           name="module"
           rules={[{ required: true, message: t('message.required') }]}
@@ -126,6 +113,7 @@ const I18nForm: React.FC<I18nFormProps> = ({ editingItem, onSuccess }) => {
             placeholder={t('i18n.selectModule')}
             disabled={!!editingItem}
             allowClear
+            showSearch
             options={modules.map(m => ({ label: m, value: m }))}
           />
         </Form.Item>
@@ -148,14 +136,39 @@ const I18nForm: React.FC<I18nFormProps> = ({ editingItem, onSuccess }) => {
         </Form.Item>
 
         <Form.Item
-          label={t('i18n.value')}
-          name="value"
+          label="中文翻译 (Chinese)"
+          name="zhCN"
           rules={[{ required: true, message: t('message.required') }]}
         >
           <Input.TextArea
-            placeholder={t('i18n.valuePlaceholder') || 'Enter translation value (supports {{variable}} interpolation)'}
-            rows={4}
+            placeholder="输入中文翻译（支持 {{variable}} 插值）"
+            rows={3}
             allowClear
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="英文翻译 (English)"
+          name="enUS"
+          rules={[{ required: true, message: t('message.required') }]}
+        >
+          <Input.TextArea
+            placeholder="Enter English translation (supports {{variable}} interpolation)"
+            rows={3}
+            allowClear
+          />
+        </Form.Item>
+
+        <Form.Item
+          label="阿拉伯语翻译 (Arabic)"
+          name="arSA"
+          rules={[{ required: true, message: t('message.required') }]}
+        >
+          <Input.TextArea
+            placeholder="أدخل الترجمة العربية (يدعم {{variable}} الاستيفاء)"
+            rows={3}
+            allowClear
+            dir="rtl"
           />
         </Form.Item>
 
@@ -172,6 +185,8 @@ const I18nForm: React.FC<I18nFormProps> = ({ editingItem, onSuccess }) => {
       </Form>
     </Spin>
   );
-};
+});
+
+I18nForm.displayName = 'I18nForm';
 
 export default I18nForm;

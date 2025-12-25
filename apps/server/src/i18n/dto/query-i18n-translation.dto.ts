@@ -1,7 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Language } from '../entities/i18n-translation.entity';
 
 export class QueryI18nTranslationDto {
   @ApiPropertyOptional({
@@ -27,14 +26,6 @@ export class QueryI18nTranslationDto {
   pageSize?: number = 50;
 
   @ApiPropertyOptional({
-    enum: Language,
-    description: '按语言筛选',
-  })
-  @IsOptional()
-  @IsEnum(Language)
-  language?: Language;
-
-  @ApiPropertyOptional({
     description: '按模块筛选',
     example: 'common',
   })
@@ -43,7 +34,7 @@ export class QueryI18nTranslationDto {
   module?: string;
 
   @ApiPropertyOptional({
-    description: '搜索关键词（搜索key或value）',
+    description: '搜索关键词（搜索key或翻译值）',
     example: 'appName',
   })
   @IsOptional()

@@ -74,45 +74,15 @@ export class I18nController {
   }
 
   /**
-   * 获取单个翻译
+   * 获取所有模块名称
    */
-  @Get(':id')
-  @ApiOperation({ summary: '获取单个翻译' })
-  async findById(@Param('id') id: string): Promise<I18nTranslation> {
-    return this.i18nService.findById(id);
-  }
-
-  /**
-   * 创建翻译
-   */
-  @Post()
-  @ApiOperation({ summary: '创建翻译' })
-  async create(
-    @Body() dto: CreateI18nTranslationDto,
-  ): Promise<I18nTranslation> {
-    return this.i18nService.create(dto);
-  }
-
-  /**
-   * 更新翻译
-   */
-  @Patch(':id')
-  @ApiOperation({ summary: '更新翻译' })
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdateI18nTranslationDto,
-  ): Promise<I18nTranslation> {
-    return this.i18nService.update(id, dto);
-  }
-
-  /**
-   * 删除翻译
-   */
-  @Delete(':id')
-  @ApiOperation({ summary: '删除翻译' })
-  async delete(@Param('id') id: string): Promise<null> {
-    await this.i18nService.delete(id);
-    return null;
+  @Get('modules')
+  @ApiOperation({
+    summary: '获取所有模块名称',
+    description: '用于管理界面的模块筛选器',
+  })
+  async getModules(): Promise<string[]> {
+    return this.i18nService.getModules();
   }
 
   /**
@@ -157,14 +127,44 @@ export class I18nController {
   }
 
   /**
-   * 获取所有模块名称
+   * 获取单个翻译
    */
-  @Get('modules')
-  @ApiOperation({
-    summary: '获取所有模块名称',
-    description: '用于管理界面的模块筛选器',
-  })
-  async getModules(): Promise<string[]> {
-    return this.i18nService.getModules();
+  @Get(':id')
+  @ApiOperation({ summary: '获取单个翻译' })
+  async findById(@Param('id') id: string): Promise<I18nTranslation> {
+    return this.i18nService.findById(id);
+  }
+
+  /**
+   * 创建翻译
+   */
+  @Post()
+  @ApiOperation({ summary: '创建翻译' })
+  async create(
+    @Body() dto: CreateI18nTranslationDto,
+  ): Promise<I18nTranslation> {
+    return this.i18nService.create(dto);
+  }
+
+  /**
+   * 更新翻译
+   */
+  @Patch(':id')
+  @ApiOperation({ summary: '更新翻译' })
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateI18nTranslationDto,
+  ): Promise<I18nTranslation> {
+    return this.i18nService.update(id, dto);
+  }
+
+  /**
+   * 删除翻译
+   */
+  @Delete(':id')
+  @ApiOperation({ summary: '删除翻译' })
+  async delete(@Param('id') id: string): Promise<null> {
+    await this.i18nService.delete(id);
+    return null;
   }
 }

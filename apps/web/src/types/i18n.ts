@@ -9,10 +9,11 @@ export type Language = 'zh-CN' | 'en-US' | 'ar-SA';
  */
 export interface I18nTranslation {
   id: string;
-  language: Language;
   module: string;
   key: string;
-  value: string;
+  zhCN: string;
+  enUS: string;
+  arSA: string;
   remark?: string;
   createdAt: string;
   updatedAt: string;
@@ -22,10 +23,11 @@ export interface I18nTranslation {
  * 创建翻译请求
  */
 export interface CreateI18nTranslationDto {
-  language: Language;
   module: string;
   key: string;
-  value: string;
+  zhCN: string;
+  enUS: string;
+  arSA: string;
   remark?: string;
 }
 
@@ -33,10 +35,11 @@ export interface CreateI18nTranslationDto {
  * 更新翻译请求
  */
 export interface UpdateI18nTranslationDto {
-  language?: Language;
   module?: string;
   key?: string;
-  value?: string;
+  zhCN?: string;
+  enUS?: string;
+  arSA?: string;
   remark?: string;
 }
 
@@ -46,7 +49,6 @@ export interface UpdateI18nTranslationDto {
 export interface QueryI18nTranslationParams {
   page?: number;
   pageSize?: number;
-  language?: Language;
   module?: string;
   keyword?: string;
 }
@@ -67,8 +69,7 @@ export interface I18nTranslationListResponse {
  * 批量导入请求
  */
 export interface BatchImportDto {
-  language: Language;
-  data: Record<string, any>;
+  data: Record<string, Record<string, any>>;
   overwrite?: boolean;
 }
 

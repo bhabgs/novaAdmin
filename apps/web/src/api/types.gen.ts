@@ -360,11 +360,20 @@ export type CopyMenuDto = {
     parentId?: string;
 };
 
-export type CreateI18nTranslationDto = {
+export type BatchImportDto = {
     /**
-     * 语言代码
+     * 是否覆盖已存在的翻译
      */
-    language: 'zh-CN' | 'en-US' | 'ar-SA';
+    overwrite?: boolean;
+    /**
+     * 按语言分组的JSON格式翻译数据
+     */
+    data: {
+        [key: string]: unknown;
+    };
+};
+
+export type CreateI18nTranslationDto = {
     /**
      * 模块名称
      */
@@ -374,9 +383,17 @@ export type CreateI18nTranslationDto = {
      */
     key: string;
     /**
-     * 翻译文本值，支持插值如 {{count}}
+     * 中文翻译
      */
-    value: string;
+    zhCN: string;
+    /**
+     * 英文翻译
+     */
+    enUS: string;
+    /**
+     * 阿拉伯语翻译
+     */
+    arSA: string;
     /**
      * 备注说明
      */
@@ -384,10 +401,6 @@ export type CreateI18nTranslationDto = {
 };
 
 export type UpdateI18nTranslationDto = {
-    /**
-     * 语言代码
-     */
-    language?: 'zh-CN' | 'en-US' | 'ar-SA';
     /**
      * 模块名称
      */
@@ -397,30 +410,21 @@ export type UpdateI18nTranslationDto = {
      */
     key?: string;
     /**
-     * 翻译文本值，支持插值如 {{count}}
+     * 中文翻译
      */
-    value?: string;
+    zhCN?: string;
+    /**
+     * 英文翻译
+     */
+    enUS?: string;
+    /**
+     * 阿拉伯语翻译
+     */
+    arSA?: string;
     /**
      * 备注说明
      */
     remark?: string;
-};
-
-export type BatchImportDto = {
-    /**
-     * 语言代码
-     */
-    language: 'zh-CN' | 'en-US' | 'ar-SA';
-    /**
-     * 是否覆盖已存在的翻译
-     */
-    overwrite?: boolean;
-    /**
-     * JSON格式的翻译数据（嵌套格式）
-     */
-    data: {
-        [key: string]: unknown;
-    };
 };
 
 export type AuthControllerLoginData = {
@@ -933,15 +937,11 @@ export type I18nControllerFindAllData = {
          */
         pageSize?: number;
         /**
-         * 按语言筛选
-         */
-        language?: 'zh-CN' | 'en-US' | 'ar-SA';
-        /**
          * 按模块筛选
          */
         module?: string;
         /**
-         * 搜索关键词（搜索key或value）
+         * 搜索关键词（搜索key或翻译值）
          */
         keyword?: string;
     };
@@ -987,42 +987,14 @@ export type I18nControllerGetAllTranslationsResponses = {
     200: unknown;
 };
 
-export type I18nControllerDeleteData = {
+export type I18nControllerGetModulesData = {
     body?: never;
-    path: {
-        id: string;
-    };
+    path?: never;
     query?: never;
-    url: '/api/i18n/{id}';
+    url: '/api/i18n/modules';
 };
 
-export type I18nControllerDeleteResponses = {
-    200: unknown;
-};
-
-export type I18nControllerFindByIdData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/api/i18n/{id}';
-};
-
-export type I18nControllerFindByIdResponses = {
-    200: unknown;
-};
-
-export type I18nControllerUpdateData = {
-    body: UpdateI18nTranslationDto;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/api/i18n/{id}';
-};
-
-export type I18nControllerUpdateResponses = {
+export type I18nControllerGetModulesResponses = {
     200: unknown;
 };
 
@@ -1061,13 +1033,41 @@ export type I18nControllerExportToJsonResponses = {
     200: unknown;
 };
 
-export type I18nControllerGetModulesData = {
+export type I18nControllerDeleteData = {
     body?: never;
-    path?: never;
+    path: {
+        id: string;
+    };
     query?: never;
-    url: '/api/i18n/modules';
+    url: '/api/i18n/{id}';
 };
 
-export type I18nControllerGetModulesResponses = {
+export type I18nControllerDeleteResponses = {
+    200: unknown;
+};
+
+export type I18nControllerFindByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/i18n/{id}';
+};
+
+export type I18nControllerFindByIdResponses = {
+    200: unknown;
+};
+
+export type I18nControllerUpdateData = {
+    body: UpdateI18nTranslationDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/i18n/{id}';
+};
+
+export type I18nControllerUpdateResponses = {
     200: unknown;
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Button, Form, Input, Select, Space, message, Modal, Spin } from 'antd';
 import { PlusOutlined, ReloadOutlined, ImportOutlined, ExportOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +6,6 @@ import type { ColumnsType } from 'antd/es/table';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { useListManagement } from '@/hooks/useListManagement';
 import CrudPage from '@/components/CrudPage';
-import { I18nTranslation, Language } from '@/types/i18n';
 import { refreshTranslations } from '@/i18n';
 import {
   fetchI18nTranslations,
@@ -14,20 +13,20 @@ import {
   deleteI18nTranslation,
   batchDeleteI18nTranslations,
   clearError,
+  type I18nTranslation,
 } from '@/store/slices/i18nSlice';
-import I18nForm from './I18nForm';
+import I18nForm, { type I18nFormRef } from './I18nForm';
 import ImportExportModal from './ImportExportModal';
 
 const I18nList: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
+  const formRef = useRef<I18nFormRef>(null);
 
   const { translations, modules, pagination, loading, error } = useAppSelector(
     state => state.i18n,
   );
 
-  const [form] = Form.useForm();
-  const [language, setLanguage] = useState<Language | undefined>();
   const [module, setModule] = useState<string | undefined>();
   const [showImportExport, setShowImportExport] = useState(false);
   const [refreshingCache, setRefreshingCache] = useState(false);
@@ -69,12 +68,11 @@ const I18nList: React.FC = () => {
       fetchI18nTranslations({
         page: currentPage,
         pageSize,
-        language,
         module,
         keyword: searchText,
       }),
     );
-  }, [currentPage, pageSize, language, module, searchText, dispatch]);
+  }, [currentPage, pageSize, module, searchText, dispatch]);
 
   // Fetch modules for filter dropdown
   useEffect(() => {
@@ -135,13 +133,6 @@ const I18nList: React.FC = () => {
   // Table columns definition
   const columns: ColumnsType<I18nTranslation> = [
     {
-      title: t('i18n.language'),
-      dataIndex: 'language',
-      key: 'language',
-      width: 100,
-      render: text => <span className="tag">{text}</span>,
-    },
-    {
       title: t('i18n.module'),
       dataIndex: 'module',
       key: 'module',
@@ -157,11 +148,37 @@ const I18nList: React.FC = () => {
       render: text => <code>{text}</code>,
     },
     {
-      title: t('i18n.value'),
-      dataIndex: 'value',
-      key: 'value',
+      title: '中文',
+      dataIndex: 'zhCN',
+      key: 'zhCN',
+      width: 200,
+      ellipsis: true,
       render: text => (
-        <div style={{ maxWidth: 300, wordBreak: 'break-word' }}>
+        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>
+          {text}
+        </div>
+      ),
+    },
+    {
+      title: 'English',
+      dataIndex: 'enUS',
+      key: 'enUS',
+      width: 200,
+      ellipsis: true,
+      render: text => (
+        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>
+          {text}
+        </div>
+      ),
+    },
+    {
+      title: 'العربية',
+      dataIndex: 'arSA',
+      key: 'arSA',
+      width: 200,
+      ellipsis: true,
+      render: text => (
+        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>
           {text}
         </div>
       ),
@@ -178,23 +195,6 @@ const I18nList: React.FC = () => {
 
   // Filter components
   const filters = [
-    {
-      key: 'language',
-      span: 6,
-      component: (
-        <Select
-          placeholder={t('i18n.selectLanguage')}
-          allowClear
-          value={language}
-          onChange={setLanguage}
-          options={[
-            { label: '中文', value: 'zh-CN' as Language },
-            { label: 'English', value: 'en-US' as Language },
-            { label: 'العربية', value: 'ar-SA' as Language },
-          ]}
-        />
-      ),
-    },
     {
       key: 'module',
       span: 6,
@@ -263,18 +263,17 @@ const I18nList: React.FC = () => {
         onModalCancel={() => {
           setIsModalVisible(false);
           setEditingItem(null);
-          form.resetFields();
         }}
         onModalOk={() => {
-          // Form submission handled in I18nForm
+          formRef.current?.submit();
         }}
         formContent={
           <I18nForm
+            ref={formRef}
             editingItem={editingItem}
             onSuccess={() => {
               setIsModalVisible(false);
               setEditingItem(null);
-              form.resetFields();
               handleRefresh();
             }}
           />

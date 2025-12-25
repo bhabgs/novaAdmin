@@ -149,6 +149,7 @@ interface ListResponse<T> {
 ## 链接后端 API
 
 - 禁止更改 src/api 目录下的内容，改目录由 openapi 统一生成管理
+- 后端接口如果发生变更的话先生成 OpenAPI 客户端，前端直接用生成的代码。
 
 ## 动态路由
 

@@ -1,22 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsEnum,
   IsString,
   IsNotEmpty,
   MaxLength,
   IsOptional,
 } from 'class-validator';
-import { Language } from '../entities/i18n-translation.entity';
 
 export class CreateI18nTranslationDto {
-  @ApiProperty({
-    enum: Language,
-    description: '语言代码',
-    example: 'zh-CN',
-  })
-  @IsEnum(Language, { message: '语言代码必须是有效的枚举值' })
-  language: Language;
-
   @ApiProperty({
     description: '模块名称',
     example: 'common',
@@ -38,12 +28,28 @@ export class CreateI18nTranslationDto {
   key: string;
 
   @ApiProperty({
-    description: '翻译文本值，支持插值如 {{count}}',
+    description: '中文翻译',
     example: 'NovaAdmin - 通用后台管理系统',
   })
-  @IsString({ message: '翻译文本值必须是字符串' })
-  @IsNotEmpty({ message: '翻译文本值不能为空' })
-  value: string;
+  @IsString({ message: '中文翻译必须是字符串' })
+  @IsNotEmpty({ message: '中文翻译不能为空' })
+  zhCN: string;
+
+  @ApiProperty({
+    description: '英文翻译',
+    example: 'NovaAdmin - Admin Management System',
+  })
+  @IsString({ message: '英文翻译必须是字符串' })
+  @IsNotEmpty({ message: '英文翻译不能为空' })
+  enUS: string;
+
+  @ApiProperty({
+    description: '阿拉伯语翻译',
+    example: 'NovaAdmin - نظام إدارة',
+  })
+  @IsString({ message: '阿拉伯语翻译必须是字符串' })
+  @IsNotEmpty({ message: '阿拉伯语翻译不能为空' })
+  arSA: string;
 
   @ApiPropertyOptional({
     description: '备注说明',

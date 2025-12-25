@@ -7,11 +7,7 @@ import {
   UserOutlined,
   SettingOutlined,
   LogoutOutlined,
-  DashboardOutlined,
-  TeamOutlined,
   MenuOutlined as MenuIcon,
-  LinkOutlined,
-  FileTextOutlined,
 } from "@ant-design/icons";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -22,6 +18,7 @@ import { toggleSidebar } from "@/store/slices/settingsSlice";
 import CustomBreadcrumb from "@/components/Breadcrumb";
 import PageTabs from "@/components/PageTabs";
 import { Menu as MenuType } from "@/types/menu";
+import { getIconByName } from "@/constants/icons";
 import styles from "./index.module.less";
 
 const { Header, Sider } = Layout;
@@ -105,19 +102,11 @@ const MainLayout: React.FC = () => {
     });
   };
 
-  // 获取菜单图标
+  // 获取菜单图标 - 使用动态图标获取，支持所有 Ant Design 图标
   const getMenuIcon = (iconName?: string) => {
-    const iconMap: Record<string, React.ReactNode> = {
-      DashboardOutlined: <DashboardOutlined />,
-      UserOutlined: <UserOutlined />,
-      TeamOutlined: <TeamOutlined />,
-      MenuOutlined: <MenuIcon />,
-      SettingOutlined: <SettingOutlined />,
-      LinkOutlined: <LinkOutlined />,
-      FileTextOutlined: <FileTextOutlined />,
-    };
-
-    return iconMap[iconName || ""] || <MenuIcon />;
+    if (!iconName) return <MenuIcon />;
+    const icon = getIconByName(iconName);
+    return icon || <MenuIcon />;
   };
 
   // 获取当前选中的菜单

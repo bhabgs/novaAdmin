@@ -204,7 +204,7 @@ const I18nList: React.FC = () => {
           allowClear
           value={module}
           onChange={setModule}
-          options={modules.map(m => ({ label: m, value: m }))}
+          options={(modules || []).map(m => ({ label: m, value: m }))}
         />
       ),
     },

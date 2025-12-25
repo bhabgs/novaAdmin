@@ -10,7 +10,7 @@ import { initializeSettings } from './store/slices/settingsSlice';
 import { useAppSelector } from './store';
 import Router from './router';
 import { Language } from './types';
-import { isRTL } from './i18n';
+import { isRTL, initializeI18n } from './i18n';
 
 // 内部组件，用于访问Redux状态
 const AppContent: React.FC = () => {
@@ -80,20 +80,35 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   const [settingsInitialized, setSettingsInitialized] = useState(false);
+  const [i18nReady, setI18nReady] = useState(false);
 
+  // 初始化i18n和设置
   useEffect(() => {
-    // 初始化设置
-    store.dispatch(initializeSettings());
-    setSettingsInitialized(true);
+    const initializeApp = async () => {
+      try {
+        // 初始化i18n（从API加载翻译）
+        await initializeI18n();
+        setI18nReady(true);
+      } catch (error) {
+        console.error('Failed to initialize i18n:', error);
+        setI18nReady(true); // 即使失败也继续，使用降级方案
+      }
 
-    // 在开发环境下将store添加到window对象，便于调试和测试
-    if (import.meta.env.DEV) {
-      (window as any).__REDUX_STORE__ = store;
-    }
+      // 初始化Redux设置
+      store.dispatch(initializeSettings());
+      setSettingsInitialized(true);
+
+      // 在开发环境下将store添加到window对象，便于调试和测试
+      if (import.meta.env.DEV) {
+        (window as any).__REDUX_STORE__ = store;
+      }
+    };
+
+    initializeApp();
   }, []);
 
-  // 如果设置未初始化，显示加载状态
-  if (!settingsInitialized) {
+  // 如果应用未初始化，显示加载状态
+  if (!settingsInitialized || !i18nReady) {
     return (
       <div
         style={{
@@ -107,7 +122,7 @@ const App: React.FC = () => {
       >
         <Spin size="large" />
         <div style={{ color: '#666', fontSize: '14px' }}>
-          正在初始化应用...
+          {!i18nReady ? '正在加载翻译...' : '正在初始化应用...'}
         </div>
       </div>
     );

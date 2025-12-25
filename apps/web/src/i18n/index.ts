@@ -14,8 +14,14 @@ export const RTL_LANGUAGES: Language[] = ["ar-SA"];
 // 默认语言
 export const DEFAULT_LANGUAGE: Language = "zh-CN";
 
-// 语言资源
-const resources = {
+// 缓存键
+const CACHE_KEY = "nova_i18n_translations";
+const CACHE_TIME_KEY = `${CACHE_KEY}_time`;
+const VERSION_KEY = "nova_i18n_version";
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24小时
+
+// 降级用的静态资源
+const fallbackResources = {
   "zh-CN": {
     translation: zhCN,
   },
@@ -27,7 +33,82 @@ const resources = {
   },
 };
 
-// 获取初始语言（优先从localStorage获取，然后从浏览器语言，最后使用默认语言）
+/**
+ * 从API加载翻译数据
+ */
+async function loadTranslationsFromAPI(): Promise<
+  Record<Language, Record<string, any>> | null
+> {
+  try {
+    // 检查localStorage缓存
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
+
+    if (cachedData && cacheTime) {
+      const age = Date.now() - parseInt(cacheTime);
+      if (age < CACHE_DURATION) {
+        console.log("[i18n] Using cached translations from localStorage");
+        return JSON.parse(cachedData);
+      }
+    }
+
+    // 从API加载
+    console.log("[i18n] Loading translations from API...");
+    const baseURL = process.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+    const response = await fetch(`${baseURL}/i18n/all`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // 如果有token，添加authorization header
+        ...(localStorage.getItem("auth_token")
+          ? { Authorization: `Bearer ${localStorage.getItem("auth_token")}` }
+          : {}),
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(
+        `[i18n] API returned ${response.status}, using fallback`,
+      );
+      return null;
+    }
+
+    const result = await response.json();
+
+    // 检查API响应格式
+    if (
+      result.success &&
+      result.data &&
+      typeof result.data === "object"
+    ) {
+      // 缓存到localStorage
+      localStorage.setItem(CACHE_KEY, JSON.stringify(result.data));
+      localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+
+      if (result.data.version) {
+        localStorage.setItem(VERSION_KEY, result.data.version);
+      }
+
+      console.log("[i18n] Translations loaded from API successfully");
+      return result.data;
+    } else if (typeof result === "object") {
+      // 直接返回data格式的响应
+      localStorage.setItem(CACHE_KEY, JSON.stringify(result));
+      localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+      console.log("[i18n] Translations loaded from API successfully");
+      return result;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("[i18n] Error loading from API:", error);
+    return null;
+  }
+}
+
+/**
+ * 获取初始语言（优先从localStorage获取，然后从浏览器语言，最后使用默认语言）
+ */
 const getInitialLanguage = (): Language => {
   try {
     // 首先尝试从localStorage获取
@@ -58,24 +139,76 @@ const getInitialLanguage = (): Language => {
       return "ar-SA";
     }
   } catch (error) {
-    console.error("Failed to get initial language:", error);
+    console.error("[i18n] Failed to get initial language:", error);
   }
 
   return DEFAULT_LANGUAGE;
 };
 
-i18n.use(initReactI18next).init({
-  resources,
-  lng: getInitialLanguage(),
-  fallbackLng: DEFAULT_LANGUAGE,
-  interpolation: {
-    escapeValue: false,
-  },
-  react: {
-    useSuspense: false,
-  },
-  debug: process.env.NODE_ENV === "development",
-});
+/**
+ * 初始化i18n（异步，需要在App中调用）
+ */
+export async function initializeI18n(): Promise<void> {
+  const apiTranslations = await loadTranslationsFromAPI();
+
+  // 构建资源对象（API优先，失败则使用静态JSON）
+  const resources: any = {};
+
+  if (apiTranslations) {
+    // 使用API返回的数据
+    for (const language of SUPPORTED_LANGUAGES) {
+      resources[language] = {
+        translation: apiTranslations[language] || fallbackResources[language]?.translation || {},
+      };
+    }
+  } else {
+    // 使用静态JSON
+    Object.assign(resources, fallbackResources);
+  }
+
+  await i18n.use(initReactI18next).init({
+    resources,
+    lng: getInitialLanguage(),
+    fallbackLng: DEFAULT_LANGUAGE,
+    interpolation: {
+      escapeValue: false,
+    },
+    react: {
+      useSuspense: false,
+    },
+    debug: process.env.NODE_ENV === "development",
+  });
+}
+
+/**
+ * 刷新翻译（当管理员更新翻译后调用）
+ */
+export async function refreshTranslations(): Promise<void> {
+  console.log("[i18n] Refreshing translations...");
+
+  // 清除缓存
+  localStorage.removeItem(CACHE_KEY);
+  localStorage.removeItem(CACHE_TIME_KEY);
+
+  // 重新加载
+  const apiTranslations = await loadTranslationsFromAPI();
+
+  if (apiTranslations) {
+    // 更新所有语言的资源
+    for (const language of SUPPORTED_LANGUAGES) {
+      i18n.addResourceBundle(
+        language,
+        "translation",
+        apiTranslations[language] || {},
+        true,
+        true,
+      );
+    }
+    console.log("[i18n] Translations refreshed successfully");
+  } else {
+    console.warn("[i18n] Failed to refresh translations");
+  }
+}
 
 // 监听语言变化，同步到localStorage
 i18n.on("languageChanged", (lng: Language) => {

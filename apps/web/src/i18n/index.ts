@@ -1,6 +1,7 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { Language } from "../types";
+import { Language, ApiResponse } from "../types";
+import { i18nControllerGetAllTranslations } from "../api";
 import zhCN from "./locales/zh-CN.json";
 import enUS from "./locales/en-US.json";
 import arSA from "./locales/ar-SA.json";
@@ -37,7 +38,7 @@ const fallbackResources = {
  * 从API加载翻译数据
  */
 async function loadTranslationsFromAPI(): Promise<
-  Record<Language, Record<string, any>> | null
+  Record<Language, Record<string, unknown>> | null
 > {
   try {
     // 检查localStorage缓存
@@ -54,52 +55,43 @@ async function loadTranslationsFromAPI(): Promise<
 
     // 从API加载
     console.log("[i18n] Loading translations from API...");
-    const baseURL = process.env.VITE_API_BASE_URL || "http://localhost:3000/api";
-    const response = await fetch(`${baseURL}/i18n/all`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        // 如果有token，添加authorization header
-        ...(localStorage.getItem("auth_token")
-          ? { Authorization: `Bearer ${localStorage.getItem("auth_token")}` }
-          : {}),
-      },
-    });
+    try {
+      const response = (await i18nControllerGetAllTranslations()) as unknown as ApiResponse<
+        Record<Language, Record<string, unknown>>
+      >;
 
-    if (!response.ok) {
+      // 检查API响应格式
+      if (response.success && response.data && typeof response.data === "object") {
+        // 缓存到localStorage
+        localStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
+        localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+
+        if (
+          response.data &&
+          typeof response.data === "object" &&
+          "version" in response.data
+        ) {
+          localStorage.setItem(
+            VERSION_KEY,
+            String((response.data as { version?: string }).version || ""),
+          );
+        }
+
+        console.log("[i18n] Translations loaded from API successfully");
+        return response.data;
+      }
+
+      console.warn("[i18n] API response format invalid, using fallback");
+      return null;
+    } catch (error: unknown) {
+      // API调用失败（可能是未授权或其他错误），使用降级方案
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
       console.warn(
-        `[i18n] API returned ${response.status}, using fallback`,
+        `[i18n] Failed to load from API: ${errorMessage}, using fallback`,
       );
       return null;
     }
-
-    const result = await response.json();
-
-    // 检查API响应格式
-    if (
-      result.success &&
-      result.data &&
-      typeof result.data === "object"
-    ) {
-      // 缓存到localStorage
-      localStorage.setItem(CACHE_KEY, JSON.stringify(result.data));
-      localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-
-      if (result.data.version) {
-        localStorage.setItem(VERSION_KEY, result.data.version);
-      }
-
-      console.log("[i18n] Translations loaded from API successfully");
-      return result.data;
-    } else if (typeof result === "object") {
-      // 直接返回data格式的响应
-      localStorage.setItem(CACHE_KEY, JSON.stringify(result));
-      localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-      console.log("[i18n] Translations loaded from API successfully");
-      return result;
-    }
-
-    return null;
   } catch (error) {
     console.error("[i18n] Error loading from API:", error);
     return null;

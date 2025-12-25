@@ -117,7 +117,7 @@ export type UpdateUserDto = {
 
 export type BatchDeleteDto = {
     /**
-     * 菜单ID列表
+     * 翻译ID列表
      */
     ids: Array<string>;
 };
@@ -358,6 +358,69 @@ export type CopyMenuDto = {
      * 父菜单ID
      */
     parentId?: string;
+};
+
+export type CreateI18nTranslationDto = {
+    /**
+     * 语言代码
+     */
+    language: 'zh-CN' | 'en-US' | 'ar-SA';
+    /**
+     * 模块名称
+     */
+    module: string;
+    /**
+     * 翻译键名
+     */
+    key: string;
+    /**
+     * 翻译文本值，支持插值如 {{count}}
+     */
+    value: string;
+    /**
+     * 备注说明
+     */
+    remark?: string;
+};
+
+export type UpdateI18nTranslationDto = {
+    /**
+     * 语言代码
+     */
+    language?: 'zh-CN' | 'en-US' | 'ar-SA';
+    /**
+     * 模块名称
+     */
+    module?: string;
+    /**
+     * 翻译键名
+     */
+    key?: string;
+    /**
+     * 翻译文本值，支持插值如 {{count}}
+     */
+    value?: string;
+    /**
+     * 备注说明
+     */
+    remark?: string;
+};
+
+export type BatchImportDto = {
+    /**
+     * 语言代码
+     */
+    language: 'zh-CN' | 'en-US' | 'ar-SA';
+    /**
+     * 是否覆盖已存在的翻译
+     */
+    overwrite?: boolean;
+    /**
+     * JSON格式的翻译数据（嵌套格式）
+     */
+    data: {
+        [key: string]: unknown;
+    };
 };
 
 export type AuthControllerLoginData = {
@@ -855,4 +918,156 @@ export type MenusControllerCopyMenuData = {
 
 export type MenusControllerCopyMenuResponses = {
     201: unknown;
+};
+
+export type I18nControllerFindAllData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 页码
+         */
+        page?: number;
+        /**
+         * 每页数量
+         */
+        pageSize?: number;
+        /**
+         * 按语言筛选
+         */
+        language?: 'zh-CN' | 'en-US' | 'ar-SA';
+        /**
+         * 按模块筛选
+         */
+        module?: string;
+        /**
+         * 搜索关键词（搜索key或value）
+         */
+        keyword?: string;
+    };
+    url: '/api/i18n';
+};
+
+export type I18nControllerFindAllResponses = {
+    200: unknown;
+};
+
+export type I18nControllerCreateData = {
+    body: CreateI18nTranslationDto;
+    path?: never;
+    query?: never;
+    url: '/api/i18n';
+};
+
+export type I18nControllerCreateResponses = {
+    201: unknown;
+};
+
+export type I18nControllerGetNestedTranslationsData = {
+    body?: never;
+    path: {
+        language: string;
+    };
+    query?: never;
+    url: '/api/i18n/nested/{language}';
+};
+
+export type I18nControllerGetNestedTranslationsResponses = {
+    200: unknown;
+};
+
+export type I18nControllerGetAllTranslationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/i18n/all';
+};
+
+export type I18nControllerGetAllTranslationsResponses = {
+    200: unknown;
+};
+
+export type I18nControllerDeleteData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/i18n/{id}';
+};
+
+export type I18nControllerDeleteResponses = {
+    200: unknown;
+};
+
+export type I18nControllerFindByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/i18n/{id}';
+};
+
+export type I18nControllerFindByIdResponses = {
+    200: unknown;
+};
+
+export type I18nControllerUpdateData = {
+    body: UpdateI18nTranslationDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/i18n/{id}';
+};
+
+export type I18nControllerUpdateResponses = {
+    200: unknown;
+};
+
+export type I18nControllerBatchDeleteData = {
+    body: BatchDeleteDto;
+    path?: never;
+    query?: never;
+    url: '/api/i18n/batch-delete';
+};
+
+export type I18nControllerBatchDeleteResponses = {
+    201: unknown;
+};
+
+export type I18nControllerImportFromJsonData = {
+    body: BatchImportDto;
+    path?: never;
+    query?: never;
+    url: '/api/i18n/import/json';
+};
+
+export type I18nControllerImportFromJsonResponses = {
+    201: unknown;
+};
+
+export type I18nControllerExportToJsonData = {
+    body?: never;
+    path: {
+        language: string;
+    };
+    query?: never;
+    url: '/api/i18n/export/json/{language}';
+};
+
+export type I18nControllerExportToJsonResponses = {
+    200: unknown;
+};
+
+export type I18nControllerGetModulesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/i18n/modules';
+};
+
+export type I18nControllerGetModulesResponses = {
+    200: unknown;
 };

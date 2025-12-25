@@ -2,6 +2,7 @@ import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import * as dotenv from 'dotenv';
 import { seedI18nTranslations } from './i18n-seed';
+import { I18nTranslation } from '../../i18n/entities/i18n-translation.entity';
 
 // 加载环境变量
 dotenv.config();
@@ -220,7 +221,7 @@ async function runSeed() {
     }
 
     // 导入i18n翻译
-    const i18nRepository = AppDataSource.getRepository('I18nTranslation');
+    const i18nRepository = AppDataSource.getRepository(I18nTranslation);
     await seedI18nTranslations(i18nRepository);
 
     console.log('\n🎉 Database seed completed successfully!');

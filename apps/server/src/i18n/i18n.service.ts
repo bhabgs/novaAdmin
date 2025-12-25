@@ -10,7 +10,7 @@ import {
 } from './dto';
 import { JsonParser } from './utils/json-parser.util';
 
-interface PaginationResult<T> {
+export interface PaginationResult<T> {
   list: T[];
   pagination: {
     page: number;
@@ -185,15 +185,15 @@ export class I18nService {
     updated: number;
     errors: string[];
   }> {
-    const { language, translations, overwrite } = dto;
+    const { language, data, overwrite } = dto;
 
     // 验证JSON格式
-    if (!JsonParser.validateJson(translations)) {
+    if (!JsonParser.validateJson(data)) {
       throw new BadRequestException('JSON格式无效');
     }
 
     // 扁平化JSON
-    const flatData = JsonParser.flattenJson(translations, language);
+    const flatData = JsonParser.flattenJson(data, language);
 
     let created = 0;
     let updated = 0;

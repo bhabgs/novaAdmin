@@ -21,7 +21,6 @@ export class BatchImportDto {
 
   @ApiProperty({
     description: 'JSON格式的翻译数据（嵌套格式）',
-    type: 'object',
     example: {
       common: {
         appName: 'NovaAdmin',
@@ -33,5 +32,5 @@ export class BatchImportDto {
     },
   })
   @IsObject({ message: '翻译数据必须是对象' })
-  translations: Record<string, any>;
+  data: Record<string, any>;
 }

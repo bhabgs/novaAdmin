@@ -8,12 +8,11 @@ import {
   Body,
   Query,
   UseGuards,
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
   BadRequestException,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../auth/decorators/public.decorator';
 import { I18nService } from './i18n.service';
 import { I18nTranslation, Language } from './entities/i18n-translation.entity';
 import {
@@ -25,7 +24,7 @@ import {
 } from './dto';
 
 @ApiTags('国际化管理')
-@Controller('api/i18n')
+@Controller('i18n')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class I18nController {
@@ -46,6 +45,7 @@ export class I18nController {
   /**
    * 获取指定语言的所有翻译（嵌套格式）
    */
+  @Public()
   @Get('nested/:language')
   @ApiOperation({
     summary: '获取指定语言的所有翻译（嵌套格式，i18next兼容）',
@@ -63,6 +63,7 @@ export class I18nController {
   /**
    * 获取所有语言的翻译（前端一次性加载）
    */
+  @Public()
   @Get('all')
   @ApiOperation({
     summary: '获取所有语言的翻译',

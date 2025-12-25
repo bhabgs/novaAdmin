@@ -1,17 +1,17 @@
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
+import { NestFactory } from "@nestjs/core";
+import { ValidationPipe } from "@nestjs/common";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // 全局前缀
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix("api");
 
   // 启用 CORS
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
     credentials: true,
   });
 
@@ -21,18 +21,19 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
-    }),
+    })
   );
 
   // Swagger 文档
   const config = new DocumentBuilder()
-    .setTitle('NovaAdmin API')
-    .setDescription('NovaAdmin 后台管理系统 API 文档')
-    .setVersion('1.0')
+    .setTitle("NovaAdmin API")
+    .setDescription("NovaAdmin 后台管理系统 API 文档")
+    .setBasePath("/nova-api")
+    .setVersion("1.0")
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup("api/docs", app, document);
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

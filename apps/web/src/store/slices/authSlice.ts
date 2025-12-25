@@ -1,8 +1,7 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { User } from '../../types/user';
-import { LoginRequest, LoginResponse } from '../../types';
-import { tokenUtils, userUtils, clearAuth } from '../../utils/auth';
-import { authApi } from '../../api/auth';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { User } from "../../types/user";
+import { LoginRequest } from "../../types";
+import { tokenUtils, userUtils, clearAuth } from "../../utils/auth";
 
 interface AuthState {
   user: User | null;
@@ -22,31 +21,31 @@ const initialState: AuthState = {
 
 // 异步登录action
 export const login = createAsyncThunk(
-  'auth/login',
+  "auth/login",
   async (credentials: LoginRequest, { rejectWithValue }) => {
     try {
       const response = await authApi.login(credentials);
       if (response.success) {
         const { user, token, refreshToken } = response.data;
-        
+
         // 保存到localStorage
         tokenUtils.setToken(token);
         tokenUtils.setRefreshToken(refreshToken);
         userUtils.setUser(user);
-        
+
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '登录失败');
+      return rejectWithValue(error.message || "登录失败");
     }
   }
 );
 
 // 异步登出action
 export const logout = createAsyncThunk(
-  'auth/logout',
+  "auth/logout",
   async (_, { rejectWithValue }) => {
     try {
       await authApi.logout();
@@ -62,14 +61,14 @@ export const logout = createAsyncThunk(
 
 // 刷新token
 export const refreshToken = createAsyncThunk(
-  'auth/refreshToken',
+  "auth/refreshToken",
   async (_, { rejectWithValue }) => {
     try {
       const refreshTokenValue = tokenUtils.getRefreshToken();
       if (!refreshTokenValue) {
-        throw new Error('No refresh token available');
+        throw new Error("No refresh token available");
       }
-      
+
       const response = await authApi.refreshToken();
       if (response.success) {
         const { token } = response.data;
@@ -80,14 +79,14 @@ export const refreshToken = createAsyncThunk(
       }
     } catch (error: any) {
       clearAuth();
-      return rejectWithValue(error.message || 'Token刷新失败');
+      return rejectWithValue(error.message || "Token刷新失败");
     }
   }
 );
 
 // 获取用户信息
 export const fetchUserInfo = createAsyncThunk(
-  'auth/fetchUserInfo',
+  "auth/fetchUserInfo",
   async (_, { rejectWithValue }) => {
     try {
       const response = await authApi.getUserInfo();
@@ -98,19 +97,22 @@ export const fetchUserInfo = createAsyncThunk(
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '获取用户信息失败');
+      return rejectWithValue(error.message || "获取用户信息失败");
     }
   }
 );
 
 // 修改密码
 export const changePassword = createAsyncThunk(
-  'auth/changePassword',
-  async (passwordData: {
-    oldPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-  }, { rejectWithValue }) => {
+  "auth/changePassword",
+  async (
+    passwordData: {
+      oldPassword: string;
+      newPassword: string;
+      confirmPassword: string;
+    },
+    { rejectWithValue }
+  ) => {
     try {
       const response = await authApi.changePassword(passwordData);
       if (response.success) {
@@ -119,13 +121,13 @@ export const changePassword = createAsyncThunk(
         return rejectWithValue(response.message);
       }
     } catch (error: any) {
-      return rejectWithValue(error.message || '修改密码失败');
+      return rejectWithValue(error.message || "修改密码失败");
     }
   }
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     clearError: (state) => {

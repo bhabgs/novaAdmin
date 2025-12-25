@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Checkbox, Card, message, Spin } from 'antd';
-import { UserOutlined, LockOutlined, EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { login } from '@/store/slices/authSlice';
+import React, { useState, useEffect } from "react";
+import { Form, Input, Button, Checkbox, Card, message, Spin } from "antd";
+import {
+  UserOutlined,
+  LockOutlined,
+  EyeInvisibleOutlined,
+  EyeTwoTone,
+} from "@ant-design/icons";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { login } from "@/store/slices/authSlice";
 
 interface LoginForm {
   username: string;
@@ -16,18 +21,18 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
-  
-  const { loading, error } = useAppSelector(state => state.auth);
+
+  const { loading, error } = useAppSelector((state) => state.auth);
   const [rememberMe, setRememberMe] = useState(false);
 
   // 获取重定向路径
-  const from = (location.state as any)?.from?.pathname || '/dashboard';
+  const from = (location.state as any)?.from?.pathname || "/dashboard";
 
   useEffect(() => {
     // 检查是否有保存的登录信息
-    const savedUsername = localStorage.getItem('rememberedUsername');
-    const savedRemember = localStorage.getItem('rememberMe') === 'true';
-    
+    const savedUsername = localStorage.getItem("rememberedUsername");
+    const savedRemember = localStorage.getItem("rememberMe") === "true";
+
     if (savedUsername && savedRemember) {
       form.setFieldsValue({
         username: savedUsername,
@@ -45,27 +50,29 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (values: LoginForm) => {
     try {
-      const result = await dispatch(login({
-        username: values.username,
-        password: values.password,
-      })).unwrap();
+      const result = await dispatch(
+        login({
+          username: values.username,
+          password: values.password,
+        })
+      ).unwrap();
 
       if (result) {
         // 处理记住我功能
         if (values.remember) {
-          localStorage.setItem('rememberedUsername', values.username);
-          localStorage.setItem('rememberMe', 'true');
+          localStorage.setItem("rememberedUsername", values.username);
+          localStorage.setItem("rememberMe", "true");
         } else {
-          localStorage.removeItem('rememberedUsername');
-          localStorage.removeItem('rememberMe');
+          localStorage.removeItem("rememberedUsername");
+          localStorage.removeItem("rememberMe");
         }
 
-        message.success('登录成功！');
+        message.success("登录成功！");
         navigate(from, { replace: true });
       }
     } catch (error) {
       // 错误已在Redux中处理
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
     }
   };
 
@@ -76,9 +83,9 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Card 
+        <Card
           className="shadow-2xl border-0 rounded-2xl"
-          bodyStyle={{ padding: '2rem' }}
+          bodyStyle={{ padding: "2rem" }}
         >
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -101,8 +108,8 @@ const Login: React.FC = () => {
                 name="username"
                 label="用户名"
                 rules={[
-                  { required: true, message: '请输入用户名！' },
-                  { min: 3, message: '用户名至少3个字符！' },
+                  { required: true, message: "请输入用户名！" },
+                  { min: 3, message: "用户名至少3个字符！" },
                 ]}
               >
                 <Input
@@ -116,15 +123,15 @@ const Login: React.FC = () => {
                 name="password"
                 label="密码"
                 rules={[
-                  { required: true, message: '请输入密码！' },
-                  { min: 6, message: '密码至少6个字符！' },
+                  { required: true, message: "请输入密码！" },
+                  { min: 6, message: "密码至少6个字符！" },
                 ]}
               >
                 <Input.Password
                   prefix={<LockOutlined className="text-gray-400" />}
                   placeholder="请输入密码"
                   className="rounded-lg"
-                  iconRender={(visible) => 
+                  iconRender={(visible) =>
                     visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
                   }
                 />
@@ -133,14 +140,12 @@ const Login: React.FC = () => {
               <Form.Item>
                 <div className="flex items-center justify-between">
                   <Form.Item name="remember" valuePropName="checked" noStyle>
-                    <Checkbox onChange={handleRememberChange}>
-                      记住我
-                    </Checkbox>
+                    <Checkbox onChange={handleRememberChange}>记住我</Checkbox>
                   </Form.Item>
-                  <Button 
-                    type="link" 
+                  <Button
+                    type="link"
                     className="p-0 text-blue-500 hover:text-blue-600"
-                    onClick={() => message.info('请联系管理员重置密码')}
+                    onClick={() => message.info("请联系管理员重置密码")}
                   >
                     忘记密码？
                   </Button>
@@ -161,9 +166,7 @@ const Login: React.FC = () => {
           </Spin>
 
           <div className="mt-6 text-center">
-            <div className="text-sm text-gray-500 mb-4">
-              测试账号信息：
-            </div>
+            <div className="text-sm text-gray-500 mb-4">测试账号信息：</div>
             <div className="bg-gray-50 rounded-lg p-3 text-sm">
               <div className="mb-2">
                 <span className="font-medium">管理员：</span>

@@ -35,7 +35,11 @@
     "density": "الكثافة",
     "actions": "الإجراءات",
     "detail": "التفاصيل",
-    "noPermission": "عذراً، ليس لديك صلاحية للوصول إلى هذه الصفحة"
+    "noPermission": "عذراً، ليس لديك صلاحية للوصول إلى هذه الصفحة",
+    "copy": "نسخ",
+    "copySuccess": "تم النسخ: {{text}}",
+    "copyError": "فشل النسخ",
+    "clickToCopy": "انقر للنسخ"
   },
   "menu": {
     "dashboard": "لوحة القيادة",
@@ -412,6 +416,7 @@
     "importError": "فشل الاستيراد",
     "exportSuccess": "تم التصدير بنجاح",
     "exportError": "فشل التصدير",
+    "copySuccess": "تم نسخ {{label}}",
     "selectFile": "الرجاء تحديد ملف",
     "fileReadError": "فشل قراءة الملف",
     "importFile": "استيراد الملف",

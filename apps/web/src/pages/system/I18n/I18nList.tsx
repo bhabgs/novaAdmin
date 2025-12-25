@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Button, Form, Input, Select, Space, message, Modal, Spin } from 'antd';
-import { PlusOutlined, ReloadOutlined, ImportOutlined, ExportOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Select, Space, message, Modal, Spin, Tooltip, Popconfirm } from 'antd';
+import { PlusOutlined, ReloadOutlined, ImportOutlined, ExportOutlined, CopyOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import type { ColumnsType } from 'antd/es/table';
 import { useAppDispatch, useAppSelector } from '@/store';
@@ -130,6 +130,79 @@ const I18nList: React.FC = () => {
     }
   };
 
+  // Handle copy to clipboard - copy as t('module.key') format
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      message.success(t('common.copySuccess') || '复制成功');
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        message.success(t('common.copySuccess') || '复制成功');
+      } catch (fallbackErr) {
+        message.error(t('common.copyError') || '复制失败');
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
+  // Generate t('module.key') format
+  const generateTFunction = (module: string, key: string) => {
+    return `t('${module}.${key}')`;
+  };
+
+  // Operation column render with edit, delete and copy buttons
+  const operationColumnRender = React.useCallback(
+    (record: I18nTranslation) => {
+      const copyText = generateTFunction(record.module, record.key);
+      return (
+        <Space size="small">
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setEditingItem(record);
+              setIsModalVisible(true);
+            }}
+          >
+            {t('common.edit')}
+          </Button>
+          <Popconfirm
+            title={t('common.deleteConfirm') || '确定要删除吗？'}
+            onConfirm={() => handleDelete(record.id)}
+            okText={t('common.confirm')}
+            cancelText={t('common.cancel')}
+          >
+            <Button
+              type="link"
+              danger
+              icon={<DeleteOutlined />}
+            >
+              {t('common.delete')}
+            </Button>
+          </Popconfirm>
+          <Tooltip title={`${t('common.copy') || '复制'}: ${copyText}`}>
+            <Button
+              type="link"
+              icon={<CopyOutlined />}
+              onClick={() => handleCopy(copyText)}
+            >
+              {t('common.copy') || '复制'}
+            </Button>
+          </Tooltip>
+        </Space>
+      );
+    },
+    [t, handleCopy, handleDelete]
+  );
+
   // Table columns definition
   const columns: ColumnsType<I18nTranslation> = [
     {
@@ -145,7 +218,7 @@ const I18nList: React.FC = () => {
       key: 'key',
       width: 200,
       ellipsis: true,
-      render: text => <code>{text}</code>,
+      render: (text: string) => <code>{text}</code>,
     },
     {
       title: '中文',
@@ -153,10 +226,8 @@ const I18nList: React.FC = () => {
       key: 'zhCN',
       width: 200,
       ellipsis: true,
-      render: text => (
-        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>
-          {text}
-        </div>
+      render: (text: string) => (
+        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>{text}</div>
       ),
     },
     {
@@ -165,10 +236,8 @@ const I18nList: React.FC = () => {
       key: 'enUS',
       width: 200,
       ellipsis: true,
-      render: text => (
-        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>
-          {text}
-        </div>
+      render: (text: string) => (
+        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>{text}</div>
       ),
     },
     {
@@ -177,10 +246,8 @@ const I18nList: React.FC = () => {
       key: 'arSA',
       width: 200,
       ellipsis: true,
-      render: text => (
-        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>
-          {text}
-        </div>
+      render: (text: string) => (
+        <div style={{ maxWidth: 200, wordBreak: 'break-word' }}>{text}</div>
       ),
     },
     {
@@ -256,6 +323,7 @@ const I18nList: React.FC = () => {
         onDelete={handleDelete}
         onBatchDelete={handleConfirmBatchDelete}
         onRefresh={handleRefresh}
+        operationColumnRender={operationColumnRender}
         modalVisible={isModalVisible}
         modalTitle={editingItem ? t('common.edit') : t('common.add')}
         modalWidth={600}

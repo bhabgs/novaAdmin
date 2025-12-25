@@ -8,6 +8,7 @@ export interface TabItem {
   closable?: boolean;
   isIframe?: boolean; // 是否为 iframe
   iframeUrl?: string; // iframe URL
+  refreshKey?: number; // 刷新key，用于强制组件重新渲染
 }
 
 interface TabsState {
@@ -142,6 +143,15 @@ const tabsSlice = createSlice({
         saveTabsToStorage(state);
       }
     },
+
+    // 刷新标签页（更新refreshKey以强制组件重新渲染）
+    refreshTab: (state, action: PayloadAction<string>) => {
+      const tab = state.items.find(item => item.key === action.payload);
+      if (tab) {
+        tab.refreshKey = (tab.refreshKey || 0) + 1;
+        saveTabsToStorage(state);
+      }
+    },
   },
 });
 
@@ -153,6 +163,7 @@ export const {
   closeAllTabs,
   closeRightTabs,
   updateTabTitle,
+  refreshTab,
 } = tabsSlice.actions;
 
 export default tabsSlice.reducer;

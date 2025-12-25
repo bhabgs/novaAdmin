@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Tabs, Dropdown } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import {
   closeOtherTabs,
   closeAllTabs,
   closeRightTabs,
+  refreshTab,
 } from '../../store/slices/tabsSlice';
 import { Menu as MenuType } from '../../types/menu';
 import styles from './index.module.less';
@@ -22,6 +23,12 @@ const PageTabs: React.FC = () => {
 
   const { items, activeKey } = useAppSelector(state => state.tabs);
   const { userMenus } = useAppSelector(state => state.menu);
+  const itemsRef = useRef(items);
+  
+  // 保持 itemsRef 与 items 同步
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   // 根据路径查找菜单项
   const findMenuByPath = (menus: MenuType[], path: string): MenuType | null => {
@@ -40,10 +47,27 @@ const PageTabs: React.FC = () => {
   // 监听路由变化，自动添加标签页
   useEffect(() => {
     const currentPath = location.pathname;
-    const fullPath = location.pathname + location.search; // 包含查询参数的完整路径
+    
+    // 解析查询参数，移除 _refresh 参数（用于刷新组件，不应该创建新tab）
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete('_refresh');
+    const cleanSearch = searchParams.toString();
+    const fullPath = currentPath + (cleanSearch ? `?${cleanSearch}` : ''); // 包含查询参数的完整路径（排除_refresh）
 
     // 跳过登录页
     if (currentPath === '/login') return;
+
+    // 检查是否已经存在该标签页（使用基础路径匹配，忽略 _refresh 参数）
+    const existingTab = itemsRef.current.find(item => {
+      const [itemBasePath] = item.path.split('?');
+      return itemBasePath === currentPath;
+    });
+
+    // 如果标签页已存在，只更新激活状态，不创建新标签页
+    if (existingTab) {
+      dispatch(setActiveTab(existingTab.key));
+      return;
+    }
 
     // 查找当前路径对应的菜单
     const menu = findMenuByPath(userMenus, currentPath);
@@ -51,17 +75,16 @@ const PageTabs: React.FC = () => {
     if (menu) {
       dispatch(
         addTab({
-          key: fullPath, // 使用完整路径作为 key
+          key: fullPath, // 使用完整路径作为 key（排除_refresh）
           title: menu.name, // 存储默认标题作为备用
           i18nKey: menu.i18nKey, // 存储国际化 key
-          path: fullPath, // 存储完整路径
+          path: fullPath, // 存储完整路径（排除_refresh）
           closable: currentPath !== '/dashboard',
         })
       );
     } else {
       // 如果找不到菜单，使用默认标题
       // 对于 iframe 页面，从 URL 参数中获取标题
-      const searchParams = new URLSearchParams(location.search);
       const urlTitle = searchParams.get('title');
 
       const pathSegments = currentPath.split('/').filter(Boolean);
@@ -70,9 +93,9 @@ const PageTabs: React.FC = () => {
 
       dispatch(
         addTab({
-          key: fullPath, // 使用完整路径作为 key
+          key: fullPath, // 使用完整路径作为 key（排除_refresh）
           title: title,
-          path: fullPath, // 存储完整路径
+          path: fullPath, // 存储完整路径（排除_refresh）
           closable: currentPath !== '/dashboard',
         })
       );
@@ -108,6 +131,36 @@ const PageTabs: React.FC = () => {
     }
   };
 
+  // 刷新标签页组件
+  const handleRefreshTab = (tabKey: string) => {
+    const tab = items.find(item => item.key === tabKey);
+    if (!tab) return;
+
+    // 更新刷新key
+    dispatch(refreshTab(tabKey));
+
+    // 通过重新导航来触发组件重新渲染
+    // 解析当前路径和查询参数
+    const [basePath, queryString] = tab.path.split('?');
+    const originalSearchParams = new URLSearchParams(queryString || '');
+    
+    // 添加刷新时间戳参数
+    const refreshParams = new URLSearchParams(originalSearchParams);
+    refreshParams.set('_refresh', Date.now().toString());
+    
+    // 导航到带刷新参数的路径（这会触发路由变化，组件会重新渲染）
+    const refreshPath = `${basePath}?${refreshParams.toString()}`;
+    navigate(refreshPath, { replace: true });
+    
+    // 在下一个事件循环中移除刷新参数，恢复原URL
+    setTimeout(() => {
+      const cleanPath = originalSearchParams.toString() 
+        ? `${basePath}?${originalSearchParams.toString()}` 
+        : basePath;
+      navigate(cleanPath, { replace: true });
+    }, 10);
+  };
+
   // 右键菜单
   const getContextMenuItems = (tabKey: string) => {
     const currentIndex = items.findIndex(item => item.key === tabKey);
@@ -118,8 +171,8 @@ const PageTabs: React.FC = () => {
         key: 'refresh',
         label: t('tabs.refresh'),
         onClick: () => {
-          // 刷新当前页面
-          window.location.reload();
+          // 刷新当前标签页组件
+          handleRefreshTab(tabKey);
         },
       },
       {

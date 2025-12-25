@@ -44,7 +44,8 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (error) {
-      message.error(error);
+      // 错误消息会在 handleSubmit 的 catch 中显示，这里不需要重复显示
+      // 但为了确保错误被清除，我们可以在这里处理
     }
   }, [error]);
 
@@ -71,8 +72,10 @@ const Login: React.FC = () => {
         navigate(from, { replace: true });
       }
     } catch (error) {
-      // 错误已在Redux中处理
-      console.error("Login failed:", error);
+      // 错误已在Redux中处理，通过useEffect显示错误消息
+      // 不进行任何导航或刷新操作，只显示错误提示
+      const errorMessage = error instanceof Error ? error.message : "登录失败，请检查用户名和密码";
+      message.error(errorMessage);
     }
   };
 

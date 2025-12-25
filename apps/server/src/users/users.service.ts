@@ -239,13 +239,15 @@ export class UsersService {
       throw new NotFoundException('用户不存在');
     }
 
-    // 合并用户直接权限和角色权限
-    const permissions = new Set<string>(user.permissions || []);
+    // 合并用户通过角色拥有的菜单ID
+    const menuIds = new Set<string>();
     user.roles?.forEach((role) => {
-      role.permissions?.forEach((p) => permissions.add(p));
+      if (role.menuIds && role.menuIds.length > 0) {
+        role.menuIds.forEach((menuId: string) => menuIds.add(menuId));
+      }
     });
 
-    return Array.from(permissions);
+    return Array.from(menuIds);
   }
 
   async updateLastLoginTime(id: string): Promise<void> {

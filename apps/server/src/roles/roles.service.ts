@@ -4,38 +4,25 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, In } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Role } from './entities/role.entity';
+import { Menu, MenuStatus } from '../menus/entities/menu.entity';
 import {
   CreateRoleDto,
   UpdateRoleDto,
   QueryRoleDto,
-  AssignPermissionsDto,
+  AssignMenusDto,
   CopyRoleDto,
 } from './dto/role.dto';
 import { PaginationResult } from '../common/dto/pagination.dto';
-
-// 预定义权限列表
-const defaultPermissions = [
-  { id: '1', code: 'system:user:list', name: '用户列表', type: 'menu' },
-  { id: '2', code: 'system:user:create', name: '创建用户', type: 'button' },
-  { id: '3', code: 'system:user:update', name: '编辑用户', type: 'button' },
-  { id: '4', code: 'system:user:delete', name: '删除用户', type: 'button' },
-  { id: '5', code: 'system:role:list', name: '角色列表', type: 'menu' },
-  { id: '6', code: 'system:role:create', name: '创建角色', type: 'button' },
-  { id: '7', code: 'system:role:update', name: '编辑角色', type: 'button' },
-  { id: '8', code: 'system:role:delete', name: '删除角色', type: 'button' },
-  { id: '9', code: 'system:menu:list', name: '菜单列表', type: 'menu' },
-  { id: '10', code: 'system:menu:create', name: '创建菜单', type: 'button' },
-  { id: '11', code: 'system:menu:update', name: '编辑菜单', type: 'button' },
-  { id: '12', code: 'system:menu:delete', name: '删除菜单', type: 'button' },
-];
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
+    @InjectRepository(Menu)
+    private menuRepository: Repository<Menu>,
   ) {}
 
   async findAll(query: QueryRoleDto): Promise<PaginationResult<Role>> {
@@ -136,69 +123,62 @@ export class RolesService {
     await this.roleRepository.delete(ids);
   }
 
-  async assignPermissions(id: string, dto: AssignPermissionsDto): Promise<void> {
+  async assignMenus(id: string, dto: AssignMenusDto): Promise<void> {
     const role = await this.findById(id);
     if (!role) {
       throw new NotFoundException('角色不存在');
     }
 
-    role.permissions = dto.permissionIds;
+    role.menuIds = dto.menuIds;
     await this.roleRepository.save(role);
   }
 
-  async getRolePermissions(id: string): Promise<any[]> {
+  async getRoleMenus(id: string): Promise<Menu[]> {
     const role = await this.findById(id);
     if (!role) {
       throw new NotFoundException('角色不存在');
     }
 
-    // 返回角色拥有的权限详情
-    return defaultPermissions.filter((p) =>
-      role.permissions?.includes(p.code),
-    );
+    if (!role.menuIds || role.menuIds.length === 0) {
+      return [];
+    }
+
+    // 返回角色拥有的菜单
+    return this.menuRepository.find({
+      where: { id: In(role.menuIds) },
+      order: { sortOrder: 'ASC' },
+    });
   }
 
-  async getPermissions(): Promise<any[]> {
-    return defaultPermissions;
+  async getMenuTree(): Promise<any[]> {
+    // 获取所有激活状态的菜单
+    const menus = await this.menuRepository.find({
+      where: { status: MenuStatus.ACTIVE },
+      order: { sortOrder: 'ASC' },
+    });
+
+    // 构建菜单树结构
+    return this.buildMenuTree(menus);
   }
 
-  async getPermissionTree(): Promise<any[]> {
-    // 构建权限树结构
-    const tree = [
-      {
-        id: 'system',
-        name: '系统管理',
-        code: 'system',
-        children: [
-          {
-            id: 'system:user',
-            name: '用户管理',
-            code: 'system:user',
-            children: defaultPermissions
-              .filter((p) => p.code.startsWith('system:user:'))
-              .map((p) => ({ ...p, children: [] })),
-          },
-          {
-            id: 'system:role',
-            name: '角色管理',
-            code: 'system:role',
-            children: defaultPermissions
-              .filter((p) => p.code.startsWith('system:role:'))
-              .map((p) => ({ ...p, children: [] })),
-          },
-          {
-            id: 'system:menu',
-            name: '菜单管理',
-            code: 'system:menu',
-            children: defaultPermissions
-              .filter((p) => p.code.startsWith('system:menu:'))
-              .map((p) => ({ ...p, children: [] })),
-          },
-        ],
-      },
-    ];
+  private buildMenuTree(menus: Menu[], parentId?: string): any[] {
+    const result: any[] = [];
 
-    return tree;
+    for (const menu of menus) {
+      if (menu.parentId === parentId || (!menu.parentId && !parentId)) {
+        const children = this.buildMenuTree(menus, menu.id);
+        result.push({
+          key: menu.id,
+          title: menu.name,
+          icon: menu.icon,
+          type: menu.type,
+          path: menu.path,
+          children: children.length > 0 ? children : undefined,
+        });
+      }
+    }
+
+    return result;
   }
 
   async copyRole(id: string, dto: CopyRoleDto): Promise<Role> {
@@ -211,12 +191,13 @@ export class RolesService {
     const newCode = `${role.code}_copy_${Date.now()}`;
 
     const copied = this.roleRepository.create({
-      ...role,
-      id: undefined,
       name: newName,
       code: newCode,
-      createdAt: undefined,
-      updatedAt: undefined,
+      description: role.description,
+      menuIds: role.menuIds,
+      status: role.status,
+      sortOrder: role.sortOrder,
+      remark: role.remark,
     });
 
     return this.roleRepository.save(copied);

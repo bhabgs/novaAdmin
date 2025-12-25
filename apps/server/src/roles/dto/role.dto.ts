@@ -25,10 +25,10 @@ export class CreateRoleDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ description: '权限列表' })
+  @ApiPropertyOptional({ description: '菜单ID列表' })
   @IsOptional()
   @IsArray()
-  permissions?: string[];
+  menuIds?: string[];
 
   @ApiPropertyOptional({ description: '状态', enum: RoleStatus })
   @IsOptional()
@@ -63,10 +63,10 @@ export class QueryRoleDto {
   keyword?: string;
 }
 
-export class AssignPermissionsDto {
-  @ApiProperty({ description: '权限列表' })
+export class AssignMenusDto {
+  @ApiProperty({ description: '菜单ID列表' })
   @IsArray()
-  permissionIds: string[];
+  menuIds: string[];
 }
 
 export class BatchDeleteDto {

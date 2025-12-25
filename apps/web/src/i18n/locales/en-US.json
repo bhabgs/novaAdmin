@@ -332,6 +332,8 @@
     "roleName": "Role Name",
     "roleCode": "Role Code",
     "permissions": "Permissions",
+    "menuCount": "Menu Permissions",
+    "menus": "menus",
     "userCount": "User Count",
     "users": "users",
     "active": "Active",

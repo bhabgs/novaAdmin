@@ -404,25 +404,16 @@ const MenuForm: React.FC<MenuFormProps> = ({
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item
-              name="permission"
-              label={t('menu.permission')}
-              rules={[{ required: true, message: t('menu.permissionRequired') }]}
+              name="sortOrder"
+              label={t('menu.sortOrder')}
+              rules={[{ type: 'number', message: t('menu.sortOrderNumber') }]}
             >
-              <Input placeholder={t('menu.permissionPlaceholder')} />
+              <InputNumber
+                placeholder={t('menu.sortOrderPlaceholder')}
+                style={{ width: '100%' }}
+                min={0}
+              />
             </Form.Item>
-          </Col>
-          <Col span={12}>
-              <Form.Item
-                name="sortOrder"
-                label={t('menu.sortOrder')}
-                rules={[{ type: 'number', message: t('menu.sortOrderNumber') }]}
-              >
-                <InputNumber
-                  placeholder={t('menu.sortOrderPlaceholder')}
-                  style={{ width: '100%' }}
-                  min={0}
-                />
-              </Form.Item>
           </Col>
         </Row>
 

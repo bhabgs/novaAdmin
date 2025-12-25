@@ -54,9 +54,6 @@ export class Menu {
   @Column({ default: false })
   openInNewTab: boolean;
 
-  @Column({ nullable: true, length: 100 })
-  permission: string;
-
   @Column({ default: 0 })
   sortOrder: number;
 

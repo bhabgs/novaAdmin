@@ -292,6 +292,8 @@
     "roleName": "اسم الدور",
     "roleCode": "رمز الدور",
     "permissions": "الصلاحيات",
+    "menuCount": "صلاحيات القائمة",
+    "menus": "قوائم",
     "userCount": "عدد المستخدمين",
     "users": "مستخدم",
     "active": "نشط",

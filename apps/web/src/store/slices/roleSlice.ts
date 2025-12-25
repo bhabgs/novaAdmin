@@ -1,20 +1,18 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Role, Permission, ListResponse, PaginationParams, ApiResponse } from '../../types';
+import { Role, ListResponse, PaginationParams, ApiResponse } from '../../types';
 import {
   rolesControllerFindAll,
   rolesControllerFindOne,
   rolesControllerCreate,
   rolesControllerUpdate,
   rolesControllerDelete,
-  rolesControllerGetPermissions,
-  rolesControllerAssignPermissions,
+  rolesControllerAssignMenus,
   type CreateRoleDto,
   type UpdateRoleDto,
 } from '../../api';
 
 interface RoleState {
   roles: Role[];
-  permissions: Permission[];
   currentRole: Role | null;
   pagination: PaginationParams;
   loading: boolean;
@@ -24,7 +22,6 @@ interface RoleState {
 
 const initialState: RoleState = {
   roles: [],
-  permissions: [],
   currentRole: null,
   pagination: {
     page: 1,
@@ -58,23 +55,6 @@ export const fetchRoles = createAsyncThunk(
   }
 );
 
-// 获取权限列表
-export const fetchPermissions = createAsyncThunk(
-  'role/fetchPermissions',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await rolesControllerGetPermissions() as unknown as ApiResponse<Permission[]>;
-      if (response.success) {
-        return response.data;
-      } else {
-        return rejectWithValue(response.message);
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : '获取权限列表失败';
-      return rejectWithValue(errorMessage);
-    }
-  }
-);
 
 // 获取角色详情
 export const fetchRoleById = createAsyncThunk(
@@ -151,30 +131,31 @@ export const deleteRole = createAsyncThunk(
   }
 );
 
-// 分配权限
-export const assignPermissions = createAsyncThunk(
-  'role/assignPermissions',
-  async ({ roleId, permissionIds }: { roleId: string; permissionIds: string[] }, { rejectWithValue, dispatch }) => {
+// 分配菜单权限
+export const assignMenus = createAsyncThunk(
+  'role/assignMenus',
+  async ({ roleId, menuIds }: { roleId: string; menuIds: string[] }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await rolesControllerAssignPermissions({
+      const response = await rolesControllerAssignMenus({
         path: { id: roleId },
-        body: { permissionIds }
+        body: { menuIds }
       }) as unknown as ApiResponse<null>;
       if (response.success) {
         dispatch(fetchRoleById(roleId));
+        dispatch(fetchRoles({}));
         return response.data;
       } else {
         return rejectWithValue(response.message);
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : '分配权限失败';
+      const errorMessage = error instanceof Error ? error.message : '分配菜单权限失败';
       return rejectWithValue(errorMessage);
     }
   }
 );
 
-// 更新角色权限 (别名)
-export const updateRolePermissions = assignPermissions;
+// 更新角色菜单权限 (别名)
+export const updateRoleMenus = assignMenus;
 
 const roleSlice = createSlice({
   name: 'role',
@@ -210,20 +191,6 @@ const roleSlice = createSlice({
         state.error = action.payload as string;
       });
 
-    // 获取权限列表
-    builder
-      .addCase(fetchPermissions.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchPermissions.fulfilled, (state, action) => {
-        state.loading = false;
-        state.permissions = action.payload;
-      })
-      .addCase(fetchPermissions.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
 
     // 获取角色详情
     builder
@@ -282,16 +249,16 @@ const roleSlice = createSlice({
         state.error = action.payload as string;
       });
 
-    // 分配权限
+    // 分配菜单权限
     builder
-      .addCase(assignPermissions.pending, (state) => {
+      .addCase(assignMenus.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(assignPermissions.fulfilled, (state) => {
+      .addCase(assignMenus.fulfilled, (state) => {
         state.loading = false;
       })
-      .addCase(assignPermissions.rejected, (state, action) => {
+      .addCase(assignMenus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

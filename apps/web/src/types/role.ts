@@ -3,7 +3,7 @@ export interface Role {
   name: string;
   code: string;
   description?: string;
-  permissions: string[];
+  menuIds: string[];
   status: 'active' | 'inactive';
   userCount?: number;
   sortOrder?: number;

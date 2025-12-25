@@ -134,22 +134,13 @@ const RoleList: React.FC = () => {
       render: (code: string) => <Tag color="geekblue">{code}</Tag>,
     },
     {
-      title: t("role.permissions"),
-      dataIndex: "permissions",
-      key: "permissions",
-      render: (permissions: string[]) => (
-        <Space wrap>
-          {permissions?.slice(0, 3).map((permission) => (
-            <Tag key={permission} color="green" style={{ fontSize: "12px" }}>
-              {permission}
-            </Tag>
-          ))}
-          {permissions?.length > 3 && (
-            <Tooltip title={permissions.slice(3).join(", ")}>
-              <Tag color="orange">+{permissions.length - 3}</Tag>
-            </Tooltip>
-          )}
-        </Space>
+      title: t("role.menuCount"),
+      dataIndex: "menuIds",
+      key: "menuIds",
+      render: (menuIds: string[]) => (
+        <Tag color="green">
+          {menuIds?.length || 0} {t("role.menus")}
+        </Tag>
       ),
     },
     {

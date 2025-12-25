@@ -55,11 +55,6 @@ export class CreateMenuDto {
   @IsBoolean()
   openInNewTab?: boolean;
 
-  @ApiPropertyOptional({ description: '权限标识' })
-  @IsOptional()
-  @IsString()
-  permission?: string;
-
   @ApiPropertyOptional({ description: '排序', default: 0 })
   @IsOptional()
   @IsNumber()

@@ -304,7 +304,7 @@ export const rolesControllerGetRolePermissions = <ThrowOnError extends boolean =
 });
 
 /**
- * 分配权限
+ * 分配权限 (已废弃，使用 rolesControllerAssignMenus)
  */
 export const rolesControllerAssignPermissions = <ThrowOnError extends boolean = false>(options: Options<RolesControllerAssignPermissionsData, ThrowOnError>) => (options.client ?? client).post<RolesControllerAssignPermissionsResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -314,6 +314,37 @@ export const rolesControllerAssignPermissions = <ThrowOnError extends boolean = 
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * 分配菜单权限
+ */
+export const rolesControllerAssignMenus = <ThrowOnError extends boolean = false>(options: { path: { id: string }; body: { menuIds: string[] } } & Omit<Options<unknown, ThrowOnError>, 'body'>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/roles/{id}/menus',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 获取菜单树（用于权限分配）
+ */
+export const rolesControllerGetMenuTree = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => (options?.client ?? client).get<unknown, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/roles/menus/tree',
+    ...options
+});
+
+/**
+ * 获取角色菜单
+ */
+export const rolesControllerGetRoleMenus = <ThrowOnError extends boolean = false>(options: { path: { id: string } } & Options<unknown, ThrowOnError>) => (options.client ?? client).get<unknown, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/roles/{id}/menus',
+    ...options
 });
 
 /**

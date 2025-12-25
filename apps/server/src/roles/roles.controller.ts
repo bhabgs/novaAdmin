@@ -15,7 +15,7 @@ import {
   CreateRoleDto,
   UpdateRoleDto,
   QueryRoleDto,
-  AssignPermissionsDto,
+  AssignMenusDto,
   BatchDeleteDto,
   CopyRoleDto,
 } from './dto/role.dto';
@@ -40,16 +40,10 @@ export class RolesController {
     return this.rolesService.findAllWithoutPagination();
   }
 
-  @Get('permissions')
-  @ApiOperation({ summary: '获取所有权限' })
-  async getPermissions() {
-    return this.rolesService.getPermissions();
-  }
-
-  @Get('permissions/tree')
-  @ApiOperation({ summary: '获取权限树' })
-  async getPermissionTree() {
-    return this.rolesService.getPermissionTree();
+  @Get('menus/tree')
+  @ApiOperation({ summary: '获取菜单树（用于权限分配）' })
+  async getMenuTree() {
+    return this.rolesService.getMenuTree();
   }
 
   @Get(':id')
@@ -84,20 +78,20 @@ export class RolesController {
     return null;
   }
 
-  @Post(':id/permissions')
-  @ApiOperation({ summary: '分配权限' })
-  async assignPermissions(
+  @Post(':id/menus')
+  @ApiOperation({ summary: '分配菜单权限' })
+  async assignMenus(
     @Param('id') id: string,
-    @Body() dto: AssignPermissionsDto,
+    @Body() dto: AssignMenusDto,
   ) {
-    await this.rolesService.assignPermissions(id, dto);
+    await this.rolesService.assignMenus(id, dto);
     return null;
   }
 
-  @Get(':id/permissions')
-  @ApiOperation({ summary: '获取角色权限' })
-  async getRolePermissions(@Param('id') id: string) {
-    return this.rolesService.getRolePermissions(id);
+  @Get(':id/menus')
+  @ApiOperation({ summary: '获取角色菜单' })
+  async getRoleMenus(@Param('id') id: string) {
+    return this.rolesService.getRoleMenus(id);
   }
 
   @Post(':id/copy')

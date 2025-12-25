@@ -26,7 +26,7 @@ export class Role {
   description: string;
 
   @Column({ type: 'simple-array', nullable: true })
-  permissions: string[];
+  menuIds: string[];
 
   @Column({
     type: 'enum',

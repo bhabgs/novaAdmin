@@ -333,6 +333,8 @@
     "roleName": "角色名称",
     "roleCode": "角色编码",
     "permissions": "权限",
+    "menuCount": "菜单权限",
+    "menus": "个菜单",
     "userCount": "用户数量",
     "users": "用户",
     "active": "启用",

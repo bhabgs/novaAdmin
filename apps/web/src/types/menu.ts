@@ -10,7 +10,6 @@ export interface Menu {
   component?: string;
   externalUrl?: string; // iframe 外部链接
   openInNewTab?: boolean; // 是否在新标签页打开（仅 iframe 类型）
-  permission?: string;
   sortOrder: number;
   status: 'active' | 'inactive';
   hideInMenu?: boolean;
@@ -34,7 +33,6 @@ export interface MenuFormData {
   component?: string;
   externalUrl?: string; // iframe 外部链接
   openInNewTab?: boolean; // 是否在新标签页打开（仅 iframe 类型）
-  permission?: string;
   sortOrder: number;
   status: 'active' | 'inactive';
   hideInMenu?: boolean;

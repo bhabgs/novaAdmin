@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Modal,
   Tree,
@@ -9,16 +9,24 @@ import {
   Input,
   Divider,
   Tag,
+  Spin,
 } from "antd";
 import {
   SearchOutlined,
   CheckOutlined,
   CloseOutlined,
+  FolderOutlined,
+  FileOutlined,
+  AppstoreOutlined,
+  LinkOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { updateRolePermissions } from "@/store/slices/roleSlice";
+import { updateRoleMenus } from "@/store/slices/roleSlice";
+import { fetchMenus } from "@/store/slices/menuSlice";
 import type { Role } from "@/types/role";
+import type { Menu } from "@/types/menu";
+import { getIconByName } from "@/constants/icons";
 
 const { Search } = Input;
 
@@ -29,10 +37,11 @@ interface PermissionModalProps {
   onSuccess: () => void;
 }
 
-interface PermissionNode {
+interface MenuTreeNode {
   key: string;
-  title: string;
-  children?: PermissionNode[];
+  title: React.ReactNode;
+  icon: React.ReactNode;
+  children?: MenuTreeNode[];
 }
 
 const PermissionModal: React.FC<PermissionModalProps> = ({
@@ -44,17 +53,76 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.role);
+  const { menus, loading: menusLoading } = useAppSelector((state) => state.menu);
 
   const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
   const [expandedKeys, setExpandedKeys] = useState<React.Key[]>([]);
   const [searchValue, setSearchValue] = useState("");
   const [autoExpandParent, setAutoExpandParent] = useState(true);
 
+  // 获取菜单图标
+  const getMenuIcon = useCallback((menu: Menu) => {
+    // 优先使用菜单配置的图标
+    if (menu.icon) {
+      const icon = getIconByName(menu.icon);
+      if (icon) return icon;
+    }
+    // 否则根据类型返回默认图标
+    switch (menu.type) {
+      case "directory":
+        return <FolderOutlined />;
+      case "page":
+        return <FileOutlined />;
+      case "button":
+        return <AppstoreOutlined />;
+      case "iframe":
+        return <LinkOutlined />;
+      default:
+        return <FileOutlined />;
+    }
+  }, []);
+
+  // 构建菜单树
+  const buildMenuTree = useCallback(
+    (menuList: Menu[], parentId?: string): MenuTreeNode[] => {
+      const result: MenuTreeNode[] = [];
+
+      for (const menu of menuList) {
+        if (menu.parentId === parentId || (!menu.parentId && !parentId)) {
+          const children = buildMenuTree(menuList, menu.id);
+          const typeLabel = {
+            directory: t("menu.directory"),
+            page: t("menu.page"),
+            button: t("menu.button"),
+            iframe: t("menu.iframe"),
+          };
+
+          result.push({
+            key: menu.id,
+            title: (
+              <Space>
+                <span>{menu.name}</span>
+                <Tag color={menu.type === "directory" ? "blue" : menu.type === "page" ? "green" : menu.type === "iframe" ? "purple" : "orange"} style={{ fontSize: 10 }}>
+                  {typeLabel[menu.type] || menu.type}
+                </Tag>
+              </Space>
+            ),
+            icon: getMenuIcon(menu),
+            children: children.length > 0 ? children : undefined,
+          });
+        }
+      }
+
+      return result;
+    },
+    [t, getMenuIcon]
+  );
+
   // 获取所有节点 key
-  const getAllKeys = React.useCallback((nodes: PermissionNode[]): string[] => {
+  const getAllKeys = useCallback((nodes: MenuTreeNode[]): string[] => {
     let keys: string[] = [];
     nodes.forEach((node) => {
-      keys.push(node.key);
+      keys.push(node.key as string);
       if (node.children) {
         keys = keys.concat(getAllKeys(node.children));
       }
@@ -62,101 +130,56 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
     return keys;
   }, []);
 
-  // 模拟权限树数据
-  const permissionTree: PermissionNode[] = React.useMemo(
-    () => [
-      {
-        key: "dashboard",
-        title: t("menu.dashboard"),
-        children: [
-          { key: "dashboard:view", title: t("permission.dashboardView") },
-          { key: "dashboard:export", title: t("permission.dashboardExport") },
-        ],
-      },
-      {
-        key: "user",
-        title: t("menu.userManagement"),
-        children: [
-          { key: "user:view", title: t("permission.userView") },
-          { key: "user:create", title: t("permission.userCreate") },
-          { key: "user:update", title: t("permission.userUpdate") },
-          { key: "user:delete", title: t("permission.userDelete") },
-          { key: "user:export", title: t("permission.userExport") },
-          { key: "user:import", title: t("permission.userImport") },
-        ],
-      },
-      {
-        key: "role",
-        title: t("menu.roleManagement"),
-        children: [
-          { key: "role:view", title: t("permission.roleView") },
-          { key: "role:create", title: t("permission.roleCreate") },
-          { key: "role:update", title: t("permission.roleUpdate") },
-          { key: "role:delete", title: t("permission.roleDelete") },
-          { key: "role:assign", title: t("permission.roleAssign") },
-        ],
-      },
-      {
-        key: "menu",
-        title: t("menu.menuManagement"),
-        children: [
-          { key: "menu:view", title: t("permission.menuView") },
-          { key: "menu:create", title: t("permission.menuCreate") },
-          { key: "menu:update", title: t("permission.menuUpdate") },
-          { key: "menu:delete", title: t("permission.menuDelete") },
-        ],
-      },
-      {
-        key: "system",
-        title: t("menu.systemSettings"),
-        children: [
-          { key: "system:view", title: t("permission.systemView") },
-          { key: "system:update", title: t("permission.systemUpdate") },
-          { key: "system:backup", title: t("permission.systemBackup") },
-          { key: "system:restore", title: t("permission.systemRestore") },
-        ],
-      },
-    ],
-    [t]
-  );
+  // 菜单树数据
+  const menuTree = useMemo(() => {
+    return buildMenuTree(menus);
+  }, [menus, buildMenuTree]);
 
   useEffect(() => {
-    if (visible && role) {
-      // 设置当前角色的权限
-      const rolePermissions = role.permissions || [];
-      setCheckedKeys(rolePermissions);
+    if (visible) {
+      // 加载菜单列表
+      dispatch(fetchMenus());
+    }
+  }, [visible, dispatch]);
+
+  useEffect(() => {
+    if (visible && role && menus.length > 0) {
+      // 设置当前角色的菜单权限
+      const roleMenuIds = role.menuIds || [];
+      setCheckedKeys(roleMenuIds);
 
       // 展开所有节点
-      const allKeys = getAllKeys(permissionTree);
+      const allKeys = getAllKeys(menuTree);
       setExpandedKeys(allKeys);
     }
-  }, [visible, role, permissionTree, getAllKeys]);
+  }, [visible, role, menus, menuTree, getAllKeys]);
 
-  const filterTreeData = (
-    tree: PermissionNode[],
-    searchValue: string
-  ): PermissionNode[] => {
-    if (!searchValue) return tree;
+  // 过滤树数据
+  const filterTreeData = useCallback(
+    (tree: MenuTreeNode[], searchVal: string): MenuTreeNode[] => {
+      if (!searchVal) return tree;
 
-    return tree.reduce((acc: PermissionNode[], node) => {
-      const isMatch = node.title
-        .toLowerCase()
-        .includes(searchValue.toLowerCase());
-      const filteredChildren = node.children
-        ? filterTreeData(node.children, searchValue)
-        : [];
+      return tree.reduce((acc: MenuTreeNode[], node) => {
+        const titleText = React.isValidElement(node.title)
+          ? (node.title.props.children?.[0]?.props?.children as string) || ""
+          : String(node.title);
+        const isMatch = titleText.toLowerCase().includes(searchVal.toLowerCase());
+        const filteredChildren = node.children
+          ? filterTreeData(node.children, searchVal)
+          : [];
 
-      if (isMatch || filteredChildren.length > 0) {
-        acc.push({
-          ...node,
-          children:
-            filteredChildren.length > 0 ? filteredChildren : node.children,
-        });
-      }
+        if (isMatch || filteredChildren.length > 0) {
+          acc.push({
+            ...node,
+            children: filteredChildren.length > 0 ? filteredChildren : node.children,
+          });
+        }
 
-      return acc;
-    }, []);
-  };
+        return acc;
+      }, []);
+    },
+    []
+  );
 
   const onExpand = (expandedKeysValue: React.Key[]) => {
     setExpandedKeys(expandedKeysValue);
@@ -175,32 +198,16 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
   };
 
   const onSearch = (value: string) => {
-    const expandedKeysValue = getAllKeys(permissionTree).filter((key) => {
-      const node = findNode(permissionTree, key);
-      return node && node.title.toLowerCase().includes(value.toLowerCase());
-    });
-
-    setExpandedKeys(expandedKeysValue);
+    if (value) {
+      const allKeys = getAllKeys(menuTree);
+      setExpandedKeys(allKeys);
+    }
     setSearchValue(value);
     setAutoExpandParent(true);
   };
 
-  const findNode = (
-    tree: PermissionNode[],
-    key: string
-  ): PermissionNode | null => {
-    for (const node of tree) {
-      if (node.key === key) return node;
-      if (node.children) {
-        const found = findNode(node.children, key);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-
   const handleSelectAll = () => {
-    const allKeys = getAllKeys(permissionTree);
+    const allKeys = getAllKeys(menuTree);
     setCheckedKeys(allKeys);
   };
 
@@ -213,9 +220,9 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
 
     try {
       await dispatch(
-        updateRolePermissions({
+        updateRoleMenus({
           roleId: role.id,
-          permissionIds: checkedKeys as string[],
+          menuIds: checkedKeys as string[],
         })
       ).unwrap();
 
@@ -226,7 +233,7 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
     }
   };
 
-  const filteredTree = filterTreeData(permissionTree, searchValue);
+  const filteredTree = filterTreeData(menuTree, searchValue);
 
   return (
     <Modal
@@ -247,7 +254,7 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
         <Space style={{ width: "100%", justifyContent: "space-between" }}>
           <Search
             style={{ width: 300 }}
-            placeholder={t("permission.searchPlaceholder")}
+            placeholder={t("menu.searchPlaceholder")}
             allowClear
             enterButton={<SearchOutlined />}
             onSearch={onSearch}
@@ -275,17 +282,20 @@ const PermissionModal: React.FC<PermissionModalProps> = ({
         {t("permission.selectedCount", { count: checkedKeys.length })}
       </Divider>
 
-      <Tree
-        checkable
-        onExpand={onExpand}
-        expandedKeys={expandedKeys}
-        autoExpandParent={autoExpandParent}
-        onCheck={onCheck}
-        checkedKeys={checkedKeys}
-        treeData={filteredTree}
-        height={400}
-        style={{ border: "1px solid #d9d9d9", borderRadius: 6, padding: 8 }}
-      />
+      <Spin spinning={menusLoading}>
+        <Tree
+          checkable
+          showIcon
+          onExpand={onExpand}
+          expandedKeys={expandedKeys}
+          autoExpandParent={autoExpandParent}
+          onCheck={onCheck}
+          checkedKeys={checkedKeys}
+          treeData={filteredTree}
+          height={400}
+          style={{ border: "1px solid #d9d9d9", borderRadius: 6, padding: 8 }}
+        />
+      </Spin>
     </Modal>
   );
 };

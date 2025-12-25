@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "check": "tsc -b --noEmit",
-    "generate:api": "orval"
+    "generate:api": "openapi-generator-cli generate -c openapi-generator-config.json"
   },
   "dependencies": {
     "@ant-design/charts": "^2.2.1",

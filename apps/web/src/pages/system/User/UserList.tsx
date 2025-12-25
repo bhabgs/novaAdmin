@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
-import { Select, Tag, Avatar, message } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { Select, Tag, Avatar, message, Button, Space, Popconfirm, Tooltip } from "antd";
+import { UserOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
@@ -33,7 +33,7 @@ const UserList: React.FC = () => {
     handleDelete,
     handleBatchDelete,
     handleRefresh,
-    rowSelection,
+    rowSelection: baseRowSelection,
     paginationConfig,
   } = useListManagement<User>({
     dispatch,
@@ -47,6 +47,14 @@ const UserList: React.FC = () => {
     batchDeleteConfirmKey: "user.batchDeleteConfirm",
   });
 
+  // Override rowSelection to disable admin user
+  const rowSelection = {
+    ...baseRowSelection,
+    getCheckboxProps: (record: User) => ({
+      disabled: record.username === "admin",
+    }),
+  };
+
   const handleStatusChange = useCallback(
     async (id: string, status: "active" | "inactive" | "banned") => {
       try {
@@ -59,6 +67,47 @@ const UserList: React.FC = () => {
       }
     },
     [dispatch, t, handleRefresh]
+  );
+
+  // 自定义操作列渲染
+  const operationColumnRender = useCallback(
+    (record: User) => {
+      const isProtectedUser = record.username === "admin";
+
+      return (
+        <Space size="small">
+          <Tooltip title={isProtectedUser ? t("user.adminProtected") : ""}>
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+              disabled={isProtectedUser}
+            >
+              {t("common.edit")}
+            </Button>
+          </Tooltip>
+          <Popconfirm
+            title={t("user.confirmDelete")}
+            onConfirm={() => handleDelete(record.id)}
+            okText={t("common.confirm")}
+            cancelText={t("common.cancel")}
+            disabled={isProtectedUser}
+          >
+            <Tooltip title={isProtectedUser ? t("user.adminProtected") : ""}>
+              <Button
+                type="link"
+                danger
+                icon={<DeleteOutlined />}
+                disabled={isProtectedUser}
+              >
+                {t("common.delete")}
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      );
+    },
+    [handleEdit, handleDelete, t]
   );
 
   // 表格列配置
@@ -111,25 +160,30 @@ const UserList: React.FC = () => {
       title: t("user.status"),
       dataIndex: "status",
       key: "status",
-      render: (status: User["status"], record: User) => (
-        <Select
-          value={status}
-          style={{ width: 100 }}
-          onChange={(value: "active" | "inactive" | "banned") =>
-            handleStatusChange(record.id, value)
-          }
-        >
-          <Option value="active">
-            <Tag color="green">{t("user.active")}</Tag>
-          </Option>
-          <Option value="inactive">
-            <Tag color="orange">{t("user.inactive")}</Tag>
-          </Option>
-          <Option value="banned">
-            <Tag color="red">{t("user.banned")}</Tag>
-          </Option>
-        </Select>
-      ),
+      render: (status: User["status"], record: User) => {
+        const isProtectedUser = record.username === "admin";
+
+        return (
+          <Select
+            value={status}
+            style={{ width: 100 }}
+            disabled={isProtectedUser}
+            onChange={(value: "active" | "inactive" | "banned") =>
+              handleStatusChange(record.id, value)
+            }
+          >
+            <Option value="active">
+              <Tag color="green">{t("user.active")}</Tag>
+            </Option>
+            <Option value="inactive">
+              <Tag color="orange">{t("user.inactive")}</Tag>
+            </Option>
+            <Option value="banned">
+              <Tag color="red">{t("user.banned")}</Tag>
+            </Option>
+          </Select>
+        );
+      },
     },
     {
       title: t("user.lastLoginTime"),
@@ -181,6 +235,7 @@ const UserList: React.FC = () => {
         onBatchDelete={handleBatchDelete}
         onRefresh={handleRefresh}
         deleteConfirmTitle={t("user.confirmDelete")}
+        operationColumnRender={operationColumnRender}
       />
 
       <UserForm

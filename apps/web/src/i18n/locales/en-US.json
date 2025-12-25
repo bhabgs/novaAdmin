@@ -323,7 +323,8 @@
     "action": "Action",
     "ipAddress": "IP Address",
     "loginAction": "User Login",
-    "updateProfileAction": "Update Profile"
+    "updateProfileAction": "Update Profile",
+    "adminProtected": "Super admin user is protected and cannot be modified"
   },
   "role": {
     "title": "Role Management",
@@ -357,7 +358,8 @@
     "remarkPlaceholder": "Please enter remark",
     "updateSuccess": "Update Successful",
     "createSuccess": "Create Successful",
-    "permissionUpdateSuccess": "Permission update successful"
+    "permissionUpdateSuccess": "Permission update successful",
+    "adminProtected": "Super admin role is protected and cannot be modified"
   },
   "permission": {
     "dashboardView": "View Dashboard",

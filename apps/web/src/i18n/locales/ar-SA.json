@@ -280,7 +280,8 @@
     "action": "الإجراء",
     "ipAddress": "عنوان IP",
     "loginAction": "تسجيل دخول المستخدم",
-    "updateProfileAction": "تحديث الملف الشخصي"
+    "updateProfileAction": "تحديث الملف الشخصي",
+    "adminProtected": "مستخدم المسؤول الفائق محمي ولا يمكن تعديله"
   },
   "role": {
     "title": "إدارة الأدوار",
@@ -314,7 +315,8 @@
     "remarkPlaceholder": "الرجاء إدخال الملاحظة",
     "updateSuccess": "تم التحديث بنجاح",
     "createSuccess": "تم الإنشاء بنجاح",
-    "permissionUpdateSuccess": "تم تحديث الصلاحيات بنجاح"
+    "permissionUpdateSuccess": "تم تحديث الصلاحيات بنجاح",
+    "adminProtected": "دور المسؤول الفائق محمي ولا يمكن تعديله"
   },
   "permission": {
     "dashboardView": "عرض لوحة القيادة",

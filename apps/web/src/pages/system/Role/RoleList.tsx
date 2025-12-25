@@ -64,39 +64,52 @@ const RoleList: React.FC = () => {
 
   // 自定义操作列渲染，包含分配权限按钮
   const operationColumnRender = useCallback(
-    (record: Role) => (
-      <Space size="small">
-        <Button
-          type="link"
-          icon={<SettingOutlined />}
-          onClick={() => handlePermissions(record)}
-        >
-          {t("role.assignPermissions")}
-        </Button>
-        <Button
-          type="link"
-          icon={<EditOutlined />}
-          onClick={() => handleEdit(record)}
-        >
-          {t("common.edit")}
-        </Button>
-        <Popconfirm
-          title={t("role.confirmDelete")}
-          onConfirm={() => handleDelete(record.id)}
-          okText={t("common.confirm")}
-          cancelText={t("common.cancel")}
-        >
-          <Button
-            type="link"
-            danger
-            icon={<DeleteOutlined />}
-            disabled={record.code === "admin"}
+    (record: Role) => {
+      const isProtectedRole = record.code === "admin";
+
+      return (
+        <Space size="small">
+          <Tooltip title={isProtectedRole ? t("role.adminProtected") : ""}>
+            <Button
+              type="link"
+              icon={<SettingOutlined />}
+              onClick={() => handlePermissions(record)}
+              disabled={isProtectedRole}
+            >
+              {t("role.assignPermissions")}
+            </Button>
+          </Tooltip>
+          <Tooltip title={isProtectedRole ? t("role.adminProtected") : ""}>
+            <Button
+              type="link"
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+              disabled={isProtectedRole}
+            >
+              {t("common.edit")}
+            </Button>
+          </Tooltip>
+          <Popconfirm
+            title={t("role.confirmDelete")}
+            onConfirm={() => handleDelete(record.id)}
+            okText={t("common.confirm")}
+            cancelText={t("common.cancel")}
+            disabled={isProtectedRole}
           >
-            {t("common.delete")}
-          </Button>
-        </Popconfirm>
-      </Space>
-    ),
+            <Tooltip title={isProtectedRole ? t("role.adminProtected") : ""}>
+              <Button
+                type="link"
+                danger
+                icon={<DeleteOutlined />}
+                disabled={isProtectedRole}
+              >
+                {t("common.delete")}
+              </Button>
+            </Tooltip>
+          </Popconfirm>
+        </Space>
+      );
+    },
     [handlePermissions, handleEdit, handleDelete, t]
   );
 

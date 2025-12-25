@@ -18,10 +18,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    react(),
-    tsconfigPaths(),
-  ],
+  plugins: [react(), tsconfigPaths()],
   css: {
     preprocessorOptions: {
       less: {

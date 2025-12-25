@@ -33,7 +33,6 @@ axiosInstance.interceptors.request.use(
     if (config.method === "get") {
       config.params = {
         ...config.params,
-        _t: Date.now(),
       };
     }
 

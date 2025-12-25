@@ -8,7 +8,7 @@ import {
   deleteUser,
   updateUserStatus,
 } from "@/store/slices/userSlice";
-import type { User } from "@/types/user";
+import type { User, Role } from "@/types/user";
 import UserForm from "./UserForm";
 import CrudPage, { FilterConfig } from "@/components/CrudPage";
 import { useListManagement } from "@/hooks/useListManagement";
@@ -48,10 +48,7 @@ const UserList: React.FC = () => {
   });
 
   const handleStatusChange = useCallback(
-    async (
-      id: string,
-      status: "active" | "inactive" | "banned",
-    ) => {
+    async (id: string, status: "active" | "inactive" | "banned") => {
       try {
         await dispatch(updateUserStatus({ id, status })).unwrap();
         message.success(t("user.saveSuccess"));
@@ -100,11 +97,11 @@ const UserList: React.FC = () => {
       title: t("user.roles"),
       dataIndex: "roles",
       key: "roles",
-      render: (roles: string[]) => (
+      render: (roles: Role[]) => (
         <>
           {roles?.map((role) => (
-            <Tag key={role} color="blue">
-              {role}
+            <Tag key={role.id} color="blue">
+              {role.name}
             </Tag>
           ))}
         </>

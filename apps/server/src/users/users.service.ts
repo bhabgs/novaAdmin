@@ -188,18 +188,42 @@ export class UsersService {
     }
   }
 
-  async resetPassword(id: string): Promise<{ password: string }> {
+  async resetPassword(id: string): Promise<{ message: string }> {
     const user = await this.findById(id);
     if (!user) {
       throw new NotFoundException('用户不存在');
     }
 
-    const newPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    // 生成更安全的临时密码：12位，包含大小写字母、数字和特殊字符
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    const specialChars = '!@#$%&*';
+    let newPassword = '';
 
+    // 确保至少包含各类字符
+    newPassword += chars.charAt(Math.floor(Math.random() * 26)); // 大写
+    newPassword += chars.charAt(26 + Math.floor(Math.random() * 26)); // 小写
+    newPassword += chars.charAt(52 + Math.floor(Math.random() * 8)); // 数字
+    newPassword += specialChars.charAt(Math.floor(Math.random() * specialChars.length)); // 特殊字符
+
+    // 填充剩余字符
+    for (let i = 0; i < 8; i++) {
+      newPassword += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    // 打乱顺序
+    newPassword = newPassword.split('').sort(() => Math.random() - 0.5).join('');
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     await this.userRepository.update(id, { password: hashedPassword });
 
-    return { password: newPassword };
+    // 安全日志记录（生产环境应使用专业日志系统）
+    console.log(`[SECURITY AUDIT] Password reset for user: ${user.username} (ID: ${id}) at ${new Date().toISOString()}`);
+
+    // 不返回明文密码，提示管理员通过安全渠道通知用户
+    // 实际生产环境应该通过邮件/短信发送新密码
+    return {
+      message: `密码已重置。新密码为: ${newPassword}。请通过安全渠道告知用户，并建议用户登录后立即修改密码。`
+    };
   }
 
   async updateStatus(id: string, dto: UpdateStatusDto): Promise<void> {

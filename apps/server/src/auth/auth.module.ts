@@ -15,12 +15,20 @@ import { UsersModule } from '../users/users.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET', 'default-secret'),
-        signOptions: {
-          expiresIn: configService.get('JWT_EXPIRES_IN', '2h'),
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const jwtSecret = configService.get<string>('JWT_SECRET');
+        if (!jwtSecret) {
+          throw new Error(
+            'JWT_SECRET 环境变量未配置！请在 .env 文件中设置安全的 JWT_SECRET',
+          );
+        }
+        return {
+          secret: jwtSecret,
+          signOptions: {
+            expiresIn: configService.get('JWT_EXPIRES_IN', '2h'),
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

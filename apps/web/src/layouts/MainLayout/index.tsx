@@ -40,6 +40,11 @@ const MainLayout: React.FC = () => {
     showTabs,
   } = layout;
 
+  // 获取当前标签页的 refreshKey，用于强制刷新组件
+  const { items: tabItems, activeKey } = useAppSelector((state) => state.tabs);
+  const currentTab = tabItems.find((tab) => tab.key === activeKey);
+  const refreshKey = currentTab?.refreshKey || 0;
+
   const [mobileDrawerVisible, setMobileDrawerVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -299,7 +304,7 @@ const MainLayout: React.FC = () => {
         {showTabs && <PageTabs />}
         {/* 主内容区域 */}
         <div className={styles.content}>
-          <Outlet />
+          <Outlet key={`${activeKey}-${refreshKey}`} />
         </div>
       </Layout>
     </Layout>

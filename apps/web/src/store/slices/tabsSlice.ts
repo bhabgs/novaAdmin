@@ -24,7 +24,17 @@ const loadTabsFromStorage = (): TabsState => {
       const parsed = JSON.parse(savedTabs);
       // 确保至少有 dashboard 标签
       if (parsed.items && parsed.items.length > 0) {
-        return parsed;
+        // 过滤掉无效的标签页（如根路径 "/" 或空路径）
+        parsed.items = parsed.items.filter(
+          (item: TabItem) => item.path && item.path !== '/' && item.key !== '/'
+        );
+        // 确保 activeKey 有效
+        if (!parsed.items.find((item: TabItem) => item.key === parsed.activeKey)) {
+          parsed.activeKey = parsed.items[0]?.key || '/dashboard';
+        }
+        if (parsed.items.length > 0) {
+          return parsed;
+        }
       }
     }
   } catch (error) {

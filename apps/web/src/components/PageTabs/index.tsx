@@ -54,8 +54,8 @@ const PageTabs: React.FC = () => {
     const cleanSearch = searchParams.toString();
     const fullPath = currentPath + (cleanSearch ? `?${cleanSearch}` : ''); // 包含查询参数的完整路径（排除_refresh）
 
-    // 跳过登录页
-    if (currentPath === '/login') return;
+    // 跳过登录页和根路径
+    if (currentPath === '/login' || currentPath === '/') return;
 
     // 检查是否已经存在该标签页（使用基础路径匹配，忽略 _refresh 参数）
     const existingTab = itemsRef.current.find(item => {
@@ -133,32 +133,8 @@ const PageTabs: React.FC = () => {
 
   // 刷新标签页组件
   const handleRefreshTab = (tabKey: string) => {
-    const tab = items.find(item => item.key === tabKey);
-    if (!tab) return;
-
-    // 更新刷新key
+    // 更新 refreshKey，MainLayout 中的 Outlet 会根据 key 变化重新渲染组件
     dispatch(refreshTab(tabKey));
-
-    // 通过重新导航来触发组件重新渲染
-    // 解析当前路径和查询参数
-    const [basePath, queryString] = tab.path.split('?');
-    const originalSearchParams = new URLSearchParams(queryString || '');
-    
-    // 添加刷新时间戳参数
-    const refreshParams = new URLSearchParams(originalSearchParams);
-    refreshParams.set('_refresh', Date.now().toString());
-    
-    // 导航到带刷新参数的路径（这会触发路由变化，组件会重新渲染）
-    const refreshPath = `${basePath}?${refreshParams.toString()}`;
-    navigate(refreshPath, { replace: true });
-    
-    // 在下一个事件循环中移除刷新参数，恢复原URL
-    setTimeout(() => {
-      const cleanPath = originalSearchParams.toString() 
-        ? `${basePath}?${originalSearchParams.toString()}` 
-        : basePath;
-      navigate(cleanPath, { replace: true });
-    }, 10);
   };
 
   // 右键菜单

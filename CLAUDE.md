@@ -17,7 +17,7 @@ Monorepo 后台管理系统：前端 React 18 + Ant Design 5 | 后端 NestJS + T
 apps/
 ├── web/src/              # 前端
 │   ├── api/              # [禁止修改] OpenAPI 生成
-│   ├── components/       # 通用组件 (CrudPage, CommonTable, CommonForm)
+│   ├── components/       # 通用组件 (CrudPage, PageContainer, ErrorBoundary)
 │   ├── pages/            # 业务页面 (base/, system/, tools/)
 │   ├── router/           # 动态路由
 │   ├── store/            # Redux (createCrudSlice 工厂)
@@ -142,7 +142,7 @@ const {
 
 **带参数路由**: `path: "/users/:id"` → 组件用 `useParams()` 获取
 
-**权限控制**: 用户登录 → 后端返回角色菜单 → 前端生成路由 → 按钮级用 `<PermissionWrapper permission="user:delete">`
+**权限控制**: 用户登录 → 后端返回角色菜单 → 前端生成路由（用户只能访问有权限的页面）
 
 ### 国际化
 ```typescript

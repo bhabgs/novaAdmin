@@ -6,7 +6,6 @@ import React, {
 } from "react";
 import { RouteObject, Navigate } from "react-router-dom";
 import type { Menu } from "@/types/menu";
-import { getComponent } from "./componentMap";
 import { Spin } from "antd";
 import IframeContainer from "@/components/IframeContainer";
 
@@ -35,57 +34,44 @@ const pageModules = import.meta.glob<{ default: ComponentType<any> }>(
 
 /**
  * 根据组件路径动态导入组件
- * 支持两种格式：
- * 1. 路径格式：'base/Dashboard' 或 'system/User/UserList'
- * 2. 组件名格式：'Dashboard' 或 'UserList'（向后兼容，从 componentMap 查找）
+ * 路径格式：'base/Dashboard' 或 'system/User/UserList'
  *
- * @param componentPath - 组件路径或组件名
+ * @param componentPath - 组件路径（相对于 pages/ 目录）
  * @returns 懒加载的组件或 null
  */
 function loadComponentByPath(
   componentPath: string
 ): LazyExoticComponent<ComponentType<any>> | null {
   try {
-    // 如果包含 '/'，说明是路径格式
-    if (componentPath.includes("/")) {
-      console.log(
-        `[loadComponent] Loading component by path: ${componentPath}`
-      );
+    console.log(`[loadComponent] Loading component: ${componentPath}`);
 
-      // 尝试多种可能的文件路径
-      const possiblePaths = [
-        `/src/pages/${componentPath}.tsx`,
-        `/src/pages/${componentPath}.ts`,
-        `/src/pages/${componentPath}/index.tsx`,
-        `/src/pages/${componentPath}/index.ts`,
-      ];
+    // 尝试多种可能的文件路径
+    const possiblePaths = [
+      `/src/pages/${componentPath}.tsx`,
+      `/src/pages/${componentPath}.ts`,
+      `/src/pages/${componentPath}/index.tsx`,
+      `/src/pages/${componentPath}/index.ts`,
+    ];
 
-      for (const modulePath of possiblePaths) {
-        if (pageModules[modulePath]) {
-          console.log(`[loadComponent] ✓ Found module: ${modulePath}`);
-          return lazy(() =>
-            pageModules[modulePath]().then((m) => ({
-              default: m.default,
-            }))
-          );
-        }
+    for (const modulePath of possiblePaths) {
+      if (pageModules[modulePath]) {
+        console.log(`[loadComponent] ✓ Found module: ${modulePath}`);
+        return lazy(() =>
+          pageModules[modulePath]().then((m) => ({
+            default: m.default,
+          }))
+        );
       }
-
-      console.error(
-        `[loadComponent] ✗ Component not found for path: ${componentPath}`
-      );
-      console.log(
-        "[loadComponent] Available modules:",
-        Object.keys(pageModules).filter((key) => key.includes(componentPath))
-      );
-      return null;
-    } else {
-      // 组件名格式：从 componentMap 查找（向后兼容）
-      console.log(
-        `[loadComponent] Loading component by name from componentMap: ${componentPath}`
-      );
-      return getComponent(componentPath);
     }
+
+    console.error(
+      `[loadComponent] ✗ Component not found: ${componentPath}`
+    );
+    console.log(
+      "[loadComponent] Available modules:",
+      Object.keys(pageModules).filter((key) => key.includes(componentPath))
+    );
+    return null;
   } catch (error) {
     console.error(
       `[loadComponent] Failed to load component: ${componentPath}`,

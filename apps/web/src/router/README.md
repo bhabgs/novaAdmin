@@ -6,8 +6,7 @@
 |------|------|
 | `index.tsx` | 路由入口，使用 HashRouter |
 | `DynamicRoutes.tsx` | 动态路由核心组件 |
-| `generateRoutes.tsx` | 路由生成器 |
-| `componentMap.tsx` | 组件映射表（兼容旧配置） |
+| `generateRoutes.tsx` | 路由生成器（使用 import.meta.glob 动态导入） |
 | `ProtectedRoute.tsx` | 受保护路由守卫 |
 | `PublicRoute.tsx` | 公开路由守卫 |
 

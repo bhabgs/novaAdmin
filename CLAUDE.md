@@ -5,7 +5,8 @@
 > ⚠️ **必须严格遵守**
 
 1. **禁止修改 `apps/web/src/api/` 目录** - 由 OpenAPI 自动生成，接口变更需运行 `pnpm generate:api`
-2. **启动服务前检查端口占用** - 避免重复启动
+2. **禁止删除 `apps/web/src/pages/` 下的内容** - 页面组件被动态路由引用，删除会导致路由失效，必要时由用户手动删除
+3. **启动服务前检查端口占用** - 避免重复启动
 
 ---
 
@@ -13,12 +14,12 @@
 
 Monorepo 后台管理系统：前端 React 18 + Ant Design 5 | 后端 NestJS + TypeORM + MySQL
 
-```
+```bash
 apps/
 ├── web/src/              # 前端
 │   ├── api/              # [禁止修改] OpenAPI 生成
 │   ├── components/       # 通用组件 (CrudPage, PageContainer, ErrorBoundary)
-│   ├── pages/            # 业务页面 (base/, system/, tools/)
+│   ├── pages/            # [禁止删除] 业务页面，动态路由引用
 │   ├── router/           # 动态路由
 │   ├── store/            # Redux (createCrudSlice 工厂)
 │   ├── hooks/            # useListManagement 等
@@ -116,9 +117,11 @@ const {
 ## 开发流程
 
 ### 新增接口
+
 1. 后端修改 Controller/DTO → 2. `pnpm generate:api` → 3. 前端使用生成的方法
 
 ### 新增页面
+
 1. 创建 `pages/system/Example/index.tsx`
 2. 菜单管理配置 `{ path, component: "system/Example" }`（component 为 pages/ 下的相对路径）
 
@@ -136,8 +139,14 @@ const {
 | `button` | 仅权限控制 | permission |
 
 **菜单配置示例**:
+
 ```json
-{ "type": "page", "path": "/reports/sales", "component": "Reports/SalesReport", "hideInMenu": false }
+{
+  "type": "page",
+  "path": "/reports/sales",
+  "component": "Reports/SalesReport",
+  "hideInMenu": false
+}
 ```
 
 **带参数路由**: `path: "/users/:id"` → 组件用 `useParams()` 获取
@@ -145,6 +154,7 @@ const {
 **权限控制**: 用户登录 → 后端返回角色菜单 → 前端生成路由（用户只能访问有权限的页面）
 
 ### 国际化
+
 ```typescript
 const { t } = useTranslation();
 // 文件: i18n/locales/{zh-CN,en-US,ar-SA}.json
@@ -154,10 +164,10 @@ const { t } = useTranslation();
 
 ## 环境变量
 
-| 前端 (.env)       | 后端 (.env)    |
-|-------------------|----------------|
-| VITE_APP_TITLE    | DB_HOST/PORT   |
+| 前端 (.env)       | 后端 (.env)          |
+| ----------------- | -------------------- |
+| VITE_APP_TITLE    | DB_HOST/PORT         |
 | VITE_API_BASE_URL | DB_USERNAME/PASSWORD |
-|                   | DB_DATABASE    |
-|                   | JWT_SECRET     |
-|                   | PORT (3000)    |
+|                   | DB_DATABASE          |
+|                   | JWT_SECRET           |
+|                   | PORT (3000)          |

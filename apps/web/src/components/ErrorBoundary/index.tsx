@@ -1,13 +1,34 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button, Result, Typography } from 'antd';
 import { ReloadOutlined, HomeOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 const { Paragraph, Text } = Typography;
+
+/** 错误边界文案配置 */
+export interface ErrorBoundaryTexts {
+  title?: string;
+  subTitle?: string;
+  reloadButton?: string;
+  homeButton?: string;
+  errorLabel?: string;
+}
+
+/** 默认文案 */
+const defaultTexts: Required<ErrorBoundaryTexts> = {
+  title: '页面出错了',
+  subTitle: '抱歉，页面发生了一些错误。您可以尝试刷新页面或返回首页。',
+  reloadButton: '刷新页面',
+  homeButton: '返回首页',
+  errorLabel: '错误信息（仅开发环境显示）:',
+};
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  /** 自定义文案，支持国际化 */
+  texts?: ErrorBoundaryTexts;
 }
 
 interface State {
@@ -16,7 +37,7 @@ interface State {
   errorInfo: ErrorInfo | null;
 }
 
-class ErrorBoundary extends Component<Props, State> {
+class ErrorBoundaryInner extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -61,7 +82,10 @@ class ErrorBoundary extends Component<Props, State> {
 
   render(): ReactNode {
     const { hasError, error, errorInfo } = this.state;
-    const { children, fallback } = this.props;
+    const { children, fallback, texts } = this.props;
+
+    // 合并默认文案和自定义文案
+    const mergedTexts = { ...defaultTexts, ...texts };
 
     if (hasError) {
       // 如果提供了自定义 fallback，使用它
@@ -83,8 +107,8 @@ class ErrorBoundary extends Component<Props, State> {
         >
           <Result
             status="error"
-            title="页面出错了"
-            subTitle="抱歉，页面发生了一些错误。您可以尝试刷新页面或返回首页。"
+            title={mergedTexts.title}
+            subTitle={mergedTexts.subTitle}
             extra={[
               <Button
                 key="reload"
@@ -92,14 +116,14 @@ class ErrorBoundary extends Component<Props, State> {
                 icon={<ReloadOutlined />}
                 onClick={this.handleReload}
               >
-                刷新页面
+                {mergedTexts.reloadButton}
               </Button>,
               <Button
                 key="home"
                 icon={<HomeOutlined />}
                 onClick={this.handleGoHome}
               >
-                返回首页
+                {mergedTexts.homeButton}
               </Button>,
             ]}
           >
@@ -107,7 +131,7 @@ class ErrorBoundary extends Component<Props, State> {
               <div style={{ textAlign: 'left', marginTop: 24 }}>
                 <Paragraph>
                   <Text strong style={{ fontSize: 16 }}>
-                    错误信息（仅开发环境显示）:
+                    {mergedTexts.errorLabel}
                   </Text>
                 </Paragraph>
                 <Paragraph>
@@ -144,5 +168,30 @@ class ErrorBoundary extends Component<Props, State> {
     return children;
   }
 }
+
+/** 带国际化支持的 ErrorBoundary 包装组件 */
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+}
+
+const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({ children, fallback, onError }) => {
+  const { t } = useTranslation();
+
+  const texts: ErrorBoundaryTexts = {
+    title: t('errorBoundary.title'),
+    subTitle: t('errorBoundary.subTitle'),
+    reloadButton: t('errorBoundary.reloadButton'),
+    homeButton: t('errorBoundary.homeButton'),
+    errorLabel: t('errorBoundary.errorLabel'),
+  };
+
+  return (
+    <ErrorBoundaryInner texts={texts} fallback={fallback} onError={onError}>
+      {children}
+    </ErrorBoundaryInner>
+  );
+};
 
 export default ErrorBoundary;

@@ -6,6 +6,7 @@ import {
   AsyncThunk,
 } from '@reduxjs/toolkit';
 import { ListResponse, PaginationParams, ApiResponse } from '../types';
+import type { RootState } from './index';
 
 // ============== 类型定义 ==============
 
@@ -33,7 +34,7 @@ export interface QueryParams {
   filters?: Record<string, unknown>;
 }
 
-/** API 方法定义 */
+/** API 方法定义 - 使用宽松类型以兼容 OpenAPI 生成的客户端 */
 export interface CrudApiMethods<T, TCreate = Partial<T>, TUpdate = Partial<T>> {
   findAll: (params: { query: QueryParams }) => Promise<unknown>;
   findOne: (params: { path: { id: string } }) => Promise<unknown>;
@@ -57,6 +58,8 @@ export interface CreateCrudSliceConfig<T, TCreate = Partial<T>, TUpdate = Partia
   reducers?: Record<string, (state: CrudState<T>, action: PayloadAction<unknown>) => void>;
   /** 初始 filters */
   initialFilters?: Record<string, unknown>;
+  /** 操作成功后是否自动刷新列表，默认 true */
+  autoRefreshOnMutate?: boolean;
 }
 
 /** 返回的 Thunks 类型 */
@@ -97,7 +100,15 @@ export interface CrudThunks<T> {
 export function createCrudSlice<T extends BaseEntity, TCreate = Partial<T>, TUpdate = Partial<T>>(
   config: CreateCrudSliceConfig<T, TCreate, TUpdate>
 ) {
-  const { name, api, entityName, extraReducers: customExtraReducers, reducers: customReducers, initialFilters = {} } = config;
+  const {
+    name,
+    api,
+    entityName,
+    extraReducers: customExtraReducers,
+    reducers: customReducers,
+    initialFilters = {},
+    autoRefreshOnMutate = true,
+  } = config;
 
   // 初始状态
   const initialState: CrudState<T> = {
@@ -114,6 +125,17 @@ export function createCrudSlice<T extends BaseEntity, TCreate = Partial<T>, TUpd
     filters: initialFilters,
   };
 
+  /** 从 RootState 获取当前 slice 的查询参数 */
+  const getQueryParamsFromState = (rootState: RootState): QueryParams => {
+    const state = rootState[name as keyof RootState] as unknown as CrudState<T>;
+    return {
+      page: state.pagination.page,
+      pageSize: state.pagination.pageSize,
+      keyword: state.searchKeyword || undefined,
+      filters: Object.keys(state.filters).length > 0 ? state.filters : undefined,
+    };
+  };
+
   // ============== 创建 AsyncThunks ==============
 
   // 获取列表
@@ -121,7 +143,7 @@ export function createCrudSlice<T extends BaseEntity, TCreate = Partial<T>, TUpd
     `${name}/fetchList`,
     async (params = {}, { rejectWithValue }) => {
       try {
-        const response = (await api.findAll({ query: params })) as unknown as ApiResponse<ListResponse<T>>;
+        const response = await api.findAll({ query: params }) as ApiResponse<ListResponse<T>>;
         if (response.success) {
           return response.data;
         }
@@ -138,7 +160,7 @@ export function createCrudSlice<T extends BaseEntity, TCreate = Partial<T>, TUpd
     `${name}/fetchById`,
     async (id, { rejectWithValue }) => {
       try {
-        const response = (await api.findOne({ path: { id } })) as unknown as ApiResponse<T>;
+        const response = await api.findOne({ path: { id } }) as ApiResponse<T>;
         if (response.success) {
           return response.data;
         }
@@ -151,13 +173,16 @@ export function createCrudSlice<T extends BaseEntity, TCreate = Partial<T>, TUpd
   );
 
   // 创建
-  const create = createAsyncThunk<T, Partial<T>, { rejectValue: string }>(
+  const create = createAsyncThunk<T, Partial<T>, { rejectValue: string; state: RootState }>(
     `${name}/create`,
-    async (data, { rejectWithValue, dispatch }) => {
+    async (data, { rejectWithValue, dispatch, getState }) => {
       try {
-        const response = (await api.create({ body: data as TCreate })) as unknown as ApiResponse<T>;
+        const response = await api.create({ body: data as TCreate }) as ApiResponse<T>;
         if (response.success) {
-          dispatch(fetchList({}));
+          if (autoRefreshOnMutate) {
+            const queryParams = getQueryParamsFromState(getState());
+            dispatch(fetchList(queryParams));
+          }
           return response.data;
         }
         return rejectWithValue(response.message);
@@ -169,13 +194,16 @@ export function createCrudSlice<T extends BaseEntity, TCreate = Partial<T>, TUpd
   );
 
   // 更新
-  const update = createAsyncThunk<T, { id: string; data: Partial<T> }, { rejectValue: string }>(
+  const update = createAsyncThunk<T, { id: string; data: Partial<T> }, { rejectValue: string; state: RootState }>(
     `${name}/update`,
-    async ({ id, data }, { rejectWithValue, dispatch }) => {
+    async ({ id, data }, { rejectWithValue, dispatch, getState }) => {
       try {
-        const response = (await api.update({ path: { id }, body: data as TUpdate })) as unknown as ApiResponse<T>;
+        const response = await api.update({ path: { id }, body: data as TUpdate }) as ApiResponse<T>;
         if (response.success) {
-          dispatch(fetchList({}));
+          if (autoRefreshOnMutate) {
+            const queryParams = getQueryParamsFromState(getState());
+            dispatch(fetchList(queryParams));
+          }
           return response.data;
         }
         return rejectWithValue(response.message);
@@ -187,13 +215,16 @@ export function createCrudSlice<T extends BaseEntity, TCreate = Partial<T>, TUpd
   );
 
   // 删除
-  const remove = createAsyncThunk<string, string, { rejectValue: string }>(
+  const remove = createAsyncThunk<string, string, { rejectValue: string; state: RootState }>(
     `${name}/remove`,
-    async (id, { rejectWithValue, dispatch }) => {
+    async (id, { rejectWithValue, dispatch, getState }) => {
       try {
-        const response = (await api.delete({ path: { id } })) as unknown as ApiResponse<null>;
+        const response = await api.delete({ path: { id } }) as ApiResponse<null>;
         if (response.success) {
-          dispatch(fetchList({}));
+          if (autoRefreshOnMutate) {
+            const queryParams = getQueryParamsFromState(getState());
+            dispatch(fetchList(queryParams));
+          }
           return id;
         }
         return rejectWithValue(response.message);
@@ -205,16 +236,19 @@ export function createCrudSlice<T extends BaseEntity, TCreate = Partial<T>, TUpd
   );
 
   // 批量删除
-  const batchRemove = createAsyncThunk<string[], string[], { rejectValue: string }>(
+  const batchRemove = createAsyncThunk<string[], string[], { rejectValue: string; state: RootState }>(
     `${name}/batchRemove`,
-    async (ids, { rejectWithValue, dispatch }) => {
+    async (ids, { rejectWithValue, dispatch, getState }) => {
       try {
         if (!api.batchDelete) {
           return rejectWithValue('批量删除功能未实现');
         }
-        const response = (await api.batchDelete({ body: { ids } })) as unknown as ApiResponse<null>;
+        const response = await api.batchDelete({ body: { ids } }) as ApiResponse<null>;
         if (response.success) {
-          dispatch(fetchList({}));
+          if (autoRefreshOnMutate) {
+            const queryParams = getQueryParamsFromState(getState());
+            dispatch(fetchList(queryParams));
+          }
           return ids;
         }
         return rejectWithValue(response.message);

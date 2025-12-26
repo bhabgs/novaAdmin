@@ -544,5 +544,12 @@
     "notFound": "The requested resource does not exist",
     "serverError": "Internal server error",
     "requestFailedWithCode": "Request failed ({{code}})"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "subTitle": "Sorry, an error occurred on this page. You can try refreshing the page or go back to the home page.",
+    "reloadButton": "Refresh Page",
+    "homeButton": "Go Home",
+    "errorLabel": "Error details (development only):"
   }
 }

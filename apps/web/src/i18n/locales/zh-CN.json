@@ -545,5 +545,12 @@
     "notFound": "请求的资源不存在",
     "serverError": "服务器内部错误",
     "requestFailedWithCode": "请求失败 ({{code}})"
+  },
+  "errorBoundary": {
+    "title": "页面出错了",
+    "subTitle": "抱歉，页面发生了一些错误。您可以尝试刷新页面或返回首页。",
+    "reloadButton": "刷新页面",
+    "homeButton": "返回首页",
+    "errorLabel": "错误信息（仅开发环境显示）:"
   }
 }

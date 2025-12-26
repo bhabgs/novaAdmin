@@ -38,7 +38,7 @@ const UserForm: React.FC<UserFormProps> = ({
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.user);
-  const { roles } = useAppSelector((state) => state.role);
+  const { items: roles } = useAppSelector((state) => state.role);
 
   useEffect(() => {
     if (visible) {

@@ -18,7 +18,7 @@ import { useListManagement } from "@/hooks/useListManagement";
 const RoleList: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { roles, loading, pagination } = useAppSelector((state) => state.role);
+  const { items: roles, loading, pagination } = useAppSelector((state) => state.role);
 
   const [isPermissionModalVisible, setIsPermissionModalVisible] =
     useState(false);

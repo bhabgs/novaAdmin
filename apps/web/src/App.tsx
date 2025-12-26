@@ -11,6 +11,7 @@ import { useAppSelector } from './store';
 import Router from './router';
 import { Language } from './types';
 import { isRTL, initializeI18n } from './i18n';
+import { ErrorBoundary } from './components';
 
 // 内部组件，用于访问Redux状态
 const AppContent: React.FC = () => {
@@ -129,9 +130,11 @@ const App: React.FC = () => {
   }
 
   return (
-    <Provider store={store}>
-      <AppContent />
-    </Provider>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <AppContent />
+      </Provider>
+    </ErrorBoundary>
   );
 };
 

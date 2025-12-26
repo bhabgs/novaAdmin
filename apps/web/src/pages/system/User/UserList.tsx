@@ -23,7 +23,7 @@ const hasSuperAdminRole = (user: User): boolean => {
 const UserList: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { users, loading, pagination } = useAppSelector((state) => state.user);
+  const { items: users, loading, pagination } = useAppSelector((state) => state.user);
 
   const [statusFilter, setStatusFilter] = useState<string>("");
 

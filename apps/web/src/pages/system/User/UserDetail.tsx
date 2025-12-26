@@ -31,7 +31,7 @@ const UserDetail: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { currentUser, loading } = useAppSelector((state) => state.user);
+  const { currentItem: currentUser, loading } = useAppSelector((state) => state.user);
 
   const [activeTab, setActiveTab] = useState("basic");
 

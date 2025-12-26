@@ -7,6 +7,7 @@ export { default as SearchForm } from './SearchForm';
 export { default as PageContainer } from './PageContainer';
 export { default as CustomBreadcrumb } from './Breadcrumb';
 export { default as CrudPage } from './CrudPage';
+export { default as ErrorBoundary } from './ErrorBoundary';
 
 // 类型导出
 export type { CommonTableProps } from './CommonTable';

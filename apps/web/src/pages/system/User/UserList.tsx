@@ -15,6 +15,11 @@ import { useListManagement } from "@/hooks/useListManagement";
 
 const { Option } = Select;
 
+// 检查用户是否拥有超级管理员角色
+const hasSuperAdminRole = (user: User): boolean => {
+  return user.roles?.some((role) => role.code === "admin") ?? false;
+};
+
 const UserList: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
@@ -47,11 +52,11 @@ const UserList: React.FC = () => {
     batchDeleteConfirmKey: "user.batchDeleteConfirm",
   });
 
-  // Override rowSelection to disable admin user
+  // Override rowSelection to disable super admin users
   const rowSelection = {
     ...baseRowSelection,
     getCheckboxProps: (record: User) => ({
-      disabled: record.username === "admin",
+      disabled: hasSuperAdminRole(record),
     }),
   };
 
@@ -72,7 +77,7 @@ const UserList: React.FC = () => {
   // 自定义操作列渲染
   const operationColumnRender = useCallback(
     (record: User) => {
-      const isProtectedUser = record.username === "admin";
+      const isProtectedUser = hasSuperAdminRole(record);
 
       return (
         <Space size="small">
@@ -161,7 +166,7 @@ const UserList: React.FC = () => {
       dataIndex: "status",
       key: "status",
       render: (status: User["status"], record: User) => {
-        const isProtectedUser = record.username === "admin";
+        const isProtectedUser = hasSuperAdminRole(record);
 
         return (
           <Select

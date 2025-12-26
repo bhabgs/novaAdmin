@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AuthControllerChangePasswordData, AuthControllerChangePasswordResponses, AuthControllerGetUserInfoData, AuthControllerGetUserInfoResponses, AuthControllerLoginData, AuthControllerLoginResponses, AuthControllerLogoutData, AuthControllerLogoutResponses, AuthControllerRefreshTokenData, AuthControllerRefreshTokenResponses, AuthControllerResetPasswordData, AuthControllerResetPasswordResponses, AuthControllerVerifyTokenData, AuthControllerVerifyTokenResponses, I18nControllerBatchDeleteData, I18nControllerBatchDeleteResponses, I18nControllerCreateData, I18nControllerCreateResponses, I18nControllerDeleteData, I18nControllerDeleteResponses, I18nControllerExportToJsonData, I18nControllerExportToJsonResponses, I18nControllerFindAllData, I18nControllerFindAllResponses, I18nControllerFindByIdData, I18nControllerFindByIdResponses, I18nControllerGetAllTranslationsData, I18nControllerGetAllTranslationsResponses, I18nControllerGetModulesData, I18nControllerGetModulesResponses, I18nControllerGetNestedTranslationsData, I18nControllerGetNestedTranslationsResponses, I18nControllerImportFromJsonData, I18nControllerImportFromJsonResponses, I18nControllerUpdateData, I18nControllerUpdateResponses, MenusControllerBatchDeleteData, MenusControllerBatchDeleteResponses, MenusControllerCopyMenuData, MenusControllerCopyMenuResponses, MenusControllerCreateData, MenusControllerCreateResponses, MenusControllerDeleteData, MenusControllerDeleteResponses, MenusControllerFindAllData, MenusControllerFindAllResponses, MenusControllerFindOneData, MenusControllerFindOneResponses, MenusControllerFindTreeData, MenusControllerFindTreeResponses, MenusControllerGetIconsData, MenusControllerGetIconsResponses, MenusControllerUpdateData, MenusControllerUpdateResponses, MenusControllerUpdateSortData, MenusControllerUpdateSortResponses, RolesControllerAssignPermissionsData, RolesControllerAssignPermissionsResponses, RolesControllerBatchDeleteData, RolesControllerBatchDeleteResponses, RolesControllerCopyRoleData, RolesControllerCopyRoleResponses, RolesControllerCreateData, RolesControllerCreateResponses, RolesControllerDeleteData, RolesControllerDeleteResponses, RolesControllerFindAllData, RolesControllerFindAllResponses, RolesControllerFindAllWithoutPaginationData, RolesControllerFindAllWithoutPaginationResponses, RolesControllerFindOneData, RolesControllerFindOneResponses, RolesControllerGetPermissionsData, RolesControllerGetPermissionsResponses, RolesControllerGetPermissionTreeData, RolesControllerGetPermissionTreeResponses, RolesControllerGetRolePermissionsData, RolesControllerGetRolePermissionsResponses, RolesControllerUpdateData, RolesControllerUpdateResponses, UsersControllerAssignRolesData, UsersControllerAssignRolesResponses, UsersControllerBatchDeleteData, UsersControllerBatchDeleteResponses, UsersControllerCreateData, UsersControllerCreateResponses, UsersControllerDeleteData, UsersControllerDeleteResponses, UsersControllerFindAllData, UsersControllerFindAllResponses, UsersControllerFindOneData, UsersControllerFindOneResponses, UsersControllerGetUserPermissionsData, UsersControllerGetUserPermissionsResponses, UsersControllerResetPasswordData, UsersControllerResetPasswordResponses, UsersControllerUpdateData, UsersControllerUpdateResponses, UsersControllerUpdateStatusData, UsersControllerUpdateStatusResponses } from './types.gen';
+import type { AuthControllerChangePasswordData, AuthControllerChangePasswordResponses, AuthControllerGetUserInfoData, AuthControllerGetUserInfoResponses, AuthControllerLoginData, AuthControllerLoginResponses, AuthControllerLogoutData, AuthControllerLogoutResponses, AuthControllerRefreshTokenData, AuthControllerRefreshTokenResponses, AuthControllerResetPasswordData, AuthControllerResetPasswordResponses, AuthControllerVerifyTokenData, AuthControllerVerifyTokenResponses, I18nControllerBatchDeleteData, I18nControllerBatchDeleteResponses, I18nControllerCreateData, I18nControllerCreateResponses, I18nControllerDeleteData, I18nControllerDeleteResponses, I18nControllerExportToJsonData, I18nControllerExportToJsonResponses, I18nControllerFindAllData, I18nControllerFindAllResponses, I18nControllerFindByIdData, I18nControllerFindByIdResponses, I18nControllerGetAllTranslationsData, I18nControllerGetAllTranslationsResponses, I18nControllerGetModulesData, I18nControllerGetModulesResponses, I18nControllerGetNestedTranslationsData, I18nControllerGetNestedTranslationsResponses, I18nControllerImportFromJsonData, I18nControllerImportFromJsonResponses, I18nControllerUpdateData, I18nControllerUpdateResponses, MenusControllerBatchDeleteData, MenusControllerBatchDeleteResponses, MenusControllerCopyMenuData, MenusControllerCopyMenuResponses, MenusControllerCreateData, MenusControllerCreateResponses, MenusControllerDeleteData, MenusControllerDeleteResponses, MenusControllerFindAllData, MenusControllerFindAllResponses, MenusControllerFindOneData, MenusControllerFindOneResponses, MenusControllerFindTreeData, MenusControllerFindTreeResponses, MenusControllerGetIconsData, MenusControllerGetIconsResponses, MenusControllerUpdateData, MenusControllerUpdateResponses, MenusControllerUpdateSortData, MenusControllerUpdateSortResponses, RolesControllerAssignMenusData, RolesControllerAssignMenusResponses, RolesControllerBatchDeleteData, RolesControllerBatchDeleteResponses, RolesControllerCopyRoleData, RolesControllerCopyRoleResponses, RolesControllerCreateData, RolesControllerCreateResponses, RolesControllerDeleteData, RolesControllerDeleteResponses, RolesControllerFindAllData, RolesControllerFindAllResponses, RolesControllerFindAllWithoutPaginationData, RolesControllerFindAllWithoutPaginationResponses, RolesControllerFindOneData, RolesControllerFindOneResponses, RolesControllerGetMenuTreeData, RolesControllerGetMenuTreeResponses, RolesControllerGetRoleMenusData, RolesControllerGetRoleMenusResponses, RolesControllerUpdateData, RolesControllerUpdateResponses, UsersControllerAssignRolesData, UsersControllerAssignRolesResponses, UsersControllerBatchDeleteData, UsersControllerBatchDeleteResponses, UsersControllerCreateData, UsersControllerCreateResponses, UsersControllerDeleteData, UsersControllerDeleteResponses, UsersControllerFindAllData, UsersControllerFindAllResponses, UsersControllerFindOneData, UsersControllerFindOneResponses, UsersControllerGetUserPermissionsData, UsersControllerGetUserPermissionsResponses, UsersControllerResetPasswordData, UsersControllerResetPasswordResponses, UsersControllerUpdateData, UsersControllerUpdateResponses, UsersControllerUpdateStatusData, UsersControllerUpdateStatusResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -22,7 +22,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  * 用户登录
  */
 export const authControllerLogin = <ThrowOnError extends boolean = false>(options: Options<AuthControllerLoginData, ThrowOnError>) => (options.client ?? client).post<AuthControllerLoginResponses, unknown, ThrowOnError>({
-    url: '/api/auth/login',
+    url: '/nova-admin-api/auth/login',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const authControllerLogin = <ThrowOnError extends boolean = false>(option
  */
 export const authControllerLogout = <ThrowOnError extends boolean = false>(options?: Options<AuthControllerLogoutData, ThrowOnError>) => (options?.client ?? client).post<AuthControllerLogoutResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/auth/logout',
+    url: '/nova-admin-api/auth/logout',
     ...options
 });
 
@@ -44,7 +44,7 @@ export const authControllerLogout = <ThrowOnError extends boolean = false>(optio
  */
 export const authControllerRefreshToken = <ThrowOnError extends boolean = false>(options?: Options<AuthControllerRefreshTokenData, ThrowOnError>) => (options?.client ?? client).post<AuthControllerRefreshTokenResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/auth/refresh-token',
+    url: '/nova-admin-api/auth/refresh-token',
     ...options
 });
 
@@ -53,7 +53,7 @@ export const authControllerRefreshToken = <ThrowOnError extends boolean = false>
  */
 export const authControllerGetUserInfo = <ThrowOnError extends boolean = false>(options?: Options<AuthControllerGetUserInfoData, ThrowOnError>) => (options?.client ?? client).get<AuthControllerGetUserInfoResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/auth/user-info',
+    url: '/nova-admin-api/auth/user-info',
     ...options
 });
 
@@ -62,7 +62,7 @@ export const authControllerGetUserInfo = <ThrowOnError extends boolean = false>(
  */
 export const authControllerChangePassword = <ThrowOnError extends boolean = false>(options: Options<AuthControllerChangePasswordData, ThrowOnError>) => (options.client ?? client).post<AuthControllerChangePasswordResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/auth/change-password',
+    url: '/nova-admin-api/auth/change-password',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export const authControllerChangePassword = <ThrowOnError extends boolean = fals
  * 重置密码（发送邮件）
  */
 export const authControllerResetPassword = <ThrowOnError extends boolean = false>(options: Options<AuthControllerResetPasswordData, ThrowOnError>) => (options.client ?? client).post<AuthControllerResetPasswordResponses, unknown, ThrowOnError>({
-    url: '/api/auth/reset-password',
+    url: '/nova-admin-api/auth/reset-password',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export const authControllerResetPassword = <ThrowOnError extends boolean = false
  */
 export const authControllerVerifyToken = <ThrowOnError extends boolean = false>(options?: Options<AuthControllerVerifyTokenData, ThrowOnError>) => (options?.client ?? client).get<AuthControllerVerifyTokenResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/auth/verify-token',
+    url: '/nova-admin-api/auth/verify-token',
     ...options
 });
 
@@ -96,7 +96,7 @@ export const authControllerVerifyToken = <ThrowOnError extends boolean = false>(
  */
 export const usersControllerFindAll = <ThrowOnError extends boolean = false>(options?: Options<UsersControllerFindAllData, ThrowOnError>) => (options?.client ?? client).get<UsersControllerFindAllResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users',
+    url: '/nova-admin-api/users',
     ...options
 });
 
@@ -105,7 +105,7 @@ export const usersControllerFindAll = <ThrowOnError extends boolean = false>(opt
  */
 export const usersControllerCreate = <ThrowOnError extends boolean = false>(options: Options<UsersControllerCreateData, ThrowOnError>) => (options.client ?? client).post<UsersControllerCreateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users',
+    url: '/nova-admin-api/users',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ export const usersControllerCreate = <ThrowOnError extends boolean = false>(opti
  */
 export const usersControllerDelete = <ThrowOnError extends boolean = false>(options: Options<UsersControllerDeleteData, ThrowOnError>) => (options.client ?? client).delete<UsersControllerDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users/{id}',
+    url: '/nova-admin-api/users/{id}',
     ...options
 });
 
@@ -127,7 +127,7 @@ export const usersControllerDelete = <ThrowOnError extends boolean = false>(opti
  */
 export const usersControllerFindOne = <ThrowOnError extends boolean = false>(options: Options<UsersControllerFindOneData, ThrowOnError>) => (options.client ?? client).get<UsersControllerFindOneResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users/{id}',
+    url: '/nova-admin-api/users/{id}',
     ...options
 });
 
@@ -136,7 +136,7 @@ export const usersControllerFindOne = <ThrowOnError extends boolean = false>(opt
  */
 export const usersControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersControllerUpdateData, ThrowOnError>) => (options.client ?? client).put<UsersControllerUpdateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users/{id}',
+    url: '/nova-admin-api/users/{id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ export const usersControllerUpdate = <ThrowOnError extends boolean = false>(opti
  */
 export const usersControllerBatchDelete = <ThrowOnError extends boolean = false>(options: Options<UsersControllerBatchDeleteData, ThrowOnError>) => (options.client ?? client).post<UsersControllerBatchDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users/batch',
+    url: '/nova-admin-api/users/batch',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ export const usersControllerBatchDelete = <ThrowOnError extends boolean = false>
  */
 export const usersControllerResetPassword = <ThrowOnError extends boolean = false>(options: Options<UsersControllerResetPasswordData, ThrowOnError>) => (options.client ?? client).post<UsersControllerResetPasswordResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users/{id}/reset-password',
+    url: '/nova-admin-api/users/{id}/reset-password',
     ...options
 });
 
@@ -171,7 +171,7 @@ export const usersControllerResetPassword = <ThrowOnError extends boolean = fals
  */
 export const usersControllerUpdateStatus = <ThrowOnError extends boolean = false>(options: Options<UsersControllerUpdateStatusData, ThrowOnError>) => (options.client ?? client).patch<UsersControllerUpdateStatusResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users/{id}/status',
+    url: '/nova-admin-api/users/{id}/status',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ export const usersControllerUpdateStatus = <ThrowOnError extends boolean = false
  */
 export const usersControllerAssignRoles = <ThrowOnError extends boolean = false>(options: Options<UsersControllerAssignRolesData, ThrowOnError>) => (options.client ?? client).post<UsersControllerAssignRolesResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users/{id}/roles',
+    url: '/nova-admin-api/users/{id}/roles',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ export const usersControllerAssignRoles = <ThrowOnError extends boolean = false>
  */
 export const usersControllerGetUserPermissions = <ThrowOnError extends boolean = false>(options: Options<UsersControllerGetUserPermissionsData, ThrowOnError>) => (options.client ?? client).get<UsersControllerGetUserPermissionsResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/users/{id}/permissions',
+    url: '/nova-admin-api/users/{id}/permissions',
     ...options
 });
 
@@ -206,7 +206,7 @@ export const usersControllerGetUserPermissions = <ThrowOnError extends boolean =
  */
 export const rolesControllerFindAll = <ThrowOnError extends boolean = false>(options?: Options<RolesControllerFindAllData, ThrowOnError>) => (options?.client ?? client).get<RolesControllerFindAllResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles',
+    url: '/nova-admin-api/roles',
     ...options
 });
 
@@ -215,7 +215,7 @@ export const rolesControllerFindAll = <ThrowOnError extends boolean = false>(opt
  */
 export const rolesControllerCreate = <ThrowOnError extends boolean = false>(options: Options<RolesControllerCreateData, ThrowOnError>) => (options.client ?? client).post<RolesControllerCreateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles',
+    url: '/nova-admin-api/roles',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -228,25 +228,16 @@ export const rolesControllerCreate = <ThrowOnError extends boolean = false>(opti
  */
 export const rolesControllerFindAllWithoutPagination = <ThrowOnError extends boolean = false>(options?: Options<RolesControllerFindAllWithoutPaginationData, ThrowOnError>) => (options?.client ?? client).get<RolesControllerFindAllWithoutPaginationResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/all',
+    url: '/nova-admin-api/roles/all',
     ...options
 });
 
 /**
- * 获取所有权限
+ * 获取菜单树（用于权限分配）
  */
-export const rolesControllerGetPermissions = <ThrowOnError extends boolean = false>(options?: Options<RolesControllerGetPermissionsData, ThrowOnError>) => (options?.client ?? client).get<RolesControllerGetPermissionsResponses, unknown, ThrowOnError>({
+export const rolesControllerGetMenuTree = <ThrowOnError extends boolean = false>(options?: Options<RolesControllerGetMenuTreeData, ThrowOnError>) => (options?.client ?? client).get<RolesControllerGetMenuTreeResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/permissions',
-    ...options
-});
-
-/**
- * 获取权限树
- */
-export const rolesControllerGetPermissionTree = <ThrowOnError extends boolean = false>(options?: Options<RolesControllerGetPermissionTreeData, ThrowOnError>) => (options?.client ?? client).get<RolesControllerGetPermissionTreeResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/permissions/tree',
+    url: '/nova-admin-api/roles/menus/tree',
     ...options
 });
 
@@ -255,7 +246,7 @@ export const rolesControllerGetPermissionTree = <ThrowOnError extends boolean = 
  */
 export const rolesControllerDelete = <ThrowOnError extends boolean = false>(options: Options<RolesControllerDeleteData, ThrowOnError>) => (options.client ?? client).delete<RolesControllerDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/{id}',
+    url: '/nova-admin-api/roles/{id}',
     ...options
 });
 
@@ -264,7 +255,7 @@ export const rolesControllerDelete = <ThrowOnError extends boolean = false>(opti
  */
 export const rolesControllerFindOne = <ThrowOnError extends boolean = false>(options: Options<RolesControllerFindOneData, ThrowOnError>) => (options.client ?? client).get<RolesControllerFindOneResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/{id}',
+    url: '/nova-admin-api/roles/{id}',
     ...options
 });
 
@@ -273,7 +264,7 @@ export const rolesControllerFindOne = <ThrowOnError extends boolean = false>(opt
  */
 export const rolesControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<RolesControllerUpdateData, ThrowOnError>) => (options.client ?? client).put<RolesControllerUpdateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/{id}',
+    url: '/nova-admin-api/roles/{id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -286,65 +277,34 @@ export const rolesControllerUpdate = <ThrowOnError extends boolean = false>(opti
  */
 export const rolesControllerBatchDelete = <ThrowOnError extends boolean = false>(options: Options<RolesControllerBatchDeleteData, ThrowOnError>) => (options.client ?? client).post<RolesControllerBatchDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/batch',
+    url: '/nova-admin-api/roles/batch',
     ...options,
     headers: {
         'Content-Type': 'application/json',
         ...options.headers
     }
-});
-
-/**
- * 获取角色权限
- */
-export const rolesControllerGetRolePermissions = <ThrowOnError extends boolean = false>(options: Options<RolesControllerGetRolePermissionsData, ThrowOnError>) => (options.client ?? client).get<RolesControllerGetRolePermissionsResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/{id}/permissions',
-    ...options
-});
-
-/**
- * 分配权限 (已废弃，使用 rolesControllerAssignMenus)
- */
-export const rolesControllerAssignPermissions = <ThrowOnError extends boolean = false>(options: Options<RolesControllerAssignPermissionsData, ThrowOnError>) => (options.client ?? client).post<RolesControllerAssignPermissionsResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/{id}/permissions',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * 分配菜单权限
- */
-export const rolesControllerAssignMenus = <ThrowOnError extends boolean = false>(options: { path: { id: string }; body: { menuIds: string[] } } & Omit<Options<unknown, ThrowOnError>, 'body'>) => (options.client ?? client).post<unknown, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/{id}/menus',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * 获取菜单树（用于权限分配）
- */
-export const rolesControllerGetMenuTree = <ThrowOnError extends boolean = false>(options?: Options<unknown, ThrowOnError>) => (options?.client ?? client).get<unknown, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/menus/tree',
-    ...options
 });
 
 /**
  * 获取角色菜单
  */
-export const rolesControllerGetRoleMenus = <ThrowOnError extends boolean = false>(options: { path: { id: string } } & Options<unknown, ThrowOnError>) => (options.client ?? client).get<unknown, unknown, ThrowOnError>({
+export const rolesControllerGetRoleMenus = <ThrowOnError extends boolean = false>(options: Options<RolesControllerGetRoleMenusData, ThrowOnError>) => (options.client ?? client).get<RolesControllerGetRoleMenusResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/{id}/menus',
+    url: '/nova-admin-api/roles/{id}/menus',
     ...options
+});
+
+/**
+ * 分配菜单权限
+ */
+export const rolesControllerAssignMenus = <ThrowOnError extends boolean = false>(options: Options<RolesControllerAssignMenusData, ThrowOnError>) => (options.client ?? client).post<RolesControllerAssignMenusResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nova-admin-api/roles/{id}/menus',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -352,7 +312,7 @@ export const rolesControllerGetRoleMenus = <ThrowOnError extends boolean = false
  */
 export const rolesControllerCopyRole = <ThrowOnError extends boolean = false>(options: Options<RolesControllerCopyRoleData, ThrowOnError>) => (options.client ?? client).post<RolesControllerCopyRoleResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/roles/{id}/copy',
+    url: '/nova-admin-api/roles/{id}/copy',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -365,7 +325,7 @@ export const rolesControllerCopyRole = <ThrowOnError extends boolean = false>(op
  */
 export const menusControllerFindAll = <ThrowOnError extends boolean = false>(options?: Options<MenusControllerFindAllData, ThrowOnError>) => (options?.client ?? client).get<MenusControllerFindAllResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus',
+    url: '/nova-admin-api/menus',
     ...options
 });
 
@@ -374,7 +334,7 @@ export const menusControllerFindAll = <ThrowOnError extends boolean = false>(opt
  */
 export const menusControllerCreate = <ThrowOnError extends boolean = false>(options: Options<MenusControllerCreateData, ThrowOnError>) => (options.client ?? client).post<MenusControllerCreateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus',
+    url: '/nova-admin-api/menus',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -387,7 +347,7 @@ export const menusControllerCreate = <ThrowOnError extends boolean = false>(opti
  */
 export const menusControllerFindTree = <ThrowOnError extends boolean = false>(options?: Options<MenusControllerFindTreeData, ThrowOnError>) => (options?.client ?? client).get<MenusControllerFindTreeResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus/tree',
+    url: '/nova-admin-api/menus/tree',
     ...options
 });
 
@@ -396,7 +356,7 @@ export const menusControllerFindTree = <ThrowOnError extends boolean = false>(op
  */
 export const menusControllerGetIcons = <ThrowOnError extends boolean = false>(options?: Options<MenusControllerGetIconsData, ThrowOnError>) => (options?.client ?? client).get<MenusControllerGetIconsResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus/icons',
+    url: '/nova-admin-api/menus/icons',
     ...options
 });
 
@@ -405,7 +365,7 @@ export const menusControllerGetIcons = <ThrowOnError extends boolean = false>(op
  */
 export const menusControllerDelete = <ThrowOnError extends boolean = false>(options: Options<MenusControllerDeleteData, ThrowOnError>) => (options.client ?? client).delete<MenusControllerDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus/{id}',
+    url: '/nova-admin-api/menus/{id}',
     ...options
 });
 
@@ -414,7 +374,7 @@ export const menusControllerDelete = <ThrowOnError extends boolean = false>(opti
  */
 export const menusControllerFindOne = <ThrowOnError extends boolean = false>(options: Options<MenusControllerFindOneData, ThrowOnError>) => (options.client ?? client).get<MenusControllerFindOneResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus/{id}',
+    url: '/nova-admin-api/menus/{id}',
     ...options
 });
 
@@ -423,7 +383,7 @@ export const menusControllerFindOne = <ThrowOnError extends boolean = false>(opt
  */
 export const menusControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<MenusControllerUpdateData, ThrowOnError>) => (options.client ?? client).put<MenusControllerUpdateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus/{id}',
+    url: '/nova-admin-api/menus/{id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -436,7 +396,7 @@ export const menusControllerUpdate = <ThrowOnError extends boolean = false>(opti
  */
 export const menusControllerBatchDelete = <ThrowOnError extends boolean = false>(options: Options<MenusControllerBatchDeleteData, ThrowOnError>) => (options.client ?? client).post<MenusControllerBatchDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus/batch',
+    url: '/nova-admin-api/menus/batch',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -449,7 +409,7 @@ export const menusControllerBatchDelete = <ThrowOnError extends boolean = false>
  */
 export const menusControllerUpdateSort = <ThrowOnError extends boolean = false>(options: Options<MenusControllerUpdateSortData, ThrowOnError>) => (options.client ?? client).put<MenusControllerUpdateSortResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus/sort',
+    url: '/nova-admin-api/menus/sort',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -462,7 +422,7 @@ export const menusControllerUpdateSort = <ThrowOnError extends boolean = false>(
  */
 export const menusControllerCopyMenu = <ThrowOnError extends boolean = false>(options: Options<MenusControllerCopyMenuData, ThrowOnError>) => (options.client ?? client).post<MenusControllerCopyMenuResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/menus/{id}/copy',
+    url: '/nova-admin-api/menus/{id}/copy',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -477,7 +437,7 @@ export const menusControllerCopyMenu = <ThrowOnError extends boolean = false>(op
  */
 export const i18nControllerFindAll = <ThrowOnError extends boolean = false>(options?: Options<I18nControllerFindAllData, ThrowOnError>) => (options?.client ?? client).get<I18nControllerFindAllResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n',
+    url: '/nova-admin-api/i18n',
     ...options
 });
 
@@ -486,7 +446,7 @@ export const i18nControllerFindAll = <ThrowOnError extends boolean = false>(opti
  */
 export const i18nControllerCreate = <ThrowOnError extends boolean = false>(options: Options<I18nControllerCreateData, ThrowOnError>) => (options.client ?? client).post<I18nControllerCreateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n',
+    url: '/nova-admin-api/i18n',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -501,7 +461,7 @@ export const i18nControllerCreate = <ThrowOnError extends boolean = false>(optio
  */
 export const i18nControllerGetNestedTranslations = <ThrowOnError extends boolean = false>(options: Options<I18nControllerGetNestedTranslationsData, ThrowOnError>) => (options.client ?? client).get<I18nControllerGetNestedTranslationsResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/nested/{language}',
+    url: '/nova-admin-api/i18n/nested/{language}',
     ...options
 });
 
@@ -512,7 +472,7 @@ export const i18nControllerGetNestedTranslations = <ThrowOnError extends boolean
  */
 export const i18nControllerGetAllTranslations = <ThrowOnError extends boolean = false>(options?: Options<I18nControllerGetAllTranslationsData, ThrowOnError>) => (options?.client ?? client).get<I18nControllerGetAllTranslationsResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/all',
+    url: '/nova-admin-api/i18n/all',
     ...options
 });
 
@@ -523,7 +483,7 @@ export const i18nControllerGetAllTranslations = <ThrowOnError extends boolean = 
  */
 export const i18nControllerGetModules = <ThrowOnError extends boolean = false>(options?: Options<I18nControllerGetModulesData, ThrowOnError>) => (options?.client ?? client).get<I18nControllerGetModulesResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/modules',
+    url: '/nova-admin-api/i18n/modules',
     ...options
 });
 
@@ -532,7 +492,7 @@ export const i18nControllerGetModules = <ThrowOnError extends boolean = false>(o
  */
 export const i18nControllerBatchDelete = <ThrowOnError extends boolean = false>(options: Options<I18nControllerBatchDeleteData, ThrowOnError>) => (options.client ?? client).post<I18nControllerBatchDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/batch-delete',
+    url: '/nova-admin-api/i18n/batch-delete',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -547,7 +507,7 @@ export const i18nControllerBatchDelete = <ThrowOnError extends boolean = false>(
  */
 export const i18nControllerImportFromJson = <ThrowOnError extends boolean = false>(options: Options<I18nControllerImportFromJsonData, ThrowOnError>) => (options.client ?? client).post<I18nControllerImportFromJsonResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/import/json',
+    url: '/nova-admin-api/i18n/import/json',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -562,7 +522,7 @@ export const i18nControllerImportFromJson = <ThrowOnError extends boolean = fals
  */
 export const i18nControllerExportToJson = <ThrowOnError extends boolean = false>(options: Options<I18nControllerExportToJsonData, ThrowOnError>) => (options.client ?? client).get<I18nControllerExportToJsonResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/export/json/{language}',
+    url: '/nova-admin-api/i18n/export/json/{language}',
     ...options
 });
 
@@ -571,7 +531,7 @@ export const i18nControllerExportToJson = <ThrowOnError extends boolean = false>
  */
 export const i18nControllerDelete = <ThrowOnError extends boolean = false>(options: Options<I18nControllerDeleteData, ThrowOnError>) => (options.client ?? client).delete<I18nControllerDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/{id}',
+    url: '/nova-admin-api/i18n/{id}',
     ...options
 });
 
@@ -580,7 +540,7 @@ export const i18nControllerDelete = <ThrowOnError extends boolean = false>(optio
  */
 export const i18nControllerFindById = <ThrowOnError extends boolean = false>(options: Options<I18nControllerFindByIdData, ThrowOnError>) => (options.client ?? client).get<I18nControllerFindByIdResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/{id}',
+    url: '/nova-admin-api/i18n/{id}',
     ...options
 });
 
@@ -589,7 +549,7 @@ export const i18nControllerFindById = <ThrowOnError extends boolean = false>(opt
  */
 export const i18nControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<I18nControllerUpdateData, ThrowOnError>) => (options.client ?? client).patch<I18nControllerUpdateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/i18n/{id}',
+    url: '/nova-admin-api/i18n/{id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',

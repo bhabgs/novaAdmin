@@ -7,7 +7,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // 全局前缀
-  app.setGlobalPrefix("api");
+  const apiPrefix = "nova-admin-api";
+  app.setGlobalPrefix(apiPrefix);
 
   // 启用 CORS
   app.enableCors({
@@ -28,17 +29,16 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle("NovaAdmin API")
     .setDescription("NovaAdmin 后台管理系统 API 文档")
-    .setBasePath("/nova-api")
     .setVersion("1.0")
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api/docs", app, document);
+  SwaggerModule.setup(`${apiPrefix}/docs`, app, document);
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
   console.log(`🚀 Server running on http://localhost:${port}`);
-  console.log(`📚 API Docs: http://localhost:${port}/api/docs`);
+  console.log(`📚 API Docs: http://localhost:${port}/${apiPrefix}/docs`);
 }
 
 bootstrap();

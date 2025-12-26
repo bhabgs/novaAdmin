@@ -150,9 +150,9 @@ export type CreateRoleDto = {
      */
     description?: string;
     /**
-     * 权限列表
+     * 菜单ID列表
      */
-    permissions?: Array<string>;
+    menuIds?: Array<string>;
     /**
      * 状态
      */
@@ -181,9 +181,9 @@ export type UpdateRoleDto = {
      */
     description?: string;
     /**
-     * 权限列表
+     * 菜单ID列表
      */
-    permissions?: Array<string>;
+    menuIds?: Array<string>;
     /**
      * 状态
      */
@@ -198,11 +198,11 @@ export type UpdateRoleDto = {
     remark?: string;
 };
 
-export type AssignPermissionsDto = {
+export type AssignMenusDto = {
     /**
-     * 权限列表
+     * 菜单ID列表
      */
-    permissionIds: Array<string>;
+    menuIds: Array<string>;
 };
 
 export type CopyRoleDto = {
@@ -249,10 +249,6 @@ export type CreateMenuDto = {
      * 是否在新标签页打开
      */
     openInNewTab?: boolean;
-    /**
-     * 权限标识
-     */
-    permission?: string;
     /**
      * 排序
      */
@@ -316,10 +312,6 @@ export type UpdateMenuDto = {
      * 是否在新标签页打开
      */
     openInNewTab?: boolean;
-    /**
-     * 权限标识
-     */
-    permission?: string;
     /**
      * 排序
      */
@@ -431,7 +423,7 @@ export type AuthControllerLoginData = {
     body: LoginDto;
     path?: never;
     query?: never;
-    url: '/api/auth/login';
+    url: '/nova-admin-api/auth/login';
 };
 
 export type AuthControllerLoginResponses = {
@@ -442,7 +434,7 @@ export type AuthControllerLogoutData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/auth/logout';
+    url: '/nova-admin-api/auth/logout';
 };
 
 export type AuthControllerLogoutResponses = {
@@ -453,7 +445,7 @@ export type AuthControllerRefreshTokenData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/auth/refresh-token';
+    url: '/nova-admin-api/auth/refresh-token';
 };
 
 export type AuthControllerRefreshTokenResponses = {
@@ -464,7 +456,7 @@ export type AuthControllerGetUserInfoData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/auth/user-info';
+    url: '/nova-admin-api/auth/user-info';
 };
 
 export type AuthControllerGetUserInfoResponses = {
@@ -475,7 +467,7 @@ export type AuthControllerChangePasswordData = {
     body: ChangePasswordDto;
     path?: never;
     query?: never;
-    url: '/api/auth/change-password';
+    url: '/nova-admin-api/auth/change-password';
 };
 
 export type AuthControllerChangePasswordResponses = {
@@ -486,7 +478,7 @@ export type AuthControllerResetPasswordData = {
     body: ResetPasswordDto;
     path?: never;
     query?: never;
-    url: '/api/auth/reset-password';
+    url: '/nova-admin-api/auth/reset-password';
 };
 
 export type AuthControllerResetPasswordResponses = {
@@ -497,7 +489,7 @@ export type AuthControllerVerifyTokenData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/auth/verify-token';
+    url: '/nova-admin-api/auth/verify-token';
 };
 
 export type AuthControllerVerifyTokenResponses = {
@@ -529,7 +521,7 @@ export type UsersControllerFindAllData = {
          */
         role?: string;
     };
-    url: '/api/users';
+    url: '/nova-admin-api/users';
 };
 
 export type UsersControllerFindAllResponses = {
@@ -540,7 +532,7 @@ export type UsersControllerCreateData = {
     body: CreateUserDto;
     path?: never;
     query?: never;
-    url: '/api/users';
+    url: '/nova-admin-api/users';
 };
 
 export type UsersControllerCreateResponses = {
@@ -553,7 +545,7 @@ export type UsersControllerDeleteData = {
         id: string;
     };
     query?: never;
-    url: '/api/users/{id}';
+    url: '/nova-admin-api/users/{id}';
 };
 
 export type UsersControllerDeleteResponses = {
@@ -566,7 +558,7 @@ export type UsersControllerFindOneData = {
         id: string;
     };
     query?: never;
-    url: '/api/users/{id}';
+    url: '/nova-admin-api/users/{id}';
 };
 
 export type UsersControllerFindOneResponses = {
@@ -579,7 +571,7 @@ export type UsersControllerUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/api/users/{id}';
+    url: '/nova-admin-api/users/{id}';
 };
 
 export type UsersControllerUpdateResponses = {
@@ -590,7 +582,7 @@ export type UsersControllerBatchDeleteData = {
     body: BatchDeleteDto;
     path?: never;
     query?: never;
-    url: '/api/users/batch';
+    url: '/nova-admin-api/users/batch';
 };
 
 export type UsersControllerBatchDeleteResponses = {
@@ -603,7 +595,7 @@ export type UsersControllerResetPasswordData = {
         id: string;
     };
     query?: never;
-    url: '/api/users/{id}/reset-password';
+    url: '/nova-admin-api/users/{id}/reset-password';
 };
 
 export type UsersControllerResetPasswordResponses = {
@@ -616,7 +608,7 @@ export type UsersControllerUpdateStatusData = {
         id: string;
     };
     query?: never;
-    url: '/api/users/{id}/status';
+    url: '/nova-admin-api/users/{id}/status';
 };
 
 export type UsersControllerUpdateStatusResponses = {
@@ -629,7 +621,7 @@ export type UsersControllerAssignRolesData = {
         id: string;
     };
     query?: never;
-    url: '/api/users/{id}/roles';
+    url: '/nova-admin-api/users/{id}/roles';
 };
 
 export type UsersControllerAssignRolesResponses = {
@@ -642,7 +634,7 @@ export type UsersControllerGetUserPermissionsData = {
         id: string;
     };
     query?: never;
-    url: '/api/users/{id}/permissions';
+    url: '/nova-admin-api/users/{id}/permissions';
 };
 
 export type UsersControllerGetUserPermissionsResponses = {
@@ -666,7 +658,7 @@ export type RolesControllerFindAllData = {
          */
         keyword?: string;
     };
-    url: '/api/roles';
+    url: '/nova-admin-api/roles';
 };
 
 export type RolesControllerFindAllResponses = {
@@ -677,7 +669,7 @@ export type RolesControllerCreateData = {
     body: CreateRoleDto;
     path?: never;
     query?: never;
-    url: '/api/roles';
+    url: '/nova-admin-api/roles';
 };
 
 export type RolesControllerCreateResponses = {
@@ -688,32 +680,21 @@ export type RolesControllerFindAllWithoutPaginationData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/roles/all';
+    url: '/nova-admin-api/roles/all';
 };
 
 export type RolesControllerFindAllWithoutPaginationResponses = {
     200: unknown;
 };
 
-export type RolesControllerGetPermissionsData = {
+export type RolesControllerGetMenuTreeData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/roles/permissions';
+    url: '/nova-admin-api/roles/menus/tree';
 };
 
-export type RolesControllerGetPermissionsResponses = {
-    200: unknown;
-};
-
-export type RolesControllerGetPermissionTreeData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/roles/permissions/tree';
-};
-
-export type RolesControllerGetPermissionTreeResponses = {
+export type RolesControllerGetMenuTreeResponses = {
     200: unknown;
 };
 
@@ -723,7 +704,7 @@ export type RolesControllerDeleteData = {
         id: string;
     };
     query?: never;
-    url: '/api/roles/{id}';
+    url: '/nova-admin-api/roles/{id}';
 };
 
 export type RolesControllerDeleteResponses = {
@@ -736,7 +717,7 @@ export type RolesControllerFindOneData = {
         id: string;
     };
     query?: never;
-    url: '/api/roles/{id}';
+    url: '/nova-admin-api/roles/{id}';
 };
 
 export type RolesControllerFindOneResponses = {
@@ -749,7 +730,7 @@ export type RolesControllerUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/api/roles/{id}';
+    url: '/nova-admin-api/roles/{id}';
 };
 
 export type RolesControllerUpdateResponses = {
@@ -760,36 +741,36 @@ export type RolesControllerBatchDeleteData = {
     body: BatchDeleteDto;
     path?: never;
     query?: never;
-    url: '/api/roles/batch';
+    url: '/nova-admin-api/roles/batch';
 };
 
 export type RolesControllerBatchDeleteResponses = {
     201: unknown;
 };
 
-export type RolesControllerGetRolePermissionsData = {
+export type RolesControllerGetRoleMenusData = {
     body?: never;
     path: {
         id: string;
     };
     query?: never;
-    url: '/api/roles/{id}/permissions';
+    url: '/nova-admin-api/roles/{id}/menus';
 };
 
-export type RolesControllerGetRolePermissionsResponses = {
+export type RolesControllerGetRoleMenusResponses = {
     200: unknown;
 };
 
-export type RolesControllerAssignPermissionsData = {
-    body: AssignPermissionsDto;
+export type RolesControllerAssignMenusData = {
+    body: AssignMenusDto;
     path: {
         id: string;
     };
     query?: never;
-    url: '/api/roles/{id}/permissions';
+    url: '/nova-admin-api/roles/{id}/menus';
 };
 
-export type RolesControllerAssignPermissionsResponses = {
+export type RolesControllerAssignMenusResponses = {
     201: unknown;
 };
 
@@ -799,7 +780,7 @@ export type RolesControllerCopyRoleData = {
         id: string;
     };
     query?: never;
-    url: '/api/roles/{id}/copy';
+    url: '/nova-admin-api/roles/{id}/copy';
 };
 
 export type RolesControllerCopyRoleResponses = {
@@ -810,7 +791,7 @@ export type MenusControllerFindAllData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/menus';
+    url: '/nova-admin-api/menus';
 };
 
 export type MenusControllerFindAllResponses = {
@@ -821,7 +802,7 @@ export type MenusControllerCreateData = {
     body: CreateMenuDto;
     path?: never;
     query?: never;
-    url: '/api/menus';
+    url: '/nova-admin-api/menus';
 };
 
 export type MenusControllerCreateResponses = {
@@ -832,7 +813,7 @@ export type MenusControllerFindTreeData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/menus/tree';
+    url: '/nova-admin-api/menus/tree';
 };
 
 export type MenusControllerFindTreeResponses = {
@@ -843,7 +824,7 @@ export type MenusControllerGetIconsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/menus/icons';
+    url: '/nova-admin-api/menus/icons';
 };
 
 export type MenusControllerGetIconsResponses = {
@@ -856,7 +837,7 @@ export type MenusControllerDeleteData = {
         id: string;
     };
     query?: never;
-    url: '/api/menus/{id}';
+    url: '/nova-admin-api/menus/{id}';
 };
 
 export type MenusControllerDeleteResponses = {
@@ -869,7 +850,7 @@ export type MenusControllerFindOneData = {
         id: string;
     };
     query?: never;
-    url: '/api/menus/{id}';
+    url: '/nova-admin-api/menus/{id}';
 };
 
 export type MenusControllerFindOneResponses = {
@@ -882,7 +863,7 @@ export type MenusControllerUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/api/menus/{id}';
+    url: '/nova-admin-api/menus/{id}';
 };
 
 export type MenusControllerUpdateResponses = {
@@ -893,7 +874,7 @@ export type MenusControllerBatchDeleteData = {
     body: BatchDeleteDto;
     path?: never;
     query?: never;
-    url: '/api/menus/batch';
+    url: '/nova-admin-api/menus/batch';
 };
 
 export type MenusControllerBatchDeleteResponses = {
@@ -904,7 +885,7 @@ export type MenusControllerUpdateSortData = {
     body: UpdateSortDto;
     path?: never;
     query?: never;
-    url: '/api/menus/sort';
+    url: '/nova-admin-api/menus/sort';
 };
 
 export type MenusControllerUpdateSortResponses = {
@@ -917,7 +898,7 @@ export type MenusControllerCopyMenuData = {
         id: string;
     };
     query?: never;
-    url: '/api/menus/{id}/copy';
+    url: '/nova-admin-api/menus/{id}/copy';
 };
 
 export type MenusControllerCopyMenuResponses = {
@@ -945,7 +926,7 @@ export type I18nControllerFindAllData = {
          */
         keyword?: string;
     };
-    url: '/api/i18n';
+    url: '/nova-admin-api/i18n';
 };
 
 export type I18nControllerFindAllResponses = {
@@ -956,7 +937,7 @@ export type I18nControllerCreateData = {
     body: CreateI18nTranslationDto;
     path?: never;
     query?: never;
-    url: '/api/i18n';
+    url: '/nova-admin-api/i18n';
 };
 
 export type I18nControllerCreateResponses = {
@@ -969,7 +950,7 @@ export type I18nControllerGetNestedTranslationsData = {
         language: string;
     };
     query?: never;
-    url: '/api/i18n/nested/{language}';
+    url: '/nova-admin-api/i18n/nested/{language}';
 };
 
 export type I18nControllerGetNestedTranslationsResponses = {
@@ -980,7 +961,7 @@ export type I18nControllerGetAllTranslationsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/i18n/all';
+    url: '/nova-admin-api/i18n/all';
 };
 
 export type I18nControllerGetAllTranslationsResponses = {
@@ -991,7 +972,7 @@ export type I18nControllerGetModulesData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/i18n/modules';
+    url: '/nova-admin-api/i18n/modules';
 };
 
 export type I18nControllerGetModulesResponses = {
@@ -1002,7 +983,7 @@ export type I18nControllerBatchDeleteData = {
     body: BatchDeleteDto;
     path?: never;
     query?: never;
-    url: '/api/i18n/batch-delete';
+    url: '/nova-admin-api/i18n/batch-delete';
 };
 
 export type I18nControllerBatchDeleteResponses = {
@@ -1013,7 +994,7 @@ export type I18nControllerImportFromJsonData = {
     body: BatchImportDto;
     path?: never;
     query?: never;
-    url: '/api/i18n/import/json';
+    url: '/nova-admin-api/i18n/import/json';
 };
 
 export type I18nControllerImportFromJsonResponses = {
@@ -1026,7 +1007,7 @@ export type I18nControllerExportToJsonData = {
         language: string;
     };
     query?: never;
-    url: '/api/i18n/export/json/{language}';
+    url: '/nova-admin-api/i18n/export/json/{language}';
 };
 
 export type I18nControllerExportToJsonResponses = {
@@ -1039,7 +1020,7 @@ export type I18nControllerDeleteData = {
         id: string;
     };
     query?: never;
-    url: '/api/i18n/{id}';
+    url: '/nova-admin-api/i18n/{id}';
 };
 
 export type I18nControllerDeleteResponses = {
@@ -1052,7 +1033,7 @@ export type I18nControllerFindByIdData = {
         id: string;
     };
     query?: never;
-    url: '/api/i18n/{id}';
+    url: '/nova-admin-api/i18n/{id}';
 };
 
 export type I18nControllerFindByIdResponses = {
@@ -1065,7 +1046,7 @@ export type I18nControllerUpdateData = {
         id: string;
     };
     query?: never;
-    url: '/api/i18n/{id}';
+    url: '/nova-admin-api/i18n/{id}';
 };
 
 export type I18nControllerUpdateResponses = {

@@ -3,7 +3,7 @@ import { defineConfig } from 'orval';
 export default defineConfig({
   novaAdmin: {
     input: {
-      target: 'http://localhost:3000/api/docs-json',
+      target: 'http://localhost:3000/nova-admin-api/docs-json',
     },
     output: {
       mode: 'single',

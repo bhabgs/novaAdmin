@@ -1,7 +1,7 @@
 import { defineConfig } from "@hey-api/openapi-ts";
 
 export default defineConfig({
-  input: "http://localhost:3000/api/docs-json", // sign up at app.heyapi.dev
+  input: "http://localhost:3000/nova-admin-api/docs-json",
   output: "src/api",
   plugins: [
     {

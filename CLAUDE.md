@@ -67,12 +67,42 @@ const { slice, thunks } = createCrudSlice<User>({
 export const fetchUsers = thunks.fetchList;
 ```
 
-### 2. 列表页 Hook
+### 2. CrudPage 组件 + useListManagement Hook
+
+标准 CRUD 列表页模式，提供搜索栏、工具栏、表格、分页、模态框：
 
 ```typescript
-const { handleSearch, handleAdd, handleEdit, handleDelete, rowSelection, paginationConfig } =
-  useListManagement<User>({ dispatch, fetchAction, deleteAction, ... });
+// 1. 使用 useListManagement 获取通用逻辑
+const {
+  selectedRowKeys, isModalVisible, editingItem,
+  handleSearch, handleAdd, handleEdit, handleDelete, handleBatchDelete, handleRefresh,
+  rowSelection, paginationConfig, setIsModalVisible,
+} = useListManagement<User>({
+  dispatch, fetchAction: fetchUsers, deleteAction: deleteUser,
+  loadingSelector: loading, totalSelector: pagination.total,
+});
+
+// 2. 使用 CrudPage 组件渲染页面
+<CrudPage<User>
+  title={t("user.title")}
+  dataSource={users}
+  columns={columns}
+  loading={loading}
+  rowSelection={rowSelection}
+  selectedRowKeys={selectedRowKeys}
+  pagination={paginationConfig}
+  onSearch={handleSearch}
+  onAdd={handleAdd}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+  onBatchDelete={handleBatchDelete}
+  onRefresh={handleRefresh}
+  filters={[{ key: "status", component: <Select ... /> }]}  // 可选过滤器
+  operationColumnRender={(record) => <CustomActions />}     // 可选自定义操作列
+/>
 ```
+
+**CrudPage 主要属性**: `title`, `dataSource`, `columns`, `loading`, `pagination`, `rowSelection`, `onSearch`, `onAdd/Edit/Delete`, `filters`, `modalVisible`, `formContent`
 
 ### 3. API 响应格式
 
@@ -90,8 +120,29 @@ const { handleSearch, handleAdd, handleEdit, handleDelete, rowSelection, paginat
 
 ### 新增页面
 1. 创建 `pages/system/Example/index.tsx`
-2. 添加到 `router/componentMap.tsx`
-3. 菜单管理配置 `{ path, component: "system/Example" }`
+2. 菜单管理配置 `{ path, component: "system/Example" }`（component 为 pages/ 下的相对路径）
+
+### 动态路由系统
+
+路由与菜单深度绑定，后台配置菜单即自动生成路由，无需修改前端代码。
+
+**核心文件**: `src/router/` - DynamicRoutes.tsx（核心）、generateRoutes.tsx（生成器）、ProtectedRoute.tsx（守卫）
+
+**菜单类型**:
+| 类型 | 用途 | 必填字段 |
+|------|------|----------|
+| `directory` | 菜单分组，不生成路由 | name, icon |
+| `page` | 生成路由和菜单项 | path, component |
+| `button` | 仅权限控制 | permission |
+
+**菜单配置示例**:
+```json
+{ "type": "page", "path": "/reports/sales", "component": "Reports/SalesReport", "hideInMenu": false }
+```
+
+**带参数路由**: `path: "/users/:id"` → 组件用 `useParams()` 获取
+
+**权限控制**: 用户登录 → 后端返回角色菜单 → 前端生成路由 → 按钮级用 `<PermissionWrapper permission="user:delete">`
 
 ### 国际化
 ```typescript

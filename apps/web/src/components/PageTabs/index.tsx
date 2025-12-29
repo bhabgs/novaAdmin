@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Tabs, Dropdown } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { match } from 'path-to-regexp';
 import { useAppDispatch, useAppSelector } from '../../store';
 import {
   addTab,
@@ -30,12 +31,29 @@ const PageTabs: React.FC = () => {
     itemsRef.current = items;
   }, [items]);
 
-  // 根据路径查找菜单项
+  // 根据路径查找菜单项（支持动态路由参数）
   const findMenuByPath = (menus: MenuType[], path: string): MenuType | null => {
     for (const menu of menus) {
+      // 先尝试精确匹配
       if (menu.path === path) {
         return menu;
       }
+
+      // 如果菜单路径包含路由参数（如 :id），使用动态匹配
+      if (menu.path && menu.path.includes(':')) {
+        try {
+          const matchFn = match(menu.path, { decode: decodeURIComponent });
+          const result = matchFn(path);
+          if (result) {
+            return menu;
+          }
+        } catch (error) {
+          // 如果路径格式不正确，忽略错误继续查找
+          console.warn(`Invalid path pattern: ${menu.path}`, error);
+        }
+      }
+
+      // 递归查找子菜单
       if (menu.children) {
         const found = findMenuByPath(menu.children, path);
         if (found) return found;

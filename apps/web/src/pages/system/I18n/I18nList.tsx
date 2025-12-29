@@ -50,11 +50,8 @@ const I18nList: React.FC = () => {
     selectedRowKeys,
     setSelectedRowKeys,
     searchText,
-    setSearchText,
     currentPage,
-    setCurrentPage,
     pageSize,
-    setPageSize,
     isModalVisible,
     setIsModalVisible,
     editingItem,
@@ -62,9 +59,7 @@ const I18nList: React.FC = () => {
     handleSearch,
     handleAdd,
     handleDelete,
-    handleBatchDelete,
     handleRefresh,
-    handlePageChange,
     rowSelection,
     paginationConfig,
   } = useListManagement({
@@ -73,7 +68,7 @@ const I18nList: React.FC = () => {
     deleteAction: deleteI18nTranslation,
     totalSelector: pagination.total,
     loadingSelector: loading,
-    initialPageSize: 50,
+    initialPageSize: 10,
   });
 
   // Fetch data when filters change

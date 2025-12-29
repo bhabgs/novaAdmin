@@ -119,7 +119,15 @@ export interface CrudPageProps<T extends { id: string }> {
   extraContent?: ReactNode;
 
   // 表格额外属性
-  tableProps?: Omit<TableProps<T>, "columns" | "dataSource" | "loading" | "rowKey" | "pagination" | "rowSelection">;
+  tableProps?: Omit<
+    TableProps<T>,
+    | "columns"
+    | "dataSource"
+    | "loading"
+    | "rowKey"
+    | "pagination"
+    | "rowSelection"
+  >;
 }
 
 /**
@@ -342,7 +350,9 @@ function CrudPage<T extends { id: string }>({
 
     return (
       <Modal
-        title={modalTitle || (editingRecord ? t("common.edit") : t("common.add"))}
+        title={
+          modalTitle || (editingRecord ? t("common.edit") : t("common.add"))
+        }
         open={modalVisible}
         width={modalWidth}
         onCancel={onModalCancel}

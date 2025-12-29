@@ -63,7 +63,21 @@ const MenuList: React.FC = () => {
       }
     });
 
-    return rootMenus;
+    // 清理空的 children 数组，设置为 undefined（Ant Design Table 不会显示展开图标）
+    const cleanEmptyChildren = (nodes: Menu[]): Menu[] => {
+      return nodes.map((node) => {
+        if (node.children && node.children.length === 0) {
+          const { children, ...rest } = node;
+          return rest as Menu;
+        }
+        if (node.children && node.children.length > 0) {
+          return { ...node, children: cleanEmptyChildren(node.children) };
+        }
+        return node;
+      });
+    };
+
+    return cleanEmptyChildren(rootMenus);
   }, []);
 
   // 过滤菜单数据

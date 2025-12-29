@@ -82,10 +82,22 @@ axiosInstance.interceptors.response.use(
 
     switch (status) {
       case 401:
-        // 未授权，清除token并跳转到登录页
+        // 检查是否是登录请求 - 登录失败不应该重定向
+        const requestUrl = error.config?.url || "";
+        const isLoginRequest = requestUrl.includes("/auth/login");
+
+        if (isLoginRequest) {
+          // 登录请求失败，返回错误让调用方处理，不显示额外消息
+          return Promise.reject(
+            new Error(data?.message || i18n.t("api.loginFailed"))
+          );
+        }
+
+        // 其他请求的401，清除token并跳转到登录页
         tokenUtils.removeToken();
         message.error(i18n.t("api.unauthorized"));
-        window.location.href = "/auth/login";
+        // 使用 React Router 导航会更好，但这里用 href 确保状态清除
+        window.location.href = "/login";
         break;
       case 403:
         message.error(i18n.t("api.forbidden"));

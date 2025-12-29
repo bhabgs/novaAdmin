@@ -168,19 +168,6 @@ const Login: React.FC = () => {
             </Form>
           </Spin>
 
-          <div className="mt-6 text-center">
-            <div className="text-sm text-gray-500 mb-4">测试账号信息：</div>
-            <div className="bg-gray-50 rounded-lg p-3 text-sm">
-              <div className="mb-2">
-                <span className="font-medium">管理员：</span>
-                <span className="ml-2">admin / 123456</span>
-              </div>
-              <div>
-                <span className="font-medium">普通用户：</span>
-                <span className="ml-2">user / 123456</span>
-              </div>
-            </div>
-          </div>
         </Card>
 
         <div className="text-center mt-6 text-sm text-gray-500">

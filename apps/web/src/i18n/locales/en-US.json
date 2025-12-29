@@ -543,7 +543,8 @@
     "forbidden": "You don't have permission to access this resource",
     "notFound": "The requested resource does not exist",
     "serverError": "Internal server error",
-    "requestFailedWithCode": "Request failed ({{code}})"
+    "requestFailedWithCode": "Request failed ({{code}})",
+    "loginFailed": "Invalid username or password"
   },
   "errorBoundary": {
     "title": "Something went wrong",

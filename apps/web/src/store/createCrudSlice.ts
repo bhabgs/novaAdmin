@@ -143,7 +143,13 @@ export function createCrudSlice<T extends BaseEntity, TCreate = Partial<T>, TUpd
     `${name}/fetchList`,
     async (params = {}, { rejectWithValue }) => {
       try {
-        const response = await api.findAll({ query: params }) as ApiResponse<ListResponse<T>>;
+        // 将 filters 对象中的字段展平到 query 参数中，以匹配 API 期望的格式
+        const { filters, ...restParams } = params;
+        const queryParams = {
+          ...restParams,
+          ...(filters || {}),
+        };
+        const response = await api.findAll({ query: queryParams }) as ApiResponse<ListResponse<T>>;
         if (response.success) {
           return response.data;
         }

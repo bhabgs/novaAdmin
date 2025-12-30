@@ -1,13 +1,11 @@
 import React, { useEffect } from "react";
-import {
-  Modal,
-  Form,
-  Input,
-  message,
-} from "antd";
+import { Modal, Form, Input, message } from "antd";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { createI18nModule, updateI18nModule } from "@/store/slices/i18nModuleSlice";
+import {
+  createI18nModule,
+  updateI18nModule,
+} from "@/store/slices/i18nModuleSlice";
 import type { I18nModule } from "@/types/i18n";
 
 interface I18nModuleFormProps {
@@ -43,22 +41,48 @@ const I18nModuleForm: React.FC<I18nModuleFormProps> = ({
       const values = await form.validateFields();
 
       if (module) {
-        await dispatch(updateI18nModule({ id: module.id, data: values })).unwrap();
+        // 编辑时，只发送允许更新的字段，不包含 code（code 字段不允许更新）
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { code, ...updateData } = values;
+        // 将 null 转换为 undefined，避免验证错误
+        const cleanData = Object.fromEntries(
+          Object.entries(updateData).map(([key, value]) => [
+            key,
+            value === null || value === "" ? undefined : value,
+          ])
+        );
+        await dispatch(
+          updateI18nModule({ id: module.id, data: cleanData })
+        ).unwrap();
         message.success(t("i18nModule.updateSuccess"));
       } else {
-        await dispatch(createI18nModule(values)).unwrap();
+        // 创建时，将 null 或空字符串转换为 undefined
+        const cleanData = Object.fromEntries(
+          Object.entries(values).map(([key, value]) => [
+            key,
+            value === null || value === "" ? undefined : value,
+          ])
+        );
+        await dispatch(createI18nModule(cleanData)).unwrap();
         message.success(t("i18nModule.createSuccess"));
       }
 
       onSuccess();
-    } catch {
-      message.error(t("message.error"));
+    } catch (error) {
+      console.error("I18nModule form submit error:", error);
+      if (error instanceof Error) {
+        message.error(error.message);
+      } else {
+        message.error(t("message.error"));
+      }
     }
   };
 
   return (
     <Modal
-      title={module ? t("i18nModule.editModule") : t("i18nModule.addModule")}
+      title={
+        module ? t("i18nModule.modelEditTitle") : t("i18nModule.modelAddTitle")
+      }
       open={visible}
       onOk={handleSubmit}
       onCancel={onCancel}
@@ -66,27 +90,24 @@ const I18nModuleForm: React.FC<I18nModuleFormProps> = ({
       width={600}
       destroyOnClose
     >
-      <Form
-        form={form}
-        layout="vertical"
-      >
+      <Form form={form} layout="vertical">
         <Form.Item
           name="code"
-          label={t("i18nModule.code")}
+          label={t("common.code")}
           rules={[
             { required: true, message: t("i18nModule.codeRequired") },
             { max: 50, message: t("validation.maxLength", { max: 50 }) },
           ]}
         >
-          <Input 
-            placeholder={t("i18nModule.codePlaceholder")} 
+          <Input
+            placeholder={t("i18nModule.codePlaceholder")}
             disabled={!!module}
           />
         </Form.Item>
 
         <Form.Item
           name="name"
-          label={t("i18nModule.name")}
+          label={t("common.name")}
           rules={[
             { required: true, message: t("i18nModule.nameRequired") },
             { max: 100, message: t("validation.maxLength", { max: 100 }) },
@@ -97,7 +118,7 @@ const I18nModuleForm: React.FC<I18nModuleFormProps> = ({
 
         <Form.Item
           name="description"
-          label={t("i18nModule.description")}
+          label={t("common.description")}
           rules={[
             { max: 255, message: t("validation.maxLength", { max: 255 }) },
           ]}
@@ -124,4 +145,3 @@ const I18nModuleForm: React.FC<I18nModuleFormProps> = ({
 };
 
 export default I18nModuleForm;
-

@@ -78,20 +78,28 @@ const MenuForm: React.FC<MenuFormProps> = ({
 
   const parentMenuOptions = buildMenuTree(menus, menu?.id);
 
-  // 构造国际化键名选项：格式为 module.code.key
+  // 构造国际化键名选项：显示中文翻译，value为 module.code.key
   const i18nKeyOptions = useMemo(() => {
     return i18ns
       .filter((i18n: I18n) => i18n.module?.code && i18n.key)
       .map((i18n: I18n) => {
         const fullKey = `${i18n.module!.code}.${i18n.key}`;
+        const moduleName = i18n.module?.name || "";
+        const chineseText = i18n.zhCn || "";
+        // 显示格式：模块名 - 中文翻译 (键名)
+        const displayLabel =
+          moduleName && chineseText
+            ? `${moduleName} - ${chineseText} (${fullKey})`
+            : chineseText || fullKey;
         return {
           value: fullKey,
-          label: fullKey,
-          module: i18n.module?.name || "",
+          label: displayLabel,
+          module: moduleName,
           key: i18n.key,
+          zhCn: chineseText,
         };
       })
-      .sort((a, b) => a.value.localeCompare(b.value));
+      .sort((a, b) => (a.zhCn || a.value).localeCompare(b.zhCn || b.value));
   }, [i18ns]);
 
   const handleSubmit = useCallback(async () => {
@@ -211,9 +219,12 @@ const MenuForm: React.FC<MenuFormProps> = ({
                   const searchText = input.toLowerCase();
                   const label = (option?.label as string) || "";
                   const value = (option?.value as string) || "";
+                  // 同时搜索中文翻译
+                  const zhCn = (option as { zhCn?: string })?.zhCn || "";
                   return (
                     label.toLowerCase().includes(searchText) ||
-                    value.toLowerCase().includes(searchText)
+                    value.toLowerCase().includes(searchText) ||
+                    zhCn.toLowerCase().includes(searchText)
                   );
                 }}
                 options={i18nKeyOptions}

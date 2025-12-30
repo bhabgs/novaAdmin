@@ -89,10 +89,10 @@ const I18nForm: React.FC<I18nFormProps> = ({
         form.setFieldsValue({ arSa: arSaResponse.data.text });
       }
 
-      message.success(t("i18n.translateSuccess"));
+      message.success(t("i18nModule.translateSuccess"));
     } catch (error) {
       console.error("Translation error:", error);
-      message.error(t("i18n.translateError") || "翻译失败，请手动输入");
+      message.error(t("i18nModule.translateError") || "翻译失败，请手动输入");
     } finally {
       setTranslating(false);
     }
@@ -136,7 +136,7 @@ const I18nForm: React.FC<I18nFormProps> = ({
 
   return (
     <Modal
-      title={i18n ? t("i18n.editI18n") : t("i18n.addI18n")}
+      title={i18n ? t("i18nModule.editI18n") : t("i18nModule.addI18n")}
       open={visible}
       onOk={handleSubmit}
       onCancel={onCancel}
@@ -181,7 +181,7 @@ const I18nForm: React.FC<I18nFormProps> = ({
               name="zhCn"
               label={
                 <Space>
-                  <span>{t("i18n.zhCn")}</span>
+                  <span>{t("common.zhCn")}</span>
                   <Button
                     type="link"
                     size="small"
@@ -196,7 +196,7 @@ const I18nForm: React.FC<I18nFormProps> = ({
                     disabled={translating}
                     style={{ padding: 0, height: "auto" }}
                   >
-                    {t("i18n.autoTranslate")}
+                    {t("i18nModule.autoTranslate")}
                   </Button>
                 </Space>
               }
@@ -211,7 +211,7 @@ const I18nForm: React.FC<I18nFormProps> = ({
           <Col span={8}>
             <Form.Item
               name="enUs"
-              label={t("i18n.enUs")}
+              label={t("common.enUs")}
               rules={[{ required: true, message: t("i18n.enUsRequired") }]}
             >
               <Input.TextArea
@@ -223,7 +223,7 @@ const I18nForm: React.FC<I18nFormProps> = ({
           <Col span={8}>
             <Form.Item
               name="arSa"
-              label={t("i18n.arSa")}
+              label={t("common.arSa")}
               rules={[{ required: true, message: t("i18n.arSaRequired") }]}
             >
               <Input.TextArea

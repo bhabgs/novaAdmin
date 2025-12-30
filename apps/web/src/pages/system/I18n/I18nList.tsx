@@ -3,7 +3,13 @@ import { Button, Space, Popconfirm, Select } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { fetchI18ns, deleteI18n, setFilters } from "@/store/slices/i18nSlice";
+import {
+  fetchI18ns,
+  deleteI18n,
+  setFilters,
+  setSearchKeyword,
+  setPagination,
+} from "@/store/slices/i18nSlice";
 import { fetchI18nModules } from "@/store/slices/i18nModuleSlice";
 import type { I18n } from "@/types/i18n";
 import I18nForm from "./I18nForm";
@@ -20,6 +26,7 @@ const I18nList: React.FC = () => {
     loading,
     pagination,
     filters,
+    searchKeyword,
   } = useAppSelector((state) => state.i18n);
   const { items: modules } = useAppSelector((state) => state.i18nModule);
 
@@ -28,7 +35,6 @@ const I18nList: React.FC = () => {
     isModalVisible,
     editingItem: editingI18n,
     setIsModalVisible,
-    handleSearch,
     handleAdd,
     handleEdit,
     handleDelete,
@@ -48,31 +54,46 @@ const I18nList: React.FC = () => {
     batchDeleteConfirmKey: "i18n.batchDeleteConfirm",
   });
 
+  // 自定义 handleSearch，更新 store 中的 searchKeyword
+  const handleSearch = useCallback(
+    (value: string) => {
+      dispatch(setSearchKeyword(value));
+      dispatch(setPagination({ page: 1 }));
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     // 加载多语言模块列表
     dispatch(fetchI18nModules({ page: 1, pageSize: 100 }));
   }, [dispatch]);
 
-  // 当 filters 改变时，重新加载数据（useListManagement 会自动加载，但不会传递 filters）
+  // 当 filters 或 searchKeyword 改变时，重新加载数据
   useEffect(() => {
     dispatch(
       fetchI18ns({
         page: pagination.page || 1,
         pageSize: pagination.pageSize || 10,
-        keyword: undefined,
+        keyword: searchKeyword || undefined,
         filters: filters.moduleId ? { moduleId: filters.moduleId } : undefined,
       })
     );
-  }, [dispatch, filters.moduleId, pagination.page, pagination.pageSize]);
+  }, [
+    dispatch,
+    filters.moduleId,
+    pagination.page,
+    pagination.pageSize,
+    searchKeyword,
+  ]);
 
   const handleModuleChange = (moduleId: string) => {
     dispatch(setFilters({ moduleId: moduleId || undefined }));
-    // 刷新列表，传递当前的 filters
+    // 刷新列表，传递当前的 filters 和 searchKeyword
     dispatch(
       fetchI18ns({
         page: pagination.page,
         pageSize: pagination.pageSize,
-        keyword: undefined,
+        keyword: searchKeyword || undefined,
         filters: { moduleId: moduleId || undefined },
       })
     );
@@ -121,19 +142,19 @@ const I18nList: React.FC = () => {
       sorter: true,
     },
     {
-      title: t("i18n.zhCn"),
+      title: t("common.zhCn"),
       dataIndex: "zhCn",
       key: "zhCn",
       ellipsis: true,
     },
     {
-      title: t("i18n.enUs"),
+      title: t("common.enUs"),
       dataIndex: "enUs",
       key: "enUs",
       ellipsis: true,
     },
     {
-      title: t("i18n.arSa"),
+      title: t("common.arSa"),
       dataIndex: "arSa",
       key: "arSa",
       ellipsis: true,

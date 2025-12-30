@@ -10,6 +10,7 @@ import menuReducer from './slices/menuSlice';
 import dashboardReducer from './slices/dashboardSlice';
 import tabsReducer from './slices/tabsSlice';
 import notificationReducer from './slices/notificationSlice';
+import i18nModuleReducer from './slices/i18nModuleSlice';
 import i18nReducer from './slices/i18nSlice';
 
 // 配置store
@@ -23,6 +24,7 @@ export const store = configureStore({
     dashboard: dashboardReducer,
     tabs: tabsReducer,
     notification: notificationReducer,
+    i18nModule: i18nModuleReducer,
     i18n: i18nReducer,
   },
   middleware: (getDefaultMiddleware) =>

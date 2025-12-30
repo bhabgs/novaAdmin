@@ -117,7 +117,7 @@ export type UpdateUserDto = {
 
 export type BatchDeleteDto = {
     /**
-     * 翻译ID列表
+     * ID列表
      */
     ids: Array<string>;
 };
@@ -352,69 +352,86 @@ export type CopyMenuDto = {
     parentId?: string;
 };
 
-export type BatchImportDto = {
+export type CreateI18nModuleDto = {
     /**
-     * 是否覆盖已存在的翻译
+     * 模块代码
      */
-    overwrite?: boolean;
-    /**
-     * 按语言分组的JSON格式翻译数据
-     */
-    data: {
-        [key: string]: unknown;
-    };
-};
-
-export type CreateI18nTranslationDto = {
+    code: string;
     /**
      * 模块名称
      */
-    module: string;
+    name: string;
     /**
-     * 翻译键名
+     * 模块描述
      */
-    key: string;
+    description?: string;
     /**
-     * 中文翻译
-     */
-    zhCN: string;
-    /**
-     * 英文翻译
-     */
-    enUS: string;
-    /**
-     * 阿拉伯语翻译
-     */
-    arSA: string;
-    /**
-     * 备注说明
+     * 备注
      */
     remark?: string;
 };
 
-export type UpdateI18nTranslationDto = {
+export type UpdateI18nModuleDto = {
     /**
      * 模块名称
      */
-    module?: string;
+    name?: string;
     /**
-     * 翻译键名
+     * 模块描述
+     */
+    description?: string;
+    /**
+     * 备注
+     */
+    remark?: string;
+};
+
+export type CreateI18nDto = {
+    /**
+     * 模块ID
+     */
+    moduleId: string;
+    /**
+     * 键名
+     */
+    key: string;
+    /**
+     * 中文
+     */
+    zhCn: string;
+    /**
+     * 英文
+     */
+    enUs: string;
+    /**
+     * 阿拉伯文
+     */
+    arSa: string;
+    /**
+     * 备注
+     */
+    remark?: string;
+};
+
+export type UpdateI18nDto = {
+    /**
+     * 键名
      */
     key?: string;
     /**
-     * 中文翻译
+     * 中文
      */
-    zhCN?: string;
+    zhCn?: string;
     /**
-     * 英文翻译
+     * 英文
      */
-    enUS?: string;
+    enUs?: string;
     /**
-     * 阿拉伯语翻译
+     * 阿拉伯文
      */
-    arSA?: string;
+    arSa?: string;
     /**
-     * 备注说明
+     * 备注
      */
     remark?: string;
 };
@@ -905,6 +922,91 @@ export type MenusControllerCopyMenuResponses = {
     201: unknown;
 };
 
+export type I18nModulesControllerFindAllData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * 页码
+         */
+        page?: number;
+        /**
+         * 每页数量
+         */
+        pageSize?: number;
+        /**
+         * 搜索关键词
+         */
+        keyword?: string;
+    };
+    url: '/nova-admin-api/i18n-modules';
+};
+
+export type I18nModulesControllerFindAllResponses = {
+    200: unknown;
+};
+
+export type I18nModulesControllerCreateData = {
+    body: CreateI18nModuleDto;
+    path?: never;
+    query?: never;
+    url: '/nova-admin-api/i18n-modules';
+};
+
+export type I18nModulesControllerCreateResponses = {
+    201: unknown;
+};
+
+export type I18nModulesControllerDeleteData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/nova-admin-api/i18n-modules/{id}';
+};
+
+export type I18nModulesControllerDeleteResponses = {
+    200: unknown;
+};
+
+export type I18nModulesControllerFindOneData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/nova-admin-api/i18n-modules/{id}';
+};
+
+export type I18nModulesControllerFindOneResponses = {
+    200: unknown;
+};
+
+export type I18nModulesControllerUpdateData = {
+    body: UpdateI18nModuleDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/nova-admin-api/i18n-modules/{id}';
+};
+
+export type I18nModulesControllerUpdateResponses = {
+    200: unknown;
+};
+
+export type I18nModulesControllerBatchDeleteData = {
+    body: BatchDeleteDto;
+    path?: never;
+    query?: never;
+    url: '/nova-admin-api/i18n-modules/batch';
+};
+
+export type I18nModulesControllerBatchDeleteResponses = {
+    201: unknown;
+};
+
 export type I18nControllerFindAllData = {
     body?: never;
     path?: never;
@@ -918,13 +1020,13 @@ export type I18nControllerFindAllData = {
          */
         pageSize?: number;
         /**
-         * 按模块筛选
-         */
-        module?: string;
-        /**
-         * 搜索关键词（搜索key或翻译值）
+         * 搜索关键词
          */
         keyword?: string;
+        /**
+         * 模块ID
+         */
+        moduleId?: string;
     };
     url: '/nova-admin-api/i18n';
 };
@@ -934,7 +1036,7 @@ export type I18nControllerFindAllResponses = {
 };
 
 export type I18nControllerCreateData = {
-    body: CreateI18nTranslationDto;
+    body: CreateI18nDto;
     path?: never;
     query?: never;
     url: '/nova-admin-api/i18n';
@@ -942,76 +1044,6 @@ export type I18nControllerCreateData = {
 
 export type I18nControllerCreateResponses = {
     201: unknown;
-};
-
-export type I18nControllerGetNestedTranslationsData = {
-    body?: never;
-    path: {
-        language: string;
-    };
-    query?: never;
-    url: '/nova-admin-api/i18n/nested/{language}';
-};
-
-export type I18nControllerGetNestedTranslationsResponses = {
-    200: unknown;
-};
-
-export type I18nControllerGetAllTranslationsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/nova-admin-api/i18n/all';
-};
-
-export type I18nControllerGetAllTranslationsResponses = {
-    200: unknown;
-};
-
-export type I18nControllerGetModulesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/nova-admin-api/i18n/modules';
-};
-
-export type I18nControllerGetModulesResponses = {
-    200: unknown;
-};
-
-export type I18nControllerBatchDeleteData = {
-    body: BatchDeleteDto;
-    path?: never;
-    query?: never;
-    url: '/nova-admin-api/i18n/batch-delete';
-};
-
-export type I18nControllerBatchDeleteResponses = {
-    201: unknown;
-};
-
-export type I18nControllerImportFromJsonData = {
-    body: BatchImportDto;
-    path?: never;
-    query?: never;
-    url: '/nova-admin-api/i18n/import/json';
-};
-
-export type I18nControllerImportFromJsonResponses = {
-    201: unknown;
-};
-
-export type I18nControllerExportToJsonData = {
-    body?: never;
-    path: {
-        language: string;
-    };
-    query?: never;
-    url: '/nova-admin-api/i18n/export/json/{language}';
-};
-
-export type I18nControllerExportToJsonResponses = {
-    200: unknown;
 };
 
 export type I18nControllerDeleteData = {
@@ -1027,7 +1059,7 @@ export type I18nControllerDeleteResponses = {
     200: unknown;
 };
 
-export type I18nControllerFindByIdData = {
+export type I18nControllerFindOneData = {
     body?: never;
     path: {
         id: string;
@@ -1036,12 +1068,12 @@ export type I18nControllerFindByIdData = {
     url: '/nova-admin-api/i18n/{id}';
 };
 
-export type I18nControllerFindByIdResponses = {
+export type I18nControllerFindOneResponses = {
     200: unknown;
 };
 
 export type I18nControllerUpdateData = {
-    body: UpdateI18nTranslationDto;
+    body: UpdateI18nDto;
     path: {
         id: string;
     };
@@ -1051,4 +1083,15 @@ export type I18nControllerUpdateData = {
 
 export type I18nControllerUpdateResponses = {
     200: unknown;
+};
+
+export type I18nControllerBatchDeleteData = {
+    body: BatchDeleteDto;
+    path?: never;
+    query?: never;
+    url: '/nova-admin-api/i18n/batch';
+};
+
+export type I18nControllerBatchDeleteResponses = {
+    201: unknown;
 };

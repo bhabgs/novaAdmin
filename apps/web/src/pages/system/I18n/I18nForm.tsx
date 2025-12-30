@@ -1,192 +1,175 @@
-import React, { useEffect, useImperativeHandle, forwardRef } from 'react';
-import { Form, Input, Select, message, Spin } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '@/store';
+import React, { useEffect } from "react";
 import {
-  createI18nTranslation,
-  updateI18nTranslation,
-  fetchI18nModules,
-  type I18nTranslation,
-} from '@/store/slices/i18nSlice';
+  Modal,
+  Form,
+  Input,
+  Select,
+  message,
+  Row,
+  Col,
+} from "antd";
+import { useTranslation } from "react-i18next";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { createI18n, updateI18n } from "@/store/slices/i18nSlice";
+import { fetchI18nModules } from "@/store/slices/i18nModuleSlice";
+import type { I18n } from "@/types/i18n";
 
-export interface I18nFormRef {
-  submit: () => Promise<void>;
-}
+const { Option } = Select;
 
 interface I18nFormProps {
-  editingItem?: I18nTranslation | null;
-  onSuccess?: () => void;
+  visible: boolean;
+  i18n: I18n | null;
+  onCancel: () => void;
+  onSuccess: () => void;
 }
 
-const I18nForm = forwardRef<I18nFormRef, I18nFormProps>(({ editingItem, onSuccess }, ref) => {
+const I18nForm: React.FC<I18nFormProps> = ({
+  visible,
+  i18n,
+  onCancel,
+  onSuccess,
+}) => {
   const { t } = useTranslation();
-  const dispatch = useAppDispatch();
   const [form] = Form.useForm();
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.i18n);
+  const { items: modules } = useAppSelector((state) => state.i18nModule);
 
-  const { modules, loading } = useAppSelector(state => state.i18n);
-
-  // Fetch modules on mount
   useEffect(() => {
-    if (modules.length === 0) {
-      dispatch(fetchI18nModules());
+    if (visible) {
+      dispatch(fetchI18nModules({ page: 1, pageSize: 100 }));
+      if (i18n) {
+        form.setFieldsValue(i18n);
+      } else {
+        form.resetFields();
+      }
     }
-  }, [dispatch, modules.length]);
+  }, [visible, i18n, form, dispatch]);
 
-  // Initialize form with editing item
-  useEffect(() => {
-    if (editingItem) {
-      form.setFieldsValue({
-        module: editingItem.module,
-        key: editingItem.key,
-        zhCN: editingItem.zhCN,
-        enUS: editingItem.enUS,
-        arSA: editingItem.arSA,
-        remark: editingItem.remark,
-      });
-    } else {
-      form.resetFields();
-    }
-  }, [editingItem, form]);
-
-  // Handle form submission
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
 
-      if (editingItem) {
-        // Update
-        await dispatch(
-          updateI18nTranslation({
-            id: editingItem.id,
-            dto: {
-              module: values.module,
-              key: values.key,
-              zhCN: values.zhCN,
-              enUS: values.enUS,
-              arSA: values.arSA,
-              remark: values.remark,
-            },
-          }),
-        ).unwrap();
-        message.success(t('message.updateSuccess'));
+      if (i18n) {
+        await dispatch(updateI18n({ id: i18n.id, data: values })).unwrap();
+        message.success(t("i18n.updateSuccess"));
       } else {
-        // Create
-        await dispatch(
-          createI18nTranslation({
-            module: values.module,
-            key: values.key,
-            zhCN: values.zhCN,
-            enUS: values.enUS,
-            arSA: values.arSA,
-            remark: values.remark,
-          }),
-        ).unwrap();
-        message.success(t('message.addSuccess'));
+        await dispatch(createI18n(values)).unwrap();
+        message.success(t("i18n.createSuccess"));
       }
 
-      onSuccess?.();
-    } catch (error: any) {
-      if (error.message) {
-        message.error(error.message);
-      }
+      onSuccess();
+    } catch {
+      message.error(t("message.error"));
     }
   };
 
-  // Expose submit method via ref
-  useImperativeHandle(ref, () => ({
-    submit: handleSubmit,
-  }));
-
   return (
-    <Spin spinning={loading}>
+    <Modal
+      title={i18n ? t("i18n.editI18n") : t("i18n.addI18n")}
+      open={visible}
+      onOk={handleSubmit}
+      onCancel={onCancel}
+      confirmLoading={loading}
+      width={800}
+      destroyOnClose
+    >
       <Form
         form={form}
         layout="vertical"
-        onFinish={handleSubmit}
       >
-        <Form.Item
-          label={t('i18n.module')}
-          name="module"
-          rules={[{ required: true, message: t('message.required') }]}
-        >
-          <Select
-            placeholder={t('i18n.selectModule')}
-            disabled={!!editingItem}
-            allowClear
-            showSearch
-            options={modules.map(m => ({ label: m, value: m }))}
-          />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              name="moduleId"
+              label={t("i18n.module")}
+              rules={[
+                { required: true, message: t("i18n.moduleRequired") },
+              ]}
+            >
+              <Select
+                placeholder={t("i18n.selectModule")}
+                disabled={!!i18n}
+              >
+                {modules.map((module) => (
+                  <Option key={module.id} value={module.id}>
+                    {module.name}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="key"
+              label={t("i18n.key")}
+              rules={[
+                { required: true, message: t("i18n.keyRequired") },
+                { max: 100, message: t("validation.maxLength", { max: 100 }) },
+              ]}
+            >
+              <Input placeholder={t("i18n.keyPlaceholder")} />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item
-          label={t('i18n.key')}
-          name="key"
-          rules={[
-            { required: true, message: t('message.required') },
-            {
-              pattern: /^[a-zA-Z0-9_\.]+$/,
-              message: t('i18n.keyFormatError') || 'Key can only contain letters, numbers, dots and underscores',
-            },
-          ]}
-        >
-          <Input
-            placeholder="e.g., appName, user.create"
-            disabled={!!editingItem}
-          />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item
+              name="zhCn"
+              label={t("i18n.zhCn")}
+              rules={[
+                { required: true, message: t("i18n.zhCnRequired") },
+              ]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder={t("i18n.zhCnPlaceholder")}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="enUs"
+              label={t("i18n.enUs")}
+              rules={[
+                { required: true, message: t("i18n.enUsRequired") },
+              ]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder={t("i18n.enUsPlaceholder")}
+              />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              name="arSa"
+              label={t("i18n.arSa")}
+              rules={[
+                { required: true, message: t("i18n.arSaRequired") },
+              ]}
+            >
+              <Input.TextArea
+                rows={3}
+                placeholder={t("i18n.arSaPlaceholder")}
+              />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item
-          label="中文翻译 (Chinese)"
-          name="zhCN"
-          rules={[{ required: true, message: t('message.required') }]}
-        >
+        <Form.Item name="remark" label={t("common.remark")}>
           <Input.TextArea
-            placeholder="输入中文翻译（支持 {{variable}} 插值）"
             rows={3}
-            allowClear
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="英文翻译 (English)"
-          name="enUS"
-          rules={[{ required: true, message: t('message.required') }]}
-        >
-          <Input.TextArea
-            placeholder="Enter English translation (supports {{variable}} interpolation)"
-            rows={3}
-            allowClear
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="阿拉伯语翻译 (Arabic)"
-          name="arSA"
-          rules={[{ required: true, message: t('message.required') }]}
-        >
-          <Input.TextArea
-            placeholder="أدخل الترجمة العربية (يدعم {{variable}} الاستيفاء)"
-            rows={3}
-            allowClear
-            dir="rtl"
-          />
-        </Form.Item>
-
-        <Form.Item
-          label={t('common.remark')}
-          name="remark"
-        >
-          <Input.TextArea
-            placeholder={t('message.optionalRemark')}
-            rows={2}
-            allowClear
+            placeholder={t("i18n.remarkPlaceholder")}
+            maxLength={255}
+            showCount
           />
         </Form.Item>
       </Form>
-    </Spin>
+    </Modal>
   );
-});
-
-I18nForm.displayName = 'I18nForm';
+};
 
 export default I18nForm;
+

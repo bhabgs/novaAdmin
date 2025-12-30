@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 import { MenusModule } from './menus/menus.module';
+import { I18nModulesModule } from './i18n-modules/i18n-modules.module';
 import { I18nModule } from './i18n/i18n.module';
 
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -42,6 +43,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     UsersModule,
     RolesModule,
     MenusModule,
+    I18nModulesModule,
     I18nModule,
   ],
   providers: [

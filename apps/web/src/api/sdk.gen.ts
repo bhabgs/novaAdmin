@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AuthControllerChangePasswordData, AuthControllerChangePasswordResponses, AuthControllerGetUserInfoData, AuthControllerGetUserInfoResponses, AuthControllerLoginData, AuthControllerLoginResponses, AuthControllerLogoutData, AuthControllerLogoutResponses, AuthControllerRefreshTokenData, AuthControllerRefreshTokenResponses, AuthControllerResetPasswordData, AuthControllerResetPasswordResponses, AuthControllerVerifyTokenData, AuthControllerVerifyTokenResponses, I18nControllerBatchDeleteData, I18nControllerBatchDeleteResponses, I18nControllerCreateData, I18nControllerCreateResponses, I18nControllerDeleteData, I18nControllerDeleteResponses, I18nControllerExportToJsonData, I18nControllerExportToJsonResponses, I18nControllerFindAllData, I18nControllerFindAllResponses, I18nControllerFindByIdData, I18nControllerFindByIdResponses, I18nControllerGetAllTranslationsData, I18nControllerGetAllTranslationsResponses, I18nControllerGetModulesData, I18nControllerGetModulesResponses, I18nControllerGetNestedTranslationsData, I18nControllerGetNestedTranslationsResponses, I18nControllerImportFromJsonData, I18nControllerImportFromJsonResponses, I18nControllerUpdateData, I18nControllerUpdateResponses, MenusControllerBatchDeleteData, MenusControllerBatchDeleteResponses, MenusControllerCopyMenuData, MenusControllerCopyMenuResponses, MenusControllerCreateData, MenusControllerCreateResponses, MenusControllerDeleteData, MenusControllerDeleteResponses, MenusControllerFindAllData, MenusControllerFindAllResponses, MenusControllerFindOneData, MenusControllerFindOneResponses, MenusControllerFindTreeData, MenusControllerFindTreeResponses, MenusControllerGetIconsData, MenusControllerGetIconsResponses, MenusControllerUpdateData, MenusControllerUpdateResponses, MenusControllerUpdateSortData, MenusControllerUpdateSortResponses, RolesControllerAssignMenusData, RolesControllerAssignMenusResponses, RolesControllerBatchDeleteData, RolesControllerBatchDeleteResponses, RolesControllerCopyRoleData, RolesControllerCopyRoleResponses, RolesControllerCreateData, RolesControllerCreateResponses, RolesControllerDeleteData, RolesControllerDeleteResponses, RolesControllerFindAllData, RolesControllerFindAllResponses, RolesControllerFindAllWithoutPaginationData, RolesControllerFindAllWithoutPaginationResponses, RolesControllerFindOneData, RolesControllerFindOneResponses, RolesControllerGetMenuTreeData, RolesControllerGetMenuTreeResponses, RolesControllerGetRoleMenusData, RolesControllerGetRoleMenusResponses, RolesControllerUpdateData, RolesControllerUpdateResponses, UsersControllerAssignRolesData, UsersControllerAssignRolesResponses, UsersControllerBatchDeleteData, UsersControllerBatchDeleteResponses, UsersControllerCreateData, UsersControllerCreateResponses, UsersControllerDeleteData, UsersControllerDeleteResponses, UsersControllerFindAllData, UsersControllerFindAllResponses, UsersControllerFindOneData, UsersControllerFindOneResponses, UsersControllerGetUserPermissionsData, UsersControllerGetUserPermissionsResponses, UsersControllerResetPasswordData, UsersControllerResetPasswordResponses, UsersControllerUpdateData, UsersControllerUpdateResponses, UsersControllerUpdateStatusData, UsersControllerUpdateStatusResponses } from './types.gen';
+import type { AuthControllerChangePasswordData, AuthControllerChangePasswordResponses, AuthControllerGetUserInfoData, AuthControllerGetUserInfoResponses, AuthControllerLoginData, AuthControllerLoginResponses, AuthControllerLogoutData, AuthControllerLogoutResponses, AuthControllerRefreshTokenData, AuthControllerRefreshTokenResponses, AuthControllerResetPasswordData, AuthControllerResetPasswordResponses, AuthControllerVerifyTokenData, AuthControllerVerifyTokenResponses, I18nControllerBatchDeleteData, I18nControllerBatchDeleteResponses, I18nControllerCreateData, I18nControllerCreateResponses, I18nControllerDeleteData, I18nControllerDeleteResponses, I18nControllerFindAllData, I18nControllerFindAllResponses, I18nControllerFindOneData, I18nControllerFindOneResponses, I18nControllerUpdateData, I18nControllerUpdateResponses, I18nModulesControllerBatchDeleteData, I18nModulesControllerBatchDeleteResponses, I18nModulesControllerCreateData, I18nModulesControllerCreateResponses, I18nModulesControllerDeleteData, I18nModulesControllerDeleteResponses, I18nModulesControllerFindAllData, I18nModulesControllerFindAllResponses, I18nModulesControllerFindOneData, I18nModulesControllerFindOneResponses, I18nModulesControllerUpdateData, I18nModulesControllerUpdateResponses, MenusControllerBatchDeleteData, MenusControllerBatchDeleteResponses, MenusControllerCopyMenuData, MenusControllerCopyMenuResponses, MenusControllerCreateData, MenusControllerCreateResponses, MenusControllerDeleteData, MenusControllerDeleteResponses, MenusControllerFindAllData, MenusControllerFindAllResponses, MenusControllerFindOneData, MenusControllerFindOneResponses, MenusControllerFindTreeData, MenusControllerFindTreeResponses, MenusControllerGetIconsData, MenusControllerGetIconsResponses, MenusControllerUpdateData, MenusControllerUpdateResponses, MenusControllerUpdateSortData, MenusControllerUpdateSortResponses, RolesControllerAssignMenusData, RolesControllerAssignMenusResponses, RolesControllerBatchDeleteData, RolesControllerBatchDeleteResponses, RolesControllerCopyRoleData, RolesControllerCopyRoleResponses, RolesControllerCreateData, RolesControllerCreateResponses, RolesControllerDeleteData, RolesControllerDeleteResponses, RolesControllerFindAllData, RolesControllerFindAllResponses, RolesControllerFindAllWithoutPaginationData, RolesControllerFindAllWithoutPaginationResponses, RolesControllerFindOneData, RolesControllerFindOneResponses, RolesControllerGetMenuTreeData, RolesControllerGetMenuTreeResponses, RolesControllerGetRoleMenusData, RolesControllerGetRoleMenusResponses, RolesControllerUpdateData, RolesControllerUpdateResponses, UsersControllerAssignRolesData, UsersControllerAssignRolesResponses, UsersControllerBatchDeleteData, UsersControllerBatchDeleteResponses, UsersControllerCreateData, UsersControllerCreateResponses, UsersControllerDeleteData, UsersControllerDeleteResponses, UsersControllerFindAllData, UsersControllerFindAllResponses, UsersControllerFindOneData, UsersControllerFindOneResponses, UsersControllerGetUserPermissionsData, UsersControllerGetUserPermissionsResponses, UsersControllerResetPasswordData, UsersControllerResetPasswordResponses, UsersControllerUpdateData, UsersControllerUpdateResponses, UsersControllerUpdateStatusData, UsersControllerUpdateStatusResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -431,9 +431,73 @@ export const menusControllerCopyMenu = <ThrowOnError extends boolean = false>(op
 });
 
 /**
- * 获取翻译列表（分页，管理界面用）
- *
- * 支持按语言、模块、关键词筛选和搜索
+ * 获取多语言模块列表
+ */
+export const i18nModulesControllerFindAll = <ThrowOnError extends boolean = false>(options?: Options<I18nModulesControllerFindAllData, ThrowOnError>) => (options?.client ?? client).get<I18nModulesControllerFindAllResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nova-admin-api/i18n-modules',
+    ...options
+});
+
+/**
+ * 创建多语言模块
+ */
+export const i18nModulesControllerCreate = <ThrowOnError extends boolean = false>(options: Options<I18nModulesControllerCreateData, ThrowOnError>) => (options.client ?? client).post<I18nModulesControllerCreateResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nova-admin-api/i18n-modules',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 删除多语言模块
+ */
+export const i18nModulesControllerDelete = <ThrowOnError extends boolean = false>(options: Options<I18nModulesControllerDeleteData, ThrowOnError>) => (options.client ?? client).delete<I18nModulesControllerDeleteResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nova-admin-api/i18n-modules/{id}',
+    ...options
+});
+
+/**
+ * 获取多语言模块详情
+ */
+export const i18nModulesControllerFindOne = <ThrowOnError extends boolean = false>(options: Options<I18nModulesControllerFindOneData, ThrowOnError>) => (options.client ?? client).get<I18nModulesControllerFindOneResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nova-admin-api/i18n-modules/{id}',
+    ...options
+});
+
+/**
+ * 更新多语言模块
+ */
+export const i18nModulesControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<I18nModulesControllerUpdateData, ThrowOnError>) => (options.client ?? client).put<I18nModulesControllerUpdateResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nova-admin-api/i18n-modules/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 批量删除多语言模块
+ */
+export const i18nModulesControllerBatchDelete = <ThrowOnError extends boolean = false>(options: Options<I18nModulesControllerBatchDeleteData, ThrowOnError>) => (options.client ?? client).post<I18nModulesControllerBatchDeleteResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nova-admin-api/i18n-modules/batch',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 获取多语言列表
  */
 export const i18nControllerFindAll = <ThrowOnError extends boolean = false>(options?: Options<I18nControllerFindAllData, ThrowOnError>) => (options?.client ?? client).get<I18nControllerFindAllResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -442,7 +506,7 @@ export const i18nControllerFindAll = <ThrowOnError extends boolean = false>(opti
 });
 
 /**
- * 创建翻译
+ * 创建多语言
  */
 export const i18nControllerCreate = <ThrowOnError extends boolean = false>(options: Options<I18nControllerCreateData, ThrowOnError>) => (options.client ?? client).post<I18nControllerCreateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -455,79 +519,7 @@ export const i18nControllerCreate = <ThrowOnError extends boolean = false>(optio
 });
 
 /**
- * 获取指定语言的所有翻译（嵌套格式，i18next兼容）
- *
- * 返回嵌套的JSON格式，适合前端加载
- */
-export const i18nControllerGetNestedTranslations = <ThrowOnError extends boolean = false>(options: Options<I18nControllerGetNestedTranslationsData, ThrowOnError>) => (options.client ?? client).get<I18nControllerGetNestedTranslationsResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/nova-admin-api/i18n/nested/{language}',
-    ...options
-});
-
-/**
- * 获取所有语言的翻译
- *
- * 返回所有支持语言的翻译数据，用于前端启动时一次性加载
- */
-export const i18nControllerGetAllTranslations = <ThrowOnError extends boolean = false>(options?: Options<I18nControllerGetAllTranslationsData, ThrowOnError>) => (options?.client ?? client).get<I18nControllerGetAllTranslationsResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/nova-admin-api/i18n/all',
-    ...options
-});
-
-/**
- * 获取所有模块名称
- *
- * 用于管理界面的模块筛选器
- */
-export const i18nControllerGetModules = <ThrowOnError extends boolean = false>(options?: Options<I18nControllerGetModulesData, ThrowOnError>) => (options?.client ?? client).get<I18nControllerGetModulesResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/nova-admin-api/i18n/modules',
-    ...options
-});
-
-/**
- * 批量删除翻译
- */
-export const i18nControllerBatchDelete = <ThrowOnError extends boolean = false>(options: Options<I18nControllerBatchDeleteData, ThrowOnError>) => (options.client ?? client).post<I18nControllerBatchDeleteResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/nova-admin-api/i18n/batch-delete',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * 导入JSON格式翻译
- *
- * 支持嵌套JSON格式，自动扁平化存储到数据库
- */
-export const i18nControllerImportFromJson = <ThrowOnError extends boolean = false>(options: Options<I18nControllerImportFromJsonData, ThrowOnError>) => (options.client ?? client).post<I18nControllerImportFromJsonResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/nova-admin-api/i18n/import/json',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * 导出JSON格式翻译
- *
- * 返回指定语言的嵌套JSON格式
- */
-export const i18nControllerExportToJson = <ThrowOnError extends boolean = false>(options: Options<I18nControllerExportToJsonData, ThrowOnError>) => (options.client ?? client).get<I18nControllerExportToJsonResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/nova-admin-api/i18n/export/json/{language}',
-    ...options
-});
-
-/**
- * 删除翻译
+ * 删除多语言
  */
 export const i18nControllerDelete = <ThrowOnError extends boolean = false>(options: Options<I18nControllerDeleteData, ThrowOnError>) => (options.client ?? client).delete<I18nControllerDeleteResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -536,20 +528,33 @@ export const i18nControllerDelete = <ThrowOnError extends boolean = false>(optio
 });
 
 /**
- * 获取单个翻译
+ * 获取多语言详情
  */
-export const i18nControllerFindById = <ThrowOnError extends boolean = false>(options: Options<I18nControllerFindByIdData, ThrowOnError>) => (options.client ?? client).get<I18nControllerFindByIdResponses, unknown, ThrowOnError>({
+export const i18nControllerFindOne = <ThrowOnError extends boolean = false>(options: Options<I18nControllerFindOneData, ThrowOnError>) => (options.client ?? client).get<I18nControllerFindOneResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/nova-admin-api/i18n/{id}',
     ...options
 });
 
 /**
- * 更新翻译
+ * 更新多语言
  */
-export const i18nControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<I18nControllerUpdateData, ThrowOnError>) => (options.client ?? client).patch<I18nControllerUpdateResponses, unknown, ThrowOnError>({
+export const i18nControllerUpdate = <ThrowOnError extends boolean = false>(options: Options<I18nControllerUpdateData, ThrowOnError>) => (options.client ?? client).put<I18nControllerUpdateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/nova-admin-api/i18n/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 批量删除多语言
+ */
+export const i18nControllerBatchDelete = <ThrowOnError extends boolean = false>(options: Options<I18nControllerBatchDeleteData, ThrowOnError>) => (options.client ?? client).post<I18nControllerBatchDeleteResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/nova-admin-api/i18n/batch',
     ...options,
     headers: {
         'Content-Type': 'application/json',

@@ -5,6 +5,7 @@ import {
   MaxLength,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class CreateI18nDto {
@@ -36,6 +37,7 @@ export class CreateI18nDto {
 
   @ApiPropertyOptional({ description: '备注' })
   @IsOptional()
+  @Transform(({ value }) => (value === null ? undefined : value))
   @IsString()
   @MaxLength(255, { message: '备注长度不能超过255个字符' })
   remark?: string;
@@ -65,6 +67,7 @@ export class UpdateI18nDto {
 
   @ApiPropertyOptional({ description: '备注' })
   @IsOptional()
+  @Transform(({ value }) => (value === null ? undefined : value))
   @IsString()
   @MaxLength(255, { message: '备注长度不能超过255个字符' })
   remark?: string;

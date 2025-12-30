@@ -15,7 +15,11 @@ import { useListManagement } from "@/hooks/useListManagement";
 const I18nModuleList: React.FC = () => {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
-  const { items: modules, loading, pagination } = useAppSelector((state) => state.i18nModule);
+  const {
+    items: modules,
+    loading,
+    pagination,
+  } = useAppSelector((state) => state.i18nModule);
 
   const {
     selectedRowKeys,
@@ -73,18 +77,18 @@ const I18nModuleList: React.FC = () => {
   // 表格列配置
   const columns = [
     {
-      title: t("i18nModule.code"),
+      title: t("common.code"),
       dataIndex: "code",
       key: "code",
       sorter: true,
     },
     {
-      title: t("i18nModule.name"),
+      title: t("common.name"),
       dataIndex: "name",
       key: "name",
     },
     {
-      title: t("i18nModule.description"),
+      title: t("common.description"),
       dataIndex: "description",
       key: "description",
     },
@@ -128,4 +132,3 @@ const I18nModuleList: React.FC = () => {
 };
 
 export default I18nModuleList;
-

@@ -16,6 +16,7 @@ import {
   UpdateI18nDto,
   QueryI18nDto,
 } from './dto/i18n.dto';
+import { TranslateDto } from './dto/translate.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { BatchDeleteDto } from '../common/dto/batch-delete.dto';
@@ -70,6 +71,18 @@ export class I18nController {
   @ApiOperation({ summary: '获取所有翻译（用于前端i18n初始化）' })
   async getAllTranslations() {
     return this.i18nService.getAllTranslations();
+  }
+
+  @Post('translate')
+  @Public()
+  @ApiOperation({ summary: '翻译文本' })
+  async translate(@Body() dto: TranslateDto) {
+    const translatedText = await this.i18nService.translateText(
+      dto.text,
+      dto.from,
+      dto.to,
+    );
+    return { text: translatedText };
   }
 }
 

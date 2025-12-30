@@ -116,6 +116,45 @@ export class I18nService {
   }
 
   /**
+   * 翻译文本（使用简单的翻译服务）
+   * 注意：这是一个简单的实现，生产环境建议使用专业的翻译 API
+   */
+  async translateText(
+    text: string,
+    from: string,
+    to: string,
+  ): Promise<string> {
+    // 如果源语言和目标语言相同，直接返回
+    if (from === to) {
+      return text;
+    }
+
+    // 这里可以使用第三方翻译 API，如 Google Translate、百度翻译等
+    // 为了演示，这里使用一个简单的实现
+    // 生产环境建议配置专业的翻译服务
+    
+    try {
+      // 使用 Google Translate 的免费接口（需要代理或配置 API Key）
+      // 或者使用其他翻译服务
+      const response = await fetch(
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from.split('-')[0]}&tl=${to.split('-')[0]}&dt=t&q=${encodeURIComponent(text)}`,
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data[0] && data[0][0] && data[0][0][0]) {
+          return data[0].map((item: any[]) => item[0]).join('');
+        }
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+    }
+
+    // 如果翻译失败，返回原文本
+    return text;
+  }
+
+  /**
    * 获取所有翻译，转换为 i18next 格式
    * 返回格式: { 'zh-CN': { translation: {...} }, 'en-US': { translation: {...} }, 'ar-SA': { translation: {...} } }
    */

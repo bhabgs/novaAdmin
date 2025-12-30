@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Form,
@@ -7,12 +7,16 @@ import {
   message,
   Row,
   Col,
+  Button,
+  Space,
 } from "antd";
+import { TranslationOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { createI18n, updateI18n } from "@/store/slices/i18nSlice";
 import { fetchI18nModules } from "@/store/slices/i18nModuleSlice";
 import type { I18n } from "@/types/i18n";
+import { post } from "@/utils/request";
 
 const { Option } = Select;
 
@@ -34,6 +38,7 @@ const I18nForm: React.FC<I18nFormProps> = ({
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.i18n);
   const { items: modules } = useAppSelector((state) => state.i18nModule);
+  const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -46,20 +51,85 @@ const I18nForm: React.FC<I18nFormProps> = ({
     }
   }, [visible, i18n, form, dispatch]);
 
+  // 自动翻译功能
+  const handleAutoTranslate = async () => {
+    const zhCn = form.getFieldValue("zhCn");
+    if (!zhCn || !zhCn.trim()) {
+      message.warning(t("i18n.zhCnRequired"));
+      return;
+    }
+
+    setTranslating(true);
+    try {
+      // 翻译为英文
+      const enUsResponse = await post<{
+        success: boolean;
+        data: { text: string };
+      }>("/nova-admin-api/i18n/translate", {
+        text: zhCn,
+        from: "zh-CN",
+        to: "en-US",
+      });
+
+      // 翻译为阿拉伯文
+      const arSaResponse = await post<{
+        success: boolean;
+        data: { text: string };
+      }>("/nova-admin-api/i18n/translate", {
+        text: zhCn,
+        from: "zh-CN",
+        to: "ar-SA",
+      });
+
+      if (enUsResponse.success && enUsResponse.data) {
+        form.setFieldsValue({ enUs: enUsResponse.data.text });
+      }
+
+      if (arSaResponse.success && arSaResponse.data) {
+        form.setFieldsValue({ arSa: arSaResponse.data.text });
+      }
+
+      message.success(t("i18n.translateSuccess"));
+    } catch (error) {
+      console.error("Translation error:", error);
+      message.error(t("i18n.translateError") || "翻译失败，请手动输入");
+    } finally {
+      setTranslating(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
 
       if (i18n) {
-        await dispatch(updateI18n({ id: i18n.id, data: values })).unwrap();
+        // 编辑时，只发送允许更新的字段，不包含 moduleId
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { moduleId, ...updateData } = values;
+        // 将 null 转换为 undefined，避免验证错误
+        const cleanData = Object.fromEntries(
+          Object.entries(updateData).map(([key, value]) => [
+            key,
+            value === null ? undefined : value,
+          ])
+        );
+        await dispatch(updateI18n({ id: i18n.id, data: cleanData })).unwrap();
         message.success(t("i18n.updateSuccess"));
       } else {
-        await dispatch(createI18n(values)).unwrap();
+        // 创建时，将 null 转换为 undefined
+        const cleanData = Object.fromEntries(
+          Object.entries(values).map(([key, value]) => [
+            key,
+            value === null ? undefined : value,
+          ])
+        );
+        await dispatch(createI18n(cleanData)).unwrap();
         message.success(t("i18n.createSuccess"));
       }
 
       onSuccess();
-    } catch {
+    } catch (error) {
+      console.error("Submit error:", error);
       message.error(t("message.error"));
     }
   };
@@ -74,23 +144,15 @@ const I18nForm: React.FC<I18nFormProps> = ({
       width={800}
       destroyOnClose
     >
-      <Form
-        form={form}
-        layout="vertical"
-      >
+      <Form form={form} layout="vertical">
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item
               name="moduleId"
               label={t("i18n.module")}
-              rules={[
-                { required: true, message: t("i18n.moduleRequired") },
-              ]}
+              rules={[{ required: true, message: t("i18n.moduleRequired") }]}
             >
-              <Select
-                placeholder={t("i18n.selectModule")}
-                disabled={!!i18n}
-              >
+              <Select placeholder={t("i18n.selectModule")} disabled={!!i18n}>
                 {modules.map((module) => (
                   <Option key={module.id} value={module.id}>
                     {module.name}
@@ -117,10 +179,28 @@ const I18nForm: React.FC<I18nFormProps> = ({
           <Col span={8}>
             <Form.Item
               name="zhCn"
-              label={t("i18n.zhCn")}
-              rules={[
-                { required: true, message: t("i18n.zhCnRequired") },
-              ]}
+              label={
+                <Space>
+                  <span>{t("i18n.zhCn")}</span>
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={
+                      translating ? (
+                        <LoadingOutlined />
+                      ) : (
+                        <TranslationOutlined />
+                      )
+                    }
+                    onClick={handleAutoTranslate}
+                    disabled={translating}
+                    style={{ padding: 0, height: "auto" }}
+                  >
+                    {t("i18n.autoTranslate")}
+                  </Button>
+                </Space>
+              }
+              rules={[{ required: true, message: t("i18n.zhCnRequired") }]}
             >
               <Input.TextArea
                 rows={3}
@@ -132,9 +212,7 @@ const I18nForm: React.FC<I18nFormProps> = ({
             <Form.Item
               name="enUs"
               label={t("i18n.enUs")}
-              rules={[
-                { required: true, message: t("i18n.enUsRequired") },
-              ]}
+              rules={[{ required: true, message: t("i18n.enUsRequired") }]}
             >
               <Input.TextArea
                 rows={3}
@@ -146,9 +224,7 @@ const I18nForm: React.FC<I18nFormProps> = ({
             <Form.Item
               name="arSa"
               label={t("i18n.arSa")}
-              rules={[
-                { required: true, message: t("i18n.arSaRequired") },
-              ]}
+              rules={[{ required: true, message: t("i18n.arSaRequired") }]}
             >
               <Input.TextArea
                 rows={3}
@@ -172,4 +248,3 @@ const I18nForm: React.FC<I18nFormProps> = ({
 };
 
 export default I18nForm;
-

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo } from "react";
 import {
   Modal,
   Form,
@@ -11,20 +11,22 @@ import {
   Row,
   Col,
   Space,
-  Button
-} from 'antd';
+  Button,
+} from "antd";
 import {
   FolderOutlined,
   FileOutlined,
   AppstoreOutlined,
   LinkOutlined,
-} from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '@/store';
-import { createMenu, updateMenu } from '@/store/slices/menuSlice';
-import type { Menu, MenuFormData } from '@/types/menu';
-import { buildMenuTree } from '@/utils/menuUtils';
-import { MENU_ICONS } from '@/constants/icons';
+} from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { createMenu, updateMenu } from "@/store/slices/menuSlice";
+import { fetchI18ns } from "@/store/slices/i18nSlice";
+import type { Menu, MenuFormData } from "@/types/menu";
+import type { I18n } from "@/types/i18n";
+import { buildMenuTree } from "@/utils/menuUtils";
+import { MENU_ICONS } from "@/constants/icons";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -46,90 +48,120 @@ const MenuForm: React.FC<MenuFormProps> = ({
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
   const { menus, loading } = useAppSelector((state) => state.menu);
+  const { items: i18ns } = useAppSelector((state) => state.i18n);
 
   const isEditing = !!menu;
 
   useEffect(() => {
     if (visible) {
+      // 加载国际化列表
+      dispatch(fetchI18ns({ page: 1, pageSize: 1000 }));
+
       if (isEditing && menu) {
         form.setFieldsValue({
           ...menu,
-          status: menu.status === 'active',
+          status: menu.status === "active",
         });
       } else {
         form.resetFields();
         form.setFieldsValue({
           status: true,
           sortOrder: 0,
-          type: 'page',
+          type: "page",
           hideInMenu: false,
           keepAlive: false,
           openInNewTab: false,
         });
       }
     }
-  }, [visible, menu, isEditing, form]);
+  }, [visible, menu, isEditing, form, dispatch]);
 
   const parentMenuOptions = buildMenuTree(menus, menu?.id);
+
+  // 构造国际化键名选项：格式为 module.code.key
+  const i18nKeyOptions = useMemo(() => {
+    return i18ns
+      .filter((i18n: I18n) => i18n.module?.code && i18n.key)
+      .map((i18n: I18n) => {
+        const fullKey = `${i18n.module!.code}.${i18n.key}`;
+        return {
+          value: fullKey,
+          label: fullKey,
+          module: i18n.module?.name || "",
+          key: i18n.key,
+        };
+      })
+      .sort((a, b) => a.value.localeCompare(b.value));
+  }, [i18ns]);
 
   const handleSubmit = useCallback(async () => {
     try {
       const values = await form.validateFields();
       const formData: MenuFormData = {
         ...values,
-        status: values.status ? 'active' : 'inactive',
+        status: values.status ? "active" : "inactive",
         parentId: values.parentId || undefined,
       };
 
       if (isEditing && menu) {
-        await dispatch(updateMenu({ id: menu.id, menuData: formData })).unwrap();
-        message.success(t('menu.updateSuccess'));
+        await dispatch(
+          updateMenu({ id: menu.id, menuData: formData })
+        ).unwrap();
+        message.success(t("menu.updateSuccess"));
       } else {
         await dispatch(createMenu(formData)).unwrap();
-        message.success(t('menu.createSuccess'));
+        message.success(t("menu.createSuccess"));
       }
 
       onSubmit();
     } catch (error) {
-      console.error('Menu form submit error:', error);
+      console.error("Menu form submit error:", error);
       if (error instanceof Error) {
         message.error(error.message);
       } else {
-        message.error(t('message.error'));
+        message.error(t("message.error"));
       }
     }
   }, [form, isEditing, menu, dispatch, t, onSubmit]);
 
-  const handleTypeChange = useCallback((type: 'directory' | 'page' | 'button' | 'iframe') => {
-    // Set default values based on menu type
-    if (type === 'directory' || type === 'button') {
-      form.setFieldsValue({
-        path: '',
-        component: '',
-        externalUrl: '',
-      });
-    } else if (type === 'iframe') {
-      form.setFieldsValue({
-        component: '',
-      });
-    } else if (type === 'page') {
-      form.setFieldsValue({
-        externalUrl: '',
-      });
-    }
-  }, [form]);
+  const handleTypeChange = useCallback(
+    (type: "directory" | "page" | "button" | "iframe") => {
+      // Set default values based on menu type
+      if (type === "directory" || type === "button") {
+        form.setFieldsValue({
+          path: "",
+          component: "",
+          externalUrl: "",
+        });
+      } else if (type === "iframe") {
+        form.setFieldsValue({
+          component: "",
+        });
+      } else if (type === "page") {
+        form.setFieldsValue({
+          externalUrl: "",
+        });
+      }
+    },
+    [form]
+  );
 
   return (
     <Modal
-      title={isEditing ? t('menu.editMenu') : t('menu.addMenu')}
+      title={isEditing ? t("menu.editMenu") : t("menu.addMenu")}
       open={visible}
       onCancel={onCancel}
       footer={[
         <Button key="cancel" onClick={onCancel}>
-          {t('common.cancel')}
+          {t("common.cancel")}
         </Button>,
-        <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
-          {t('common.save')}
+        <Button
+          key="submit"
+          type="primary"
+          loading={loading}
+          onClick={handleSubmit}
+        >
+          {t("common.save")}
         </Button>,
       ]}
       width={800}
@@ -141,7 +173,7 @@ const MenuForm: React.FC<MenuFormProps> = ({
         initialValues={{
           status: true,
           sortOrder: 0,
-          type: 'page',
+          type: "page",
           hideInMenu: false,
           keepAlive: false,
         }}
@@ -150,25 +182,42 @@ const MenuForm: React.FC<MenuFormProps> = ({
           <Col span={12}>
             <Form.Item
               name="name"
-              label={t('menu.menuName')}
+              label={t("menu.menuName")}
               rules={[
-                { required: true, message: t('menu.menuNameRequired') },
-                { max: 50, message: t('validation.maxLength', { max: 50 }) },
+                { required: true, message: t("menu.menuNameRequired") },
+                { max: 50, message: t("validation.maxLength", { max: 50 }) },
               ]}
             >
-              <Input placeholder={t('menu.menuNamePlaceholder')} />
+              <Input placeholder={t("menu.menuNamePlaceholder")} />
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               name="i18nKey"
-              label={t('menu.i18nKey')}
-              tooltip={t('menu.i18nKeyTooltip')}
+              label={t("menu.i18nKey")}
+              tooltip={t("menu.i18nKeyTooltip")}
               rules={[
-                { pattern: /^[a-zA-Z][a-zA-Z0-9_.]*$/, message: t('menu.i18nKeyPattern') },
+                {
+                  pattern: /^[a-zA-Z][a-zA-Z0-9_.]*$/,
+                  message: t("menu.i18nKeyPattern"),
+                },
               ]}
             >
-              <Input placeholder={t('menu.i18nKeyPlaceholder')} />
+              <Select
+                placeholder={t("menu.i18nKeyPlaceholder")}
+                allowClear
+                showSearch
+                filterOption={(input, option) => {
+                  const searchText = input.toLowerCase();
+                  const label = (option?.label as string) || "";
+                  const value = (option?.value as string) || "";
+                  return (
+                    label.toLowerCase().includes(searchText) ||
+                    value.toLowerCase().includes(searchText)
+                  );
+                }}
+                options={i18nKeyOptions}
+              />
             </Form.Item>
           </Col>
         </Row>
@@ -177,32 +226,35 @@ const MenuForm: React.FC<MenuFormProps> = ({
           <Col span={12}>
             <Form.Item
               name="type"
-              label={t('menu.menuType')}
-              rules={[{ required: true, message: t('menu.menuTypeRequired') }]}
+              label={t("menu.menuType")}
+              rules={[{ required: true, message: t("menu.menuTypeRequired") }]}
             >
-              <Select placeholder={t('menu.menuTypePlaceholder')} onChange={handleTypeChange}>
+              <Select
+                placeholder={t("menu.menuTypePlaceholder")}
+                onChange={handleTypeChange}
+              >
                 <Option value="directory">
                   <Space>
                     <FolderOutlined />
-                    {t('menu.directory')}
+                    {t("menu.directory")}
                   </Space>
                 </Option>
                 <Option value="page">
                   <Space>
                     <FileOutlined />
-                    {t('menu.page')}
+                    {t("menu.page")}
                   </Space>
                 </Option>
                 <Option value="iframe">
                   <Space>
                     <LinkOutlined />
-                    {t('menu.iframe')}
+                    {t("menu.iframe")}
                   </Space>
                 </Option>
                 <Option value="button">
                   <Space>
                     <AppstoreOutlined />
-                    {t('menu.button')}
+                    {t("menu.button")}
                   </Space>
                 </Option>
               </Select>
@@ -212,12 +264,9 @@ const MenuForm: React.FC<MenuFormProps> = ({
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item
-              name="parentId"
-              label={t('menu.parentMenu')}
-            >
+            <Form.Item name="parentId" label={t("menu.parentMenu")}>
               <TreeSelect
-                placeholder={t('menu.parentMenuPlaceholder')}
+                placeholder={t("menu.parentMenuPlaceholder")}
                 allowClear
                 treeData={parentMenuOptions}
                 treeDefaultExpandAll
@@ -225,22 +274,21 @@ const MenuForm: React.FC<MenuFormProps> = ({
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item
-              name="icon"
-              label={t('menu.menuIcon')}
-            >
+            <Form.Item name="icon" label={t("menu.menuIcon")}>
               <Select
-                placeholder={t('menu.menuIconPlaceholder')}
+                placeholder={t("menu.menuIconPlaceholder")}
                 allowClear
                 showSearch
                 filterOption={(input, option) =>
-                  (option?.value as string)?.toLowerCase().includes(input.toLowerCase())
+                  (option?.value as string)
+                    ?.toLowerCase()
+                    .includes(input.toLowerCase())
                 }
                 optionLabelProp="label"
                 virtual
                 listHeight={400}
               >
-                {MENU_ICONS.map(option => (
+                {MENU_ICONS.map((option) => (
                   <Option
                     key={option.value}
                     value={option.value}
@@ -264,78 +312,94 @@ const MenuForm: React.FC<MenuFormProps> = ({
 
         <Form.Item
           noStyle
-          shouldUpdate={(prevValues, currentValues) => prevValues.type !== currentValues.type}
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.type !== currentValues.type
+          }
         >
           {({ getFieldValue }) => {
-            const menuType = getFieldValue('type');
+            const menuType = getFieldValue("type");
             return (
               <>
                 <Row gutter={16}>
                   <Col span={12}>
                     <Form.Item
                       name="path"
-                      label={t('menu.menuPath')}
+                      label={t("menu.menuPath")}
                       rules={
-                        menuType === 'page' || menuType === 'iframe'
+                        menuType === "page" || menuType === "iframe"
                           ? [
-                              { required: true, message: t('menu.menuPathRequired') },
-                              { pattern: /^\//, message: t('menu.menuPathPattern') },
+                              {
+                                required: true,
+                                message: t("menu.menuPathRequired"),
+                              },
+                              {
+                                pattern: /^\//,
+                                message: t("menu.menuPathPattern"),
+                              },
                             ]
                           : []
                       }
                     >
                       <Input
                         placeholder={
-                          menuType === 'directory'
-                            ? t('menu.directoryPathPlaceholder')
-                            : menuType === 'page'
-                            ? t('menu.pagePathPlaceholder')
-                            : menuType === 'iframe'
-                            ? t('menu.iframePathPlaceholder')
-                            : t('menu.buttonPathPlaceholder')
+                          menuType === "directory"
+                            ? t("menu.directoryPathPlaceholder")
+                            : menuType === "page"
+                            ? t("menu.pagePathPlaceholder")
+                            : menuType === "iframe"
+                            ? t("menu.iframePathPlaceholder")
+                            : t("menu.buttonPathPlaceholder")
                         }
-                        disabled={menuType === 'button'}
+                        disabled={menuType === "button"}
                       />
                     </Form.Item>
                   </Col>
                   <Col span={12}>
                     <Form.Item
                       name="component"
-                      label={t('menu.component')}
+                      label={t("menu.component")}
                       rules={
-                        menuType === 'page'
-                          ? [{ required: true, message: t('menu.componentRequired') }]
+                        menuType === "page"
+                          ? [
+                              {
+                                required: true,
+                                message: t("menu.componentRequired"),
+                              },
+                            ]
                           : []
                       }
                     >
                       <Input
-                        placeholder={t('menu.componentPlaceholder')}
-                        disabled={menuType !== 'page'}
+                        placeholder={t("menu.componentPlaceholder")}
+                        disabled={menuType !== "page"}
                       />
                     </Form.Item>
                   </Col>
                 </Row>
-                {menuType === 'iframe' && (
+                {menuType === "iframe" && (
                   <>
                     <Form.Item
                       name="externalUrl"
-                      label={t('menu.externalUrl')}
+                      label={t("menu.externalUrl")}
                       rules={[
-                        { required: true, message: t('menu.externalUrlRequired') },
-                        { type: 'url', message: t('menu.externalUrlPattern') },
+                        {
+                          required: true,
+                          message: t("menu.externalUrlRequired"),
+                        },
+                        { type: "url", message: t("menu.externalUrlPattern") },
                       ]}
                     >
-                      <Input placeholder={t('menu.externalUrlPlaceholder')} />
+                      <Input placeholder={t("menu.externalUrlPlaceholder")} />
                     </Form.Item>
                     <Form.Item
                       name="openInNewTab"
-                      label={t('menu.openInNewTab')}
+                      label={t("menu.openInNewTab")}
                       valuePropName="checked"
-                      tooltip={t('menu.openInNewTabTooltip')}
+                      tooltip={t("menu.openInNewTabTooltip")}
                     >
                       <Switch
-                        checkedChildren={t('menu.openInNewTabYes')}
-                        unCheckedChildren={t('menu.openInNewTabNo')}
+                        checkedChildren={t("menu.openInNewTabYes")}
+                        unCheckedChildren={t("menu.openInNewTabNo")}
                       />
                     </Form.Item>
                   </>
@@ -349,12 +413,12 @@ const MenuForm: React.FC<MenuFormProps> = ({
           <Col span={12}>
             <Form.Item
               name="sortOrder"
-              label={t('menu.sortOrder')}
-              rules={[{ type: 'number', message: t('menu.sortOrderNumber') }]}
+              label={t("menu.sortOrder")}
+              rules={[{ type: "number", message: t("menu.sortOrderNumber") }]}
             >
               <InputNumber
-                placeholder={t('menu.sortOrderPlaceholder')}
-                style={{ width: '100%' }}
+                placeholder={t("menu.sortOrderPlaceholder")}
+                style={{ width: "100%" }}
                 min={0}
               />
             </Form.Item>
@@ -363,49 +427,55 @@ const MenuForm: React.FC<MenuFormProps> = ({
 
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item name="status" label={t('common.status')} valuePropName="checked">
+            <Form.Item
+              name="status"
+              label={t("common.status")}
+              valuePropName="checked"
+            >
               <Switch
-                checkedChildren={t('common.active')}
-                unCheckedChildren={t('common.inactive')}
+                checkedChildren={t("common.active")}
+                unCheckedChildren={t("common.inactive")}
               />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="hideInMenu" label={t('menu.hideInMenu')} valuePropName="checked">
+            <Form.Item
+              name="hideInMenu"
+              label={t("menu.hideInMenu")}
+              valuePropName="checked"
+            >
               <Switch
-                checkedChildren={t('common.yes')}
-                unCheckedChildren={t('common.no')}
+                checkedChildren={t("common.yes")}
+                unCheckedChildren={t("common.no")}
               />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="keepAlive" label={t('menu.keepAlive')} valuePropName="checked">
+            <Form.Item
+              name="keepAlive"
+              label={t("menu.keepAlive")}
+              valuePropName="checked"
+            >
               <Switch
-                checkedChildren={t('common.yes')}
-                unCheckedChildren={t('common.no')}
+                checkedChildren={t("common.yes")}
+                unCheckedChildren={t("common.no")}
               />
             </Form.Item>
           </Col>
         </Row>
 
-        <Form.Item
-          name="description"
-          label={t('common.description')}
-        >
+        <Form.Item name="description" label={t("common.description")}>
           <TextArea
-            placeholder={t('menu.descriptionPlaceholder')}
+            placeholder={t("menu.descriptionPlaceholder")}
             rows={3}
             maxLength={200}
             showCount
           />
         </Form.Item>
 
-        <Form.Item
-          name="remark"
-          label={t('common.remark')}
-        >
+        <Form.Item name="remark" label={t("common.remark")}>
           <TextArea
-            placeholder={t('menu.remarkPlaceholder')}
+            placeholder={t("menu.remarkPlaceholder")}
             rows={2}
             maxLength={100}
             showCount

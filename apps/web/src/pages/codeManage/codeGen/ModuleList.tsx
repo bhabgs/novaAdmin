@@ -1,11 +1,22 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Button, Space, Tag, Popconfirm, Tooltip, Steps, message } from "antd";
+import {
+  Button,
+  Space,
+  Tag,
+  Popconfirm,
+  Tooltip,
+  Steps,
+  message,
+  Dropdown,
+} from "antd";
+import type { MenuProps } from "antd";
 import {
   EditOutlined,
   DeleteOutlined,
   TableOutlined,
   CodeOutlined,
   CheckCircleOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -150,70 +161,95 @@ const ModuleList: React.FC = () => {
 
   // 自定义操作列渲染
   const operationColumnRender = useCallback(
-    (record: CodeModule) => (
-      <Space size="small">
-        <Tooltip title={t("common.edit")}>
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
-          >
-            {t("common.edit")}
-          </Button>
-        </Tooltip>
+    (record: CodeModule) => {
+      const menuItems: MenuProps["items"] = [
+        {
+          key: "design",
+          icon: <TableOutlined />,
+          label: t("codeGen.designTable"),
+          onClick: () => handleDesignTable(record),
+        },
+        ...(record.status === "ready"
+          ? [
+              {
+                key: "generate",
+                icon: <CodeOutlined />,
+                label: t("codeGen.generateCode"),
+                onClick: () => handleGenerateCode(record),
+              },
+            ]
+          : []),
+        ...(record.status === "generated"
+          ? [
+              {
+                key: "view",
+                icon: <CheckCircleOutlined />,
+                label: t("codeGen.viewCode"),
+                onClick: () => handleGenerateCode(record),
+              },
+            ]
+          : []),
+        { type: "divider" as const },
+        {
+          key: "delete",
+          icon: <DeleteOutlined />,
+          label: t("common.delete"),
+          danger: true,
+        },
+      ];
 
-        <Tooltip title={t("codeGen.designTable")}>
-          <Button
-            type="link"
-            size="small"
-            icon={<TableOutlined />}
-            onClick={() => handleDesignTable(record)}
-          >
-            {t("codeGen.designTable")}
-          </Button>
-        </Tooltip>
-
-        {record.status === "ready" && (
-          <Tooltip title={t("codeGen.generateCode")}>
+      return (
+        <Space size="small">
+          <Tooltip title={t("common.edit")}>
             <Button
               type="link"
               size="small"
-              icon={<CodeOutlined />}
-              onClick={() => handleGenerateCode(record)}
-            >
-              {t("codeGen.generateCode")}
-            </Button>
+              icon={<EditOutlined />}
+              onClick={() => handleEdit(record)}
+            />
           </Tooltip>
-        )}
 
-        {record.status === "generated" && (
-          <Tooltip title={t("codeGen.viewCode")}>
+          <Tooltip title={t("codeGen.designTable")}>
             <Button
               type="link"
               size="small"
-              icon={<CheckCircleOutlined />}
-              onClick={() => handleGenerateCode(record)}
-            >
-              {t("codeGen.viewCode")}
-            </Button>
+              icon={<TableOutlined />}
+              onClick={() => handleDesignTable(record)}
+            />
           </Tooltip>
-        )}
 
-        <Popconfirm
-          title={t("codeGen.confirmDelete")}
-          onConfirm={() => handleDelete(record.id)}
-          okText={t("common.confirm")}
-          cancelText={t("common.cancel")}
-        >
-          <Tooltip title={t("common.delete")}>
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              {t("common.delete")}
-            </Button>
-          </Tooltip>
-        </Popconfirm>
-      </Space>
-    ),
+          <Popconfirm
+            title={t("codeGen.confirmDelete")}
+            onConfirm={() => handleDelete(record.id)}
+            okText={t("common.confirm")}
+            cancelText={t("common.cancel")}
+          >
+            <Tooltip title={t("common.delete")}>
+              <Button
+                type="link"
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+              />
+            </Tooltip>
+          </Popconfirm>
+
+          <Dropdown
+            menu={{
+              items: menuItems,
+              onClick: ({ key }) => {
+                if (key === "delete") {
+                  // 删除需要通过 Popconfirm，这里不处理
+                }
+              },
+            }}
+            trigger={["click"]}
+          >
+            <Button type="link" size="small" icon={<MoreOutlined />} />
+          </Dropdown>
+        </Space>
+      );
+    },
     [handleEdit, handleDesignTable, handleGenerateCode, handleDelete, t]
   );
 
@@ -307,7 +343,7 @@ const ModuleList: React.FC = () => {
         onBatchDelete={handleBatchDelete}
         onRefresh={handleRefresh}
         deleteConfirmTitle={t("codeGen.confirmDelete")}
-        operationColumnWidth={320}
+        operationColumnWidth={150}
         operationColumnRender={operationColumnRender}
         tableProps={{
           scroll: { x: 1400 },

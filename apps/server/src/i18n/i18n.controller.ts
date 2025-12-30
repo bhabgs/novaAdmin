@@ -17,6 +17,7 @@ import {
   QueryI18nDto,
 } from './dto/i18n.dto';
 import { TranslateDto } from './dto/translate.dto';
+import { ImportI18nDto } from './dto/import-i18n.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { BatchDeleteDto } from '../common/dto/batch-delete.dto';
@@ -83,6 +84,17 @@ export class I18nController {
       dto.to,
     );
     return { text: translatedText };
+  }
+
+  @Post('import')
+  @ApiOperation({ summary: '批量导入国际化数据' })
+  async import(@Body() dto: ImportI18nDto) {
+    const result = await this.i18nService.importI18nData(
+      dto.items,
+      dto.modules,
+      dto.overwrite || false,
+    );
+    return result;
   }
 }
 

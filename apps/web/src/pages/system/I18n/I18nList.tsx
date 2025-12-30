@@ -1,6 +1,10 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button, Space, Popconfirm, Select } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ImportOutlined,
+} from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
@@ -13,6 +17,7 @@ import {
 import { fetchI18nModules } from "@/store/slices/i18nModuleSlice";
 import type { I18n } from "@/types/i18n";
 import I18nForm from "./I18nForm";
+import I18nImportModal from "./I18nImportModal";
 import CrudPage from "@/components/CrudPage";
 import { useListManagement } from "@/hooks/useListManagement";
 
@@ -29,6 +34,7 @@ const I18nList: React.FC = () => {
     searchKeyword,
   } = useAppSelector((state) => state.i18n);
   const { items: modules } = useAppSelector((state) => state.i18nModule);
+  const [importModalVisible, setImportModalVisible] = useState(false);
 
   const {
     selectedRowKeys,
@@ -190,6 +196,17 @@ const I18nList: React.FC = () => {
     },
   ];
 
+  // 工具栏按钮配置
+  const toolbarButtons = [
+    {
+      key: "import",
+      label: t("i18n.import") || "导入",
+      icon: <ImportOutlined />,
+      type: "default" as const,
+      onClick: () => setImportModalVisible(true),
+    },
+  ];
+
   return (
     <>
       <CrudPage
@@ -209,6 +226,7 @@ const I18nList: React.FC = () => {
         filters={filterConfig}
         operationColumnRender={operationColumnRender}
         deleteConfirmTitle={t("i18n.confirmDelete")}
+        toolbarButtons={toolbarButtons}
       />
       <I18nForm
         visible={isModalVisible}
@@ -216,6 +234,14 @@ const I18nList: React.FC = () => {
         onCancel={() => setIsModalVisible(false)}
         onSuccess={() => {
           setIsModalVisible(false);
+          handleRefresh();
+        }}
+      />
+      <I18nImportModal
+        visible={importModalVisible}
+        onCancel={() => setImportModalVisible(false)}
+        onSuccess={() => {
+          setImportModalVisible(false);
           handleRefresh();
         }}
       />

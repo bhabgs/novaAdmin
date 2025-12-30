@@ -186,5 +186,137 @@ export class I18nService {
 
     return translations;
   }
+
+  /**
+   * 批量导入国际化数据
+   * @param importData 导入数据
+   * @param overwrite 是否覆盖已存在的数据
+   */
+  async importI18nData(
+    importData: Array<{
+      module: string;
+      key: string;
+      zhCn: string;
+      enUs: string;
+      arSa: string;
+    }>,
+    modules?: Array<{
+      code: string;
+      name: string;
+      description?: string;
+    }>,
+    overwrite: boolean = false,
+  ): Promise<{
+    created: number;
+    updated: number;
+    skipped: number;
+    errors: Array<{ module: string; key: string; error: string }>;
+  }> {
+    const result = {
+      created: 0,
+      updated: 0,
+      skipped: 0,
+      errors: [] as Array<{ module: string; key: string; error: string }>,
+    };
+
+    // 先创建或更新模块
+    const moduleMap = new Map<string, I18nModule>();
+    if (modules && modules.length > 0) {
+      for (const moduleData of modules) {
+        try {
+          let module = await this.i18nModuleRepository.findOne({
+            where: { code: moduleData.code },
+          });
+
+          if (!module) {
+            module = this.i18nModuleRepository.create({
+              code: moduleData.code,
+              name: moduleData.name,
+              description: moduleData.description,
+            });
+            module = await this.i18nModuleRepository.save(module);
+          } else {
+            // 更新模块信息
+            module.name = moduleData.name;
+            if (moduleData.description !== undefined) {
+              module.description = moduleData.description;
+            }
+            module = await this.i18nModuleRepository.save(module);
+          }
+
+          moduleMap.set(moduleData.code, module);
+        } catch (error) {
+          console.error(`Error creating/updating module ${moduleData.code}:`, error);
+        }
+      }
+    }
+
+    // 处理每个国际化项
+    for (const item of importData) {
+      try {
+        // 查找或创建模块
+        let module = moduleMap.get(item.module);
+        if (!module) {
+          const foundModule = await this.i18nModuleRepository.findOne({
+            where: { code: item.module },
+          });
+
+          if (foundModule) {
+            module = foundModule;
+          } else {
+            // 如果模块不存在且没有在 modules 中定义，创建一个默认模块
+            module = this.i18nModuleRepository.create({
+              code: item.module,
+              name: item.module.charAt(0).toUpperCase() + item.module.slice(1),
+              description: `${item.module} 模块`,
+            });
+            module = await this.i18nModuleRepository.save(module);
+          }
+          moduleMap.set(item.module, module);
+        }
+
+        // 查找是否已存在
+        const existingI18n = await this.i18nRepository.findOne({
+          where: { moduleId: module.id, key: item.key },
+        });
+
+        if (existingI18n) {
+          if (overwrite) {
+            // 更新现有数据
+            existingI18n.zhCn = item.zhCn;
+            existingI18n.enUs = item.enUs;
+            existingI18n.arSa = item.arSa;
+            await this.i18nRepository.save(existingI18n);
+            result.updated++;
+          } else {
+            result.skipped++;
+          }
+        } else {
+          // 创建新数据
+          const newI18n = this.i18nRepository.create({
+            moduleId: module.id,
+            key: item.key,
+            zhCn: item.zhCn,
+            enUs: item.enUs,
+            arSa: item.arSa,
+          });
+          await this.i18nRepository.save(newI18n);
+          result.created++;
+        }
+      } catch (error) {
+        result.errors.push({
+          module: item.module,
+          key: item.key,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        console.error(
+          `Error importing i18n item ${item.module}.${item.key}:`,
+          error,
+        );
+      }
+    }
+
+    return result;
+  }
 }
 

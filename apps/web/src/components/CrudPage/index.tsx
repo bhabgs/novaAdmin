@@ -291,6 +291,21 @@ function CrudPage<T extends { id: string }>({
         {/* 工具栏按钮 */}
         <Col span={onSearch ? buttonsSpan : 24}>
           <Space style={{ float: "right" }}>
+            {/* 工具栏自定义按钮 */}
+            {toolbarButtons.map((button) => (
+              <Button
+                key={button.key}
+                type={button.type || "default"}
+                icon={button.icon}
+                danger={button.danger}
+                disabled={button.disabled}
+                onClick={button.onClick}
+                title={button.tooltip}
+              >
+                {button.label}
+              </Button>
+            ))}
+
             {/* 添加按钮 */}
             {showAddButton && onAdd && (
               <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>

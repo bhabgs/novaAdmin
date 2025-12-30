@@ -436,6 +436,21 @@ export type UpdateI18nDto = {
     remark?: string;
 };
 
+export type TranslateDto = {
+    /**
+     * 要翻译的文本
+     */
+    text: string;
+    /**
+     * 源语言代码
+     */
+    from: string;
+    /**
+     * 目标语言代码
+     */
+    to: string;
+};
+
 export type AuthControllerLoginData = {
     body: LoginDto;
     path?: never;
@@ -1093,5 +1108,27 @@ export type I18nControllerBatchDeleteData = {
 };
 
 export type I18nControllerBatchDeleteResponses = {
+    201: unknown;
+};
+
+export type I18nControllerGetAllTranslationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/nova-admin-api/i18n/translations/all';
+};
+
+export type I18nControllerGetAllTranslationsResponses = {
+    200: unknown;
+};
+
+export type I18nControllerTranslateData = {
+    body: TranslateDto;
+    path?: never;
+    query?: never;
+    url: '/nova-admin-api/i18n/translate';
+};
+
+export type I18nControllerTranslateResponses = {
     201: unknown;
 };

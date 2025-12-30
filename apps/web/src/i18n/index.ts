@@ -1,9 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { Language } from "../types";
-import zhCN from "./locales/zh-CN.json";
-import enUS from "./locales/en-US.json";
-import arSA from "./locales/ar-SA.json";
 import { get } from "../utils/request";
 
 // 支持的语言列表
@@ -14,19 +11,6 @@ export const RTL_LANGUAGES: Language[] = ["ar-SA"];
 
 // 默认语言
 export const DEFAULT_LANGUAGE: Language = "zh-CN";
-
-// 静态资源
-const resources = {
-  "zh-CN": {
-    translation: zhCN,
-  },
-  "en-US": {
-    translation: enUS,
-  },
-  "ar-SA": {
-    translation: arSA,
-  },
-};
 
 /**
  * 获取初始语言（优先从localStorage获取，然后从浏览器语言，最后使用默认语言）
@@ -71,38 +55,38 @@ const getInitialLanguage = (): Language => {
  * 从接口加载翻译
  */
 async function loadTranslationsFromAPI(): Promise<{
-  'zh-CN': Record<string, string>;
-  'en-US': Record<string, string>;
-  'ar-SA': Record<string, string>;
+  "zh-CN": Record<string, string>;
+  "en-US": Record<string, string>;
+  "ar-SA": Record<string, string>;
 } | null> {
   try {
     const response = await get<{
       success: boolean;
       data: {
-        'zh-CN': Record<string, string>;
-        'en-US': Record<string, string>;
-        'ar-SA': Record<string, string>;
+        "zh-CN": Record<string, string>;
+        "en-US": Record<string, string>;
+        "ar-SA": Record<string, string>;
       };
-    }>('/nova-admin-api/i18n/translations/all');
-    
+    }>("/nova-admin-api/i18n/translations/all");
+
     if (response.success && response.data) {
       return response.data;
     }
     return null;
   } catch (error) {
-    console.error('[i18n] Failed to load translations from API:', error);
+    console.error("[i18n] Failed to load translations from API:", error);
     return null;
   }
 }
 
 /**
  * 初始化i18n（异步，需要在App中调用）
- * 优先从接口加载翻译，失败则使用本地翻译作为降级方案
+ * 从接口加载翻译
  */
 export async function initializeI18n(): Promise<void> {
-  // 先使用本地资源初始化，确保应用可以正常启动
+  // 使用空资源初始化，等待从 API 加载翻译
   await i18n.use(initReactI18next).init({
-    resources,
+    resources: {},
     lng: getInitialLanguage(),
     fallbackLng: DEFAULT_LANGUAGE,
     interpolation: {
@@ -114,67 +98,56 @@ export async function initializeI18n(): Promise<void> {
     debug: process.env.NODE_ENV === "development",
   });
 
-  // 尝试从接口加载翻译
+  // 从接口加载翻译
   const apiTranslations = await loadTranslationsFromAPI();
   if (apiTranslations) {
-    console.log('[i18n] Loaded translations from API');
+    console.log("[i18n] Loaded translations from API");
     // 将接口返回的翻译添加到 i18n
     for (const language of SUPPORTED_LANGUAGES) {
-      const translations = apiTranslations[language as keyof typeof apiTranslations];
+      const translations =
+        apiTranslations[language as keyof typeof apiTranslations];
       if (translations) {
         i18n.addResourceBundle(
           language,
-          'translation',
+          "translation",
           translations,
           true, // 合并
-          true  // 覆盖
+          true // 覆盖
         );
       }
     }
   } else {
-    console.log('[i18n] Using local translations as fallback');
+    console.warn("[i18n] Failed to load translations from API");
   }
 }
 
 /**
- * 刷新翻译（优先从接口重新加载，失败则使用本地资源）
+ * 刷新翻译（从接口重新加载）
  */
 export async function refreshTranslations(): Promise<void> {
   console.log("[i18n] Refreshing translations...");
-  
-  // 优先从接口加载翻译
+
+  // 从接口加载翻译
   const apiTranslations = await loadTranslationsFromAPI();
   if (apiTranslations) {
     console.log("[i18n] Refreshed translations from API");
     for (const language of SUPPORTED_LANGUAGES) {
-      const translations = apiTranslations[language as keyof typeof apiTranslations];
+      const translations =
+        apiTranslations[language as keyof typeof apiTranslations];
       if (translations) {
         i18n.addResourceBundle(
           language,
-          'translation',
+          "translation",
           translations,
           true, // 合并
-          true  // 覆盖
+          true // 覆盖
         );
       }
     }
+    console.log("[i18n] Translations refreshed successfully");
   } else {
-    // 降级方案：重新加载本地静态资源
-    console.log("[i18n] Refreshed translations from local resources");
-    for (const language of SUPPORTED_LANGUAGES) {
-      const resource = resources[language as keyof typeof resources];
-      if (resource) {
-        i18n.addResourceBundle(
-          language,
-          "translation",
-          resource.translation,
-          true,
-          true,
-        );
-      }
-    }
+    console.warn("[i18n] Failed to refresh translations from API");
   }
-  console.log("[i18n] Translations refreshed successfully");
 }
 
 // 监听语言变化，同步到localStorage

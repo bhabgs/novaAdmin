@@ -74,7 +74,7 @@ const MainLayout: React.FC = () => {
       const icon = getMenuIcon(menu.icon);
       // 使用 i18nKey 或回退到 name
       const label = menu.i18nKey ? t(menu.i18nKey) : menu.name;
-
+      console.log("label", label, menu.i18nKey, t(menu.i18nKey));
       if (menu.children && menu.children.length > 0) {
         // 创建副本并排序，避免修改只读数组
         const sortedChildren = [...menu.children]

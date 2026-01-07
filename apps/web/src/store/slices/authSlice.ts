@@ -21,7 +21,7 @@ const initialState: AuthState = {
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials: { username: string; password: string }) => {
-    const response = await request.post('/api/auth/login', credentials);
+    const response = await request.post('/api/auth/auth/login', credentials);
     return response.data;
   },
 );

@@ -19,7 +19,8 @@
     "psq": "docker exec -it nova-postgres psql -U postgres -d nova_admin",
     "db:schema": "docker exec -i nova-postgres psql -U postgres -d nova_admin < database/seeds/00-schema.sql",
     "db:seed": "docker exec -i nova-postgres psql -U postgres -d nova_admin < database/seeds/seed.sql",
-    "db:init": "pnpm db:schema && pnpm db:seed"
+    "db:init": "pnpm db:schema && pnpm db:seed",
+    "generate-api": "pnpm --filter @nova-admin/web generate-api"
   },
   "devDependencies": {
     "turbo": "^2.3.0",

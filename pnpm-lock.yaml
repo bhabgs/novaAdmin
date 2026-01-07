@@ -267,6 +267,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@hey-api/client-axios':
+        specifier: ^0.9.1
+        version: 0.9.1(@hey-api/openapi-ts@0.53.12(typescript@5.9.3))(axios@1.13.2)
       '@hookform/resolvers':
         specifier: ^3.9.0
         version: 3.10.0(react-hook-form@7.70.0(react@18.3.1))
@@ -674,6 +677,13 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@hey-api/client-axios@0.9.1':
+    resolution: {integrity: sha512-fvpOdnEz6tu5T2+IMNZW3g9mAZwaXavqpsvtapEZNtYxyYtQ+lQs9wJn/VPhZEvdXAXu8HPTCRpmfa0t1aRATA==}
+    deprecated: Starting with v0.73.0, this package is bundled directly inside @hey-api/openapi-ts.
+    peerDependencies:
+      '@hey-api/openapi-ts': < 2
+      axios: '>= 1.0.0 < 2'
 
   '@hey-api/openapi-ts@0.53.12':
     resolution: {integrity: sha512-cOm8AlUqJIWdLXq+Pk4mTXhEApRSc9xEWTVT8MZAyEqrN1Yhiisl2wyZGH9quzKpolq+oqvgcx61txtwHwi8vQ==}
@@ -4567,6 +4577,11 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@hey-api/client-axios@0.9.1(@hey-api/openapi-ts@0.53.12(typescript@5.9.3))(axios@1.13.2)':
+    dependencies:
+      '@hey-api/openapi-ts': 0.53.12(typescript@5.9.3)
+      axios: 1.13.2
 
   '@hey-api/openapi-ts@0.53.12(typescript@5.9.3)':
     dependencies:

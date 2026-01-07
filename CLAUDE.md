@@ -171,3 +171,108 @@ const { t } = useTranslation();
 |                   | DB_DATABASE          |
 |                   | JWT_SECRET           |
 |                   | PORT (3000)          |
+
+---
+
+## 微服务架构 (feature/microservices-refactor 分支)
+
+### 服务划分
+
+| 服务             | 目录                 | 端口 | 职责                                         |
+| ---------------- | -------------------- | ---- | -------------------------------------------- |
+| **Gateway**      | `apps/gateway/`      | 3000 | API 网关：路由转发、JWT 验证、限流、统一入口 |
+| **Auth Service** | `apps/auth-service/` | 3001 | 认证服务：登录/登出、Token 管理、密码验证    |
+| **RBAC Service** | `apps/rbac-service/` | 3002 | 权限服务：用户、角色、菜单管理               |
+| **I18n Service** | `apps/i18n-service/` | 3003 | 国际化服务：多语言模块和条目管理             |
+| **Web**          | `apps/web/`          | 5173 | 前端应用                                     |
+
+### 目录结构
+
+```bash
+apps/
+├── gateway/              # API 网关
+│   └── src/
+│       ├── proxy/        # 服务代理转发
+│       ├── guards/       # JWT 认证守卫
+│       └── decorators/   # @Public() 等装饰器
+├── auth-service/         # 认证服务
+│   └── src/
+│       ├── auth/         # 登录/Token 逻辑
+│       └── strategies/   # JWT 策略
+├── rbac-service/         # 权限服务
+│   └── src/
+│       ├── users/        # 用户模块
+│       ├── roles/        # 角色模块
+│       └── menus/        # 菜单模块
+├── i18n-service/         # 国际化服务
+│   └── src/
+│       ├── i18n/         # 国际化条目
+│       └── i18n-modules/ # 国际化模块
+└── web/                  # 前端
+
+libs/
+└── shared/               # 共享库
+    ├── nacos/            # Nacos 服务注册发现
+    ├── guards/           # InternalApiGuard 内部 API 认证
+    ├── interceptors/     # TraceInterceptor 链路追踪、TransformInterceptor 响应转换
+    ├── dto/              # 共享 DTO (分页、响应格式等)
+    └── utils/            # ServiceClient 服务调用工具
+```
+
+### 服务通信规则
+
+1. **外部请求**：前端 → Gateway (3000) → 各微服务
+2. **服务发现**：Nacos 注册中心（自动注册与发现）
+3. **内部通信**：通过 Nacos 服务发现获取地址，使用 HTTP 调用
+4. **认证流程**：Gateway 统一验证 JWT，内部服务信任 Gateway 转发的请求
+
+### Nacos 配置
+
+环境变量配置（各服务）：
+- `NACOS_SERVER_ADDR`: Nacos 服务器地址（默认: `http://localhost:8848`）
+- `NACOS_NAMESPACE`: 命名空间（默认: `public`）
+- `NACOS_USERNAME`: 用户名（默认: `nacos`）
+- `NACOS_PASSWORD`: 密码（默认: `nacos`）
+- `SERVICE_NAME`: 服务名称（如: `auth-service`）
+- `SERVICE_IP`: 服务 IP（默认: `localhost`）
+- `PORT`: 服务端口
+
+### 路由映射 (Gateway → 微服务)
+
+| Gateway 路径          | 目标服务            | 转发路径          |
+| --------------------- | ------------------- | ----------------- |
+| `/api/auth/*`         | Auth Service (3001) | `/auth/*`         |
+| `/api/users/*`        | RBAC Service (3002) | `/users/*`        |
+| `/api/roles/*`        | RBAC Service (3002) | `/roles/*`        |
+| `/api/menus/*`        | RBAC Service (3002) | `/menus/*`        |
+| `/api/i18n/*`         | I18n Service (3003) | `/i18n/*`         |
+| `/api/i18n-modules/*` | I18n Service (3003) | `/i18n-modules/*` |
+
+### 开发规范
+
+1. **共享代码放 `libs/shared/`**：DTO、Guard、Interceptor、工具函数、Nacos 服务
+2. **每个服务独立数据库连接**：可共享数据库，但连接独立配置
+3. **服务间调用使用 ServiceClient**：通过 Nacos 服务发现自动获取服务地址
+4. **环境变量命名规范**：`SERVICE_NAME_` 前缀区分，如 `AUTH_SERVICE_PORT`
+5. **日志统一格式**：包含 `traceId`、`serviceName`、`timestamp`
+6. **服务自动注册**：服务启动时自动注册到 Nacos，关闭时自动注销
+
+### 启动命令
+
+```bash
+pnpm dev:gateway        # 启动网关
+pnpm dev:auth           # 启动认证服务
+pnpm dev:rbac           # 启动权限服务
+pnpm dev:i18n           # 启动国际化服务
+pnpm dev:services       # 启动所有后端服务
+pnpm dev                # 启动全部 (前端 + 后端服务)
+```
+
+### 新增微服务流程
+
+1. 在 `apps/` 下创建新服务目录，使用 `nest new` 或复制模板
+2. 配置 `package.json`，设置 `name` 为 `@nova-admin/xxx-service`
+3. 在 `pnpm-workspace.yaml` 中确保 `apps/*` 已包含
+4. 添加服务到 Gateway 路由映射
+5. 配置环境变量和端口
+6. 更新根目录 `package.json` 添加启动脚本

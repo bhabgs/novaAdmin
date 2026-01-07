@@ -8,8 +8,8 @@ import { message } from "antd";
 import { tokenUtils } from "../utils/auth";
 import i18n from "../i18n";
 
-// API 前缀配置（开发环境使用 Vite 代理）
-const baseURL = "";
+// API 前缀配置（指向 Gateway）
+const baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
 // 创建axios实例
 const axiosInstance: AxiosInstance = axios.create({

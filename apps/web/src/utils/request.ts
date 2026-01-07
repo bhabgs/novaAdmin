@@ -4,7 +4,7 @@ import axios, {
   AxiosResponse,
   AxiosRequestConfig,
 } from 'axios';
-import { message } from 'antd';
+import { toast } from 'sonner';
 import { tokenUtils } from '../utils/auth';
 import i18n from '../i18n';
 
@@ -61,7 +61,7 @@ axiosInstance.interceptors.response.use(
       } else {
         // 业务错误
         const errorMessage = data.message || i18n.t('api.requestFailed');
-        message.error(errorMessage);
+        toast.error(errorMessage);
         return Promise.reject(new Error(errorMessage));
       }
     }
@@ -74,7 +74,7 @@ axiosInstance.interceptors.response.use(
 
     // 网络错误
     if (!error.response) {
-      message.error(i18n.t('api.networkConnectionFailed'));
+      toast.error(i18n.t('api.networkConnectionFailed'));
       return Promise.reject(error);
     }
 
@@ -93,21 +93,21 @@ axiosInstance.interceptors.response.use(
 
         // 其他请求的401，清除token并跳转到登录页
         tokenUtils.removeToken();
-        message.error(i18n.t('api.unauthorized'));
+        toast.error(i18n.t('api.unauthorized'));
         // 使用 React Router 导航会更好，但这里用 href 确保状态清除
         window.location.href = '/login';
         break;
       case 403:
-        message.error(i18n.t('api.forbidden'));
+        toast.error(i18n.t('api.forbidden'));
         break;
       case 404:
-        message.error(i18n.t('api.notFound'));
+        toast.error(i18n.t('api.notFound'));
         break;
       case 500:
-        message.error(i18n.t('api.serverError'));
+        toast.error(i18n.t('api.serverError'));
         break;
       default:
-        message.error(data?.message || i18n.t('api.requestFailedWithCode', { code: status }));
+        toast.error(data?.message || i18n.t('api.requestFailedWithCode', { code: status }));
     }
 
     return Promise.reject(error);

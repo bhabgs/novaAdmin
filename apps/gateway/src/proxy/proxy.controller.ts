@@ -1,5 +1,5 @@
 import { Controller, All, Req, Res, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiExcludeController } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import axios from 'axios';
 import { Public } from '../auth/decorators/public.decorator';
@@ -10,24 +10,21 @@ const SERVICE_MAP: Record<string, string> = {
   system: process.env.SYSTEM_SERVICE_URL || 'http://localhost:3003',
 };
 
-@ApiTags('Proxy')
+@ApiExcludeController()
 @Controller()
 export class ProxyController {
   @All('auth/*')
   @Public()
-  @ApiOperation({ summary: 'Proxy to Auth Service' })
   async proxyAuth(@Req() req: Request, @Res() res: Response) {
     return this.proxy(req, res, 'auth');
   }
 
   @All('rbac/*')
-  @ApiOperation({ summary: 'Proxy to RBAC Service' })
   async proxyRbac(@Req() req: Request, @Res() res: Response) {
     return this.proxy(req, res, 'rbac');
   }
 
   @All('system/*')
-  @ApiOperation({ summary: 'Proxy to System Service' })
   async proxySystem(@Req() req: Request, @Res() res: Response) {
     return this.proxy(req, res, 'system');
   }

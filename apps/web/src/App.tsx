@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { useAppSelector } from './hooks/redux';
 import MainLayout from './layouts/MainLayout';
 import Login from './pages/auth/Login';
@@ -16,23 +17,26 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <MainLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="system/user" element={<UserList />} />
-        <Route path="system/role" element={<RoleList />} />
-        <Route path="system/department" element={<DepartmentList />} />
-        <Route path="system/menu" element={<MenuList />} />
-      </Route>
-    </Routes>
+    <>
+      <Toaster position="top-center" richColors closeButton />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="system/user" element={<UserList />} />
+          <Route path="system/role" element={<RoleList />} />
+          <Route path="system/department" element={<DepartmentList />} />
+          <Route path="system/menu" element={<MenuList />} />
+        </Route>
+      </Routes>
+    </>
   );
 }

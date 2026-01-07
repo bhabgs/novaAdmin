@@ -4,25 +4,25 @@ import { BaseEntity } from '@nova-admin/shared';
 @Entity('sys_department')
 @Tree('closure-table')
 export class Department extends BaseEntity {
-  @Column()
+  @Column({ length: 100 })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   code: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   leader: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   phone: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   email: string;
 
-  @Column({ default: 1 })
+  @Column({ type: 'smallint', default: 1 })
   status: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   sort: number;
 
   @TreeParent()

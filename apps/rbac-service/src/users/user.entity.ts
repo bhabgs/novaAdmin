@@ -4,32 +4,38 @@ import { Role } from '../roles/role.entity';
 
 @Entity('sys_user')
 export class User extends BaseEntity {
-  @Column({ unique: true })
+  @Column({ length: 50, unique: true })
   username: string;
 
-  @Column()
+  @Column({ length: 255 })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 50, nullable: true })
   nickname: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 100, nullable: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   phone: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   avatar: string;
 
-  @Column({ default: 0 })
+  @Column({ type: 'smallint', default: 0 })
   gender: number;
 
-  @Column({ default: 1 })
+  @Column({ type: 'smallint', default: 1 })
   status: number;
 
-  @Column({ name: 'department_id', nullable: true })
+  @Column({ name: 'department_id', type: 'uuid', nullable: true })
   departmentId: string;
+
+  @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
+  lastLoginAt: Date;
+
+  @Column({ name: 'last_login_ip', length: 50, nullable: true })
+  lastLoginIp: string;
 
   @ManyToMany(() => Role)
   @JoinTable({

@@ -3,15 +3,15 @@ import { BaseEntity } from '@nova-admin/shared';
 
 @Entity('sys_config')
 export class Config extends BaseEntity {
-  @Column({ unique: true })
+  @Column({ length: 100, unique: true })
   key: string;
 
   @Column({ type: 'text', nullable: true })
   value: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 20, nullable: true })
   type: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   description: string;
 }

@@ -6,3 +6,4 @@ export declare abstract class BaseEntity {
     createdBy?: string;
     updatedBy?: string;
 }
+//# sourceMappingURL=base.entity.d.ts.map

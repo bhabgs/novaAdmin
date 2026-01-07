@@ -4,19 +4,19 @@ import { Menu } from '../menus/menu.entity';
 
 @Entity('sys_role')
 export class Role extends BaseEntity {
-  @Column()
+  @Column({ length: 50 })
   name: string;
 
-  @Column({ unique: true })
+  @Column({ length: 50, unique: true })
   code: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 255, nullable: true })
   description: string;
 
-  @Column({ default: 1 })
+  @Column({ type: 'smallint', default: 1 })
   status: number;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   sort: number;
 
   @ManyToMany(() => Menu)

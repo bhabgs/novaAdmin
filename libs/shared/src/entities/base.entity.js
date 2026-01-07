@@ -25,23 +25,23 @@ __decorate([
     __metadata("design:type", String)
 ], BaseEntity.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ name: 'created_at' }),
+    (0, typeorm_1.CreateDateColumn)({ name: 'created_at', type: 'timestamp' }),
     __metadata("design:type", Date)
 ], BaseEntity.prototype, "createdAt", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)({ name: 'updated_at' }),
+    (0, typeorm_1.UpdateDateColumn)({ name: 'updated_at', type: 'timestamp' }),
     __metadata("design:type", Date)
 ], BaseEntity.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.DeleteDateColumn)({ name: 'deleted_at' }),
+    (0, typeorm_1.DeleteDateColumn)({ name: 'deleted_at', type: 'timestamp' }),
     __metadata("design:type", Date)
 ], BaseEntity.prototype, "deletedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'created_by', nullable: true }),
+    (0, typeorm_1.Column)({ name: 'created_by', type: 'uuid', nullable: true }),
     __metadata("design:type", String)
 ], BaseEntity.prototype, "createdBy", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'updated_by', nullable: true }),
+    (0, typeorm_1.Column)({ name: 'updated_by', type: 'uuid', nullable: true }),
     __metadata("design:type", String)
 ], BaseEntity.prototype, "updatedBy", void 0);
 //# sourceMappingURL=base.entity.js.map

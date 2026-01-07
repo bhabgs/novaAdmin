@@ -52,7 +52,18 @@ pnpm docker:up
 ### 3. 初始化数据库
 
 ```bash
-psql -U postgres -d nova_admin -f database/seeds/seed.sql
+# 方式1: 一键初始化（创建表结构 + 初始化数据，推荐）
+pnpm db:init
+
+# 方式2: 分步执行
+# 2.1 创建表结构
+pnpm db:schema
+# 2.2 初始化数据
+pnpm db:seed
+
+# 方式3: 使用 docker exec
+docker exec -i nova-postgres psql -U postgres -d nova_admin < database/migrations/schema.sql
+docker exec -i nova-postgres psql -U postgres -d nova_admin < database/seeds/seed.sql
 ```
 
 ### 4. 启动开发服务

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "nest build",
-    "dev": "nest start --watch",
+    "dev": "ts-node-dev --respawn --transpile-only src/main.ts",
     "start": "nest start",
     "start:prod": "node dist/main",
     "clean": "rm -rf dist"
@@ -27,6 +27,7 @@
     "@nestjs/cli": "^10.4.0",
     "@types/express": "^4.17.21",
     "@types/passport-jwt": "^4.0.1",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.5.0"
   }
 }

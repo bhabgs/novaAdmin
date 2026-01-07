@@ -1,0 +1,58 @@
+{
+  "common": {
+    "add": "新增",
+    "edit": "编辑",
+    "delete": "删除",
+    "batchDelete": "批量删除",
+    "search": "搜索",
+    "reset": "重置",
+    "confirm": "确认",
+    "cancel": "取消",
+    "save": "保存",
+    "submit": "提交",
+    "loading": "加载中...",
+    "success": "操作成功",
+    "error": "操作失败",
+    "status": "状态",
+    "enabled": "启用",
+    "disabled": "禁用",
+    "actions": "操作"
+  },
+  "login": {
+    "title": "Nova Admin",
+    "subtitle": "后台管理系统",
+    "username": "用户名",
+    "password": "密码",
+    "login": "登录",
+    "remember": "记住我"
+  },
+  "menu": {
+    "dashboard": "仪表盘",
+    "system": "系统管理",
+    "user": "用户管理",
+    "role": "角色管理",
+    "department": "部门管理",
+    "menu": "菜单管理"
+  },
+  "user": {
+    "username": "用户名",
+    "nickname": "昵称",
+    "email": "邮箱",
+    "phone": "手机号",
+    "status": "状态",
+    "department": "部门",
+    "roles": "角色"
+  },
+  "role": {
+    "name": "角色名称",
+    "code": "角色编码",
+    "description": "描述",
+    "permissions": "权限"
+  },
+  "department": {
+    "name": "部门名称",
+    "code": "部门编码",
+    "leader": "负责人",
+    "parent": "上级部门"
+  }
+}

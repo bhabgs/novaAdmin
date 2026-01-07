@@ -1,108 +1,64 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsEnum,
-  IsArray,
-  IsNumber,
-  IsBoolean,
-} from 'class-validator';
+import { IsString, IsOptional, IsInt, IsUUID, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { MenuType, MenuStatus } from '../entities/menu.entity';
 
 export class CreateMenuDto {
-  @ApiProperty({ description: '菜单名称' })
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty({ message: '菜单名称不能为空' })
   name: string;
 
-  @ApiPropertyOptional({ description: '国际化Key' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  i18nKey?: string;
+  nameI18n?: string;
 
-  @ApiProperty({ description: '菜单类型', enum: MenuType })
-  @IsEnum(MenuType)
-  type: MenuType;
-
-  @ApiPropertyOptional({ description: '父菜单ID' })
+  @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
+  @IsUUID()
   parentId?: string;
 
-  @ApiPropertyOptional({ description: '图标' })
-  @IsOptional()
-  @IsString()
-  icon?: string;
-
-  @ApiPropertyOptional({ description: '路由路径' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   path?: string;
 
-  @ApiPropertyOptional({ description: '组件路径' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   component?: string;
 
-  @ApiPropertyOptional({ description: '外部链接' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  externalUrl?: string;
+  redirect?: string;
 
-  @ApiPropertyOptional({ description: '是否在新标签页打开' })
-  @IsOptional()
-  @IsBoolean()
-  openInNewTab?: boolean;
-
-  @ApiPropertyOptional({ description: '排序', default: 0 })
-  @IsOptional()
-  @IsNumber()
-  sortOrder?: number;
-
-  @ApiPropertyOptional({ description: '状态', enum: MenuStatus })
-  @IsOptional()
-  @IsEnum(MenuStatus)
-  status?: MenuStatus;
-
-  @ApiPropertyOptional({ description: '是否隐藏' })
-  @IsOptional()
-  @IsBoolean()
-  hideInMenu?: boolean;
-
-  @ApiPropertyOptional({ description: '是否缓存' })
-  @IsOptional()
-  @IsBoolean()
-  keepAlive?: boolean;
-
-  @ApiPropertyOptional({ description: '描述' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  description?: string;
+  icon?: string;
 
-  @ApiPropertyOptional({ description: '备注' })
+  @ApiProperty()
+  @IsInt()
+  type: number;
+
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  remark?: string;
+  permission?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  sort?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  visible?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  status?: number;
 }
 
 export class UpdateMenuDto extends PartialType(CreateMenuDto) {}
-
-export class BatchDeleteDto {
-  @ApiProperty({ description: '菜单ID列表' })
-  @IsArray()
-  ids: string[];
-}
-
-export class UpdateSortDto {
-  @ApiProperty({ description: '菜单排序数据' })
-  @IsArray()
-  menus: { id: string; sortOrder: number; parentId?: string }[];
-}
-
-export class CopyMenuDto {
-  @ApiPropertyOptional({ description: '父菜单ID' })
-  @IsOptional()
-  @IsString()
-  parentId?: string;
-}

@@ -1,93 +1,62 @@
-import { Controller, All, Req, Res, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, All, Req, Res, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { AuthServiceProxy } from './service-proxies/auth-service.proxy';
-import { RbacServiceProxy } from './service-proxies/rbac-service.proxy';
-import { I18nServiceProxy } from './service-proxies/i18n-service.proxy';
+import axios from 'axios';
 import { Public } from '../auth/decorators/public.decorator';
 
-@ApiTags('Gateway')
+const SERVICE_MAP: Record<string, string> = {
+  auth: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
+  rbac: process.env.RBAC_SERVICE_URL || 'http://localhost:3002',
+  system: process.env.SYSTEM_SERVICE_URL || 'http://localhost:3003',
+};
+
+@ApiTags('Proxy')
 @Controller()
 export class ProxyController {
-  constructor(
-    private authProxy: AuthServiceProxy,
-    private rbacProxy: RbacServiceProxy,
-    private i18nProxy: I18nServiceProxy,
-  ) {}
-
-  /**
-   * 转发到 Auth Service
-   * 路由: /api/auth/*
-   */
-  @Public() // 登录接口公开
-  @All('auth/login')
-  @ApiOperation({ summary: '用户登录（转发到 Auth Service）' })
-  async authLogin(@Req() req: Request, @Res() res: Response) {
-    return this.authProxy.forward('/login', req, res);
+  @All('auth/*')
+  @Public()
+  @ApiOperation({ summary: 'Proxy to Auth Service' })
+  async proxyAuth(@Req() req: Request, @Res() res: Response) {
+    return this.proxy(req, res, 'auth');
   }
 
-  @Public() // 重置密码接口公开
-  @All('auth/reset-password')
-  @ApiOperation({ summary: '重置密码（转发到 Auth Service）' })
-  async authResetPassword(@Req() req: Request, @Res() res: Response) {
-    return this.authProxy.forward('/reset-password', req, res);
+  @All('rbac/*')
+  @ApiOperation({ summary: 'Proxy to RBAC Service' })
+  async proxyRbac(@Req() req: Request, @Res() res: Response) {
+    return this.proxy(req, res, 'rbac');
   }
 
-  @All('auth/:path*')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '认证服务代理' })
-  async forwardToAuth(@Req() req: Request, @Res() res: Response) {
-    // 提取路径，去掉 /api/auth 前缀
-    const path = req.url.replace(/^\/api\/auth/, '') || '/';
-    return this.authProxy.forward(path, req, res);
+  @All('system/*')
+  @ApiOperation({ summary: 'Proxy to System Service' })
+  async proxySystem(@Req() req: Request, @Res() res: Response) {
+    return this.proxy(req, res, 'system');
   }
 
-  /**
-   * 转发到 RBAC Service
-   * 路由: /api/users/*, /api/roles/*, /api/menus/*
-   */
-  @All('users/:path*')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '用户管理（转发到 RBAC Service）' })
-  async forwardToUsers(@Req() req: Request, @Res() res: Response) {
-    const path = req.url.replace(/^\/api/, '') || '/users';
-    return this.rbacProxy.forward(path, req, res);
-  }
+  private async proxy(req: Request, res: Response, service: string) {
+    const serviceUrl = SERVICE_MAP[service];
+    const path = req.path.replace(`/api/${service}`, '');
+    const url = `${serviceUrl}/api${path}`;
 
-  @All('roles/:path*')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '角色管理（转发到 RBAC Service）' })
-  async forwardToRoles(@Req() req: Request, @Res() res: Response) {
-    const path = req.url.replace(/^\/api/, '') || '/roles';
-    return this.rbacProxy.forward(path, req, res);
-  }
-
-  @All('menus/:path*')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '菜单管理（转发到 RBAC Service）' })
-  async forwardToMenus(@Req() req: Request, @Res() res: Response) {
-    const path = req.url.replace(/^\/api/, '') || '/menus';
-    return this.rbacProxy.forward(path, req, res);
-  }
-
-  /**
-   * 转发到 I18n Service
-   * 路由: /api/i18n/*, /api/i18n-modules/*
-   */
-  @All('i18n/:path*')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '国际化条目（转发到 I18n Service）' })
-  async forwardToI18n(@Req() req: Request, @Res() res: Response) {
-    const path = req.url.replace(/^\/api/, '') || '/i18n';
-    return this.i18nProxy.forward(path, req, res);
-  }
-
-  @All('i18n-modules/:path*')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: '国际化模块（转发到 I18n Service）' })
-  async forwardToI18nModules(@Req() req: Request, @Res() res: Response) {
-    const path = req.url.replace(/^\/api/, '') || '/i18n-modules';
-    return this.i18nProxy.forward(path, req, res);
+    try {
+      const response = await axios({
+        method: req.method as any,
+        url,
+        data: req.body,
+        params: req.query,
+        headers: {
+          ...req.headers,
+          host: undefined,
+        },
+        validateStatus: () => true,
+      });
+      res.status(response.status).json(response.data);
+    } catch (error) {
+      res.status(HttpStatus.BAD_GATEWAY).json({
+        code: HttpStatus.BAD_GATEWAY,
+        message: `Service ${service} unavailable`,
+        data: null,
+        timestamp: Date.now(),
+      });
+    }
   }
 }
-

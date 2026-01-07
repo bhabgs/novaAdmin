@@ -1,88 +1,57 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
-import { Role, ApiResponse } from '../../types';
-import {
-  rolesControllerFindAll,
-  rolesControllerFindOne,
-  rolesControllerCreate,
-  rolesControllerUpdate,
-  rolesControllerDelete,
-  rolesControllerAssignMenus,
-  type CreateRoleDto,
-  type UpdateRoleDto,
-} from '../../api';
-import { createCrudSlice, CrudState } from '../createCrudSlice';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import request from '@/utils/request';
 
-// 使用工厂函数创建基础 CRUD slice
-const { slice, thunks, actions } = createCrudSlice<Role, CreateRoleDto, UpdateRoleDto>({
-  name: 'role',
-  api: {
-    findAll: rolesControllerFindAll,
-    findOne: rolesControllerFindOne,
-    create: rolesControllerCreate,
-    update: rolesControllerUpdate,
-    delete: rolesControllerDelete,
-  },
-  entityName: '角色',
+interface RoleState {
+  list: any[];
+  current: any | null;
+  loading: boolean;
+  pagination: { page: number; pageSize: number; total: number };
+}
+
+const initialState: RoleState = {
+  list: [],
+  current: null,
+  loading: false,
+  pagination: { page: 1, pageSize: 10, total: 0 },
+};
+
+export const fetchRoles = createAsyncThunk('role/fetchList', async (params: any) => {
+  const response = await request.get('/api/rbac/roles', { params });
+  return response.data;
 });
 
-// ============== 额外的异步操作 ==============
+export const createRole = createAsyncThunk('role/create', async (data: any) => {
+  const response = await request.post('/api/rbac/roles', data);
+  return response.data;
+});
 
-// 分配菜单权限
-export const assignMenus = createAsyncThunk(
-  'role/assignMenus',
-  async (
-    { roleId, menuIds }: { roleId: string; menuIds: string[] },
-    { rejectWithValue, dispatch }
-  ) => {
-    try {
-      const response = (await rolesControllerAssignMenus({
-        path: { id: roleId },
-        body: { menuIds },
-      })) as unknown as ApiResponse<null>;
-      if (response.success) {
-        dispatch(thunks.fetchById(roleId));
-        dispatch(thunks.fetchList({}));
-        return response.data;
-      }
-      return rejectWithValue(response.message);
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : '分配菜单权限失败';
-      return rejectWithValue(errorMessage);
-    }
-  }
-);
+export const updateRole = createAsyncThunk('role/update', async ({ id, data }: { id: string; data: any }) => {
+  const response = await request.put(`/api/rbac/roles/${id}`, data);
+  return response.data;
+});
 
-// 更新角色菜单权限 (别名)
-export const updateRoleMenus = assignMenus;
+export const deleteRole = createAsyncThunk('role/delete', async (id: string) => {
+  await request.delete(`/api/rbac/roles/${id}`);
+  return id;
+});
 
-// ============== 导出 ==============
+const roleSlice = createSlice({
+  name: 'role',
+  initialState,
+  reducers: {
+    setCurrent: (state, action) => { state.current = action.payload; },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchRoles.pending, (state) => { state.loading = true; })
+      .addCase(fetchRoles.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload.list;
+        state.pagination.total = action.payload.total;
+      })
+      .addCase(fetchRoles.rejected, (state) => { state.loading = false; });
+  },
+});
 
-// 导出通用 thunks（保持向后兼容的命名）
-export const fetchRoles = thunks.fetchList;
-export const fetchRoleById = thunks.fetchById;
-export const createRole = thunks.create;
-export const updateRole = (params: { id: string; roleData: Partial<Role> }) =>
-  thunks.update({ id: params.id, data: params.roleData });
-export const deleteRole = thunks.remove;
-
-// 导出 actions（保持向后兼容的命名）
-export const {
-  clearError,
-  setSearchKeyword,
-  setPagination,
-  clearCurrentItem: clearCurrentRole,
-} = actions;
-
-// 为了兼容性，导出 setFilters
-export const setFilters = actions.setFilters;
-
-// 导出 State 类型
-export type RoleState = CrudState<Role>;
-
-// 兼容性：选择器辅助函数
-export const selectRoles = (state: { role: RoleState }) => state.role.items;
-export const selectCurrentRole = (state: { role: RoleState }) => state.role.currentItem;
-export const selectRoleLoading = (state: { role: RoleState }) => state.role.loading;
-export const selectRolePagination = (state: { role: RoleState }) => state.role.pagination;
-
-export default slice.reducer;
+export const { setCurrent } = roleSlice.actions;
+export default roleSlice.reducer;

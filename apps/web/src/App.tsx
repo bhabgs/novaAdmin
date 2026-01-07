@@ -1,141 +1,38 @@
-import React, { useEffect, useState } from 'react';
-import { Provider } from 'react-redux';
-import { ConfigProvider, App as AntdApp, Spin, theme as antdTheme } from 'antd';
-import zhCN from 'antd/locale/zh_CN';
-import enUS from 'antd/locale/en_US';
-import arEG from 'antd/locale/ar_EG';
-import { useTranslation } from 'react-i18next';
-import { store } from './store';
-import { initializeSettings } from './store/slices/settingsSlice';
-import { useAppSelector } from './store';
-import Router from './router';
-import { Language } from './types';
-import { isRTL, initializeI18n } from './i18n';
-import { ErrorBoundary } from './components';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAppSelector } from './hooks/redux';
+import MainLayout from './layouts/MainLayout';
+import Login from './pages/auth/Login';
+import Dashboard from './pages/dashboard';
+import UserList from './pages/system/user';
+import RoleList from './pages/system/role';
+import DepartmentList from './pages/system/department';
+import MenuList from './pages/system/menu';
 
-// 内部组件，用于访问Redux状态
-const AppContent: React.FC = () => {
-  const { i18n } = useTranslation();
-  const { language, theme } = useAppSelector(state => state.settings);
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { token } = useAppSelector((state) => state.auth);
+  if (!token) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
 
-  // 根据语言设置获取Antd的locale
-  const getAntdLocale = (lang: Language) => {
-    switch (lang) {
-      case 'en-US':
-        return enUS;
-      case 'ar-SA':
-        return arEG;
-      case 'zh-CN':
-      default:
-        return zhCN;
-    }
-  };
-
-  // 监听语言变化，更新页面标题
-  useEffect(() => {
-    const updateTitle = () => {
-      const titleKey = 'common.appName';
-      if (i18n.exists(titleKey)) {
-        document.title = i18n.t(titleKey);
-      } else {
-        document.title = language === 'zh-CN' ? 'NovaAdmin - 通用后台管理系统' : 'NovaAdmin - Admin Dashboard';
-      }
-    };
-
-    updateTitle();
-    i18n.on('languageChanged', updateTitle);
-
-    return () => {
-      i18n.off('languageChanged', updateTitle);
-    };
-  }, [i18n, language]);
-
-  // 应用主题到HTML根元素
-  useEffect(() => {
-    const root = document.documentElement;
-    root.setAttribute('data-theme', theme.mode);
-    
-    // 设置CSS变量
-    root.style.setProperty('--primary-color', theme.primaryColor);
-    root.style.setProperty('--border-radius', `${theme.borderRadius}px`);
-  }, [theme]);
-
+export default function App() {
   return (
-    <ConfigProvider
-      locale={getAntdLocale(language)}
-      direction={isRTL(language) ? 'rtl' : 'ltr'}
-      theme={{
-        token: {
-          colorPrimary: theme.primaryColor,
-          borderRadius: theme.borderRadius,
-        },
-        algorithm: theme.mode === 'dark' ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-      }}
-    >
-      <AntdApp>
-        <Router />
-      </AntdApp>
-    </ConfigProvider>
-  );
-};
-
-const App: React.FC = () => {
-  const [settingsInitialized, setSettingsInitialized] = useState(false);
-  const [i18nReady, setI18nReady] = useState(false);
-
-  // 初始化i18n和设置
-  useEffect(() => {
-    const initializeApp = async () => {
-      try {
-        // 初始化i18n（从API加载翻译）
-        await initializeI18n();
-        setI18nReady(true);
-      } catch (error) {
-        console.error('Failed to initialize i18n:', error);
-        setI18nReady(true); // 即使失败也继续，使用降级方案
-      }
-
-      // 初始化Redux设置
-      store.dispatch(initializeSettings());
-      setSettingsInitialized(true);
-
-      // 在开发环境下将store添加到window对象，便于调试和测试
-      if (import.meta.env.DEV) {
-        (window as any).__REDUX_STORE__ = store;
-      }
-    };
-
-    initializeApp();
-  }, []);
-
-  // 如果应用未初始化，显示加载状态
-  if (!settingsInitialized || !i18nReady) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          flexDirection: 'column',
-          gap: '16px'
-        }}
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
       >
-        <Spin size="large" />
-        <div style={{ color: '#666', fontSize: '14px' }}>
-          {!i18nReady ? '正在加载翻译...' : '正在初始化应用...'}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <ErrorBoundary>
-      <Provider store={store}>
-        <AppContent />
-      </Provider>
-    </ErrorBoundary>
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="system/user" element={<UserList />} />
+        <Route path="system/role" element={<RoleList />} />
+        <Route path="system/department" element={<DepartmentList />} />
+        <Route path="system/menu" element={<MenuList />} />
+      </Route>
+    </Routes>
   );
-};
-
-export default App;
+}

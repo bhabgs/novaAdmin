@@ -1,83 +1,47 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsEnum,
-  IsArray,
-  IsNumber,
-} from 'class-validator';
+import { IsString, IsOptional, IsInt, IsArray, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
-import { RoleStatus } from '../entities/role.entity';
 
 export class CreateRoleDto {
-  @ApiProperty({ description: '角色名称' })
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty({ message: '角色名称不能为空' })
   name: string;
 
-  @ApiProperty({ description: '角色编码' })
+  @ApiProperty()
   @IsString()
-  @IsNotEmpty({ message: '角色编码不能为空' })
   code: string;
 
-  @ApiPropertyOptional({ description: '角色描述' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ description: '菜单ID列表' })
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  status?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  sort?: number;
+
+  @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()
+  @IsUUID('4', { each: true })
   menuIds?: string[];
-
-  @ApiPropertyOptional({ description: '状态', enum: RoleStatus })
-  @IsOptional()
-  @IsEnum(RoleStatus)
-  status?: RoleStatus;
-
-  @ApiPropertyOptional({ description: '排序' })
-  @IsOptional()
-  @IsNumber()
-  sortOrder?: number;
-
-  @ApiPropertyOptional({ description: '备注' })
-  @IsOptional()
-  @IsString()
-  remark?: string;
 }
 
 export class UpdateRoleDto extends PartialType(CreateRoleDto) {}
 
 export class QueryRoleDto {
-  @ApiPropertyOptional({ description: '页码', default: 1 })
-  @IsOptional()
-  page?: number;
-
-  @ApiPropertyOptional({ description: '每页数量', default: 10 })
-  @IsOptional()
-  pageSize?: number;
-
-  @ApiPropertyOptional({ description: '搜索关键词' })
-  @IsOptional()
-  @IsString()
-  keyword?: string;
-}
-
-export class AssignMenusDto {
-  @ApiProperty({ description: '菜单ID列表' })
-  @IsArray()
-  menuIds: string[];
-}
-
-export class BatchDeleteDto {
-  @ApiProperty({ description: '角色ID列表' })
-  @IsArray()
-  ids: string[];
-}
-
-export class CopyRoleDto {
-  @ApiPropertyOptional({ description: '新角色名称' })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   name?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  status?: number;
 }

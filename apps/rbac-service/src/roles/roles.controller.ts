@@ -1,98 +1,48 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { RolesService } from './roles.service';
-import {
-  CreateRoleDto,
-  UpdateRoleDto,
-  QueryRoleDto,
-  AssignMenusDto,
-  BatchDeleteDto,
-  CopyRoleDto,
-} from './dto/role.dto';
-@ApiTags('角色管理')
-@Controller('roles')
+import { CreateRoleDto, UpdateRoleDto, QueryRoleDto } from './dto/role.dto';
+import { PaginationDto, BatchDeleteDto } from '@nova-admin/shared';
+
+@ApiTags('Roles')
 @ApiBearerAuth()
+@Controller('roles')
 export class RolesController {
   constructor(private rolesService: RolesService) {}
 
   @Get()
-  @ApiOperation({ summary: '获取角色列表（分页）' })
-  async findAll(@Query() query: QueryRoleDto) {
+  @ApiOperation({ summary: 'Get roles list' })
+  findAll(@Query() query: QueryRoleDto & PaginationDto) {
     return this.rolesService.findAll(query);
   }
 
-  @Get('all')
-  @ApiOperation({ summary: '获取所有角色（不分页）' })
-  async findAllWithoutPagination() {
-    return this.rolesService.findAllWithoutPagination();
-  }
-
-  @Get('menus/tree')
-  @ApiOperation({ summary: '获取菜单树（用于权限分配）' })
-  async getMenuTree() {
-    return this.rolesService.getMenuTree();
-  }
-
   @Get(':id')
-  @ApiOperation({ summary: '获取角色详情' })
-  async findOne(@Param('id') id: string) {
-    return this.rolesService.findById(id);
+  @ApiOperation({ summary: 'Get role by id' })
+  findOne(@Param('id') id: string) {
+    return this.rolesService.findOne(id);
   }
 
   @Post()
-  @ApiOperation({ summary: '创建角色' })
-  async create(@Body() dto: CreateRoleDto) {
+  @ApiOperation({ summary: 'Create role' })
+  create(@Body() dto: CreateRoleDto) {
     return this.rolesService.create(dto);
   }
 
   @Put(':id')
-  @ApiOperation({ summary: '更新角色' })
-  async update(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
+  @ApiOperation({ summary: 'Update role' })
+  update(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
     return this.rolesService.update(id, dto);
   }
 
+  @Delete('batch')
+  @ApiOperation({ summary: 'Batch delete roles' })
+  batchRemove(@Body() dto: BatchDeleteDto) {
+    return this.rolesService.batchRemove(dto.ids);
+  }
+
   @Delete(':id')
-  @ApiOperation({ summary: '删除角色' })
-  async delete(@Param('id') id: string) {
-    await this.rolesService.delete(id);
-    return null;
-  }
-
-  @Post('batch')
-  @ApiOperation({ summary: '批量删除角色' })
-  async batchDelete(@Body() dto: BatchDeleteDto) {
-    await this.rolesService.batchDelete(dto.ids);
-    return null;
-  }
-
-  @Post(':id/menus')
-  @ApiOperation({ summary: '分配菜单权限' })
-  async assignMenus(
-    @Param('id') id: string,
-    @Body() dto: AssignMenusDto,
-  ) {
-    await this.rolesService.assignMenus(id, dto);
-    return null;
-  }
-
-  @Get(':id/menus')
-  @ApiOperation({ summary: '获取角色菜单' })
-  async getRoleMenus(@Param('id') id: string) {
-    return this.rolesService.getRoleMenus(id);
-  }
-
-  @Post(':id/copy')
-  @ApiOperation({ summary: '复制角色' })
-  async copyRole(@Param('id') id: string, @Body() dto: CopyRoleDto) {
-    return this.rolesService.copyRole(id, dto);
+  @ApiOperation({ summary: 'Delete role' })
+  remove(@Param('id') id: string) {
+    return this.rolesService.remove(id);
   }
 }

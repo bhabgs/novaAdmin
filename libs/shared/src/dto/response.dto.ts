@@ -1,10 +1,29 @@
-/**
- * 标准 API 响应格式
- */
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
+import { ApiProperty } from '@nestjs/swagger';
+
+export class ApiResponse<T> {
+  @ApiProperty()
+  code: number;
+
+  @ApiProperty()
   message: string;
-  code?: number;
+
+  @ApiProperty()
+  data: T;
+
+  @ApiProperty()
+  timestamp: number;
 }
 
+export class PaginatedData<T> {
+  @ApiProperty()
+  list: T[];
+
+  @ApiProperty()
+  total: number;
+
+  @ApiProperty()
+  page: number;
+
+  @ApiProperty()
+  pageSize: number;
+}

@@ -1,0 +1,58 @@
+{
+  "common": {
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "batchDelete": "Batch Delete",
+    "search": "Search",
+    "reset": "Reset",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "status": "Status",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "actions": "Actions"
+  },
+  "login": {
+    "title": "Nova Admin",
+    "subtitle": "Admin Dashboard",
+    "username": "Username",
+    "password": "Password",
+    "login": "Login",
+    "remember": "Remember me"
+  },
+  "menu": {
+    "dashboard": "Dashboard",
+    "system": "System",
+    "user": "Users",
+    "role": "Roles",
+    "department": "Departments",
+    "menu": "Menus"
+  },
+  "user": {
+    "username": "Username",
+    "nickname": "Nickname",
+    "email": "Email",
+    "phone": "Phone",
+    "status": "Status",
+    "department": "Department",
+    "roles": "Roles"
+  },
+  "role": {
+    "name": "Role Name",
+    "code": "Role Code",
+    "description": "Description",
+    "permissions": "Permissions"
+  },
+  "department": {
+    "name": "Department Name",
+    "code": "Department Code",
+    "leader": "Leader",
+    "parent": "Parent Department"
+  }
+}

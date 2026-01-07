@@ -2,40 +2,14 @@ import { IsString, IsNotEmpty, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginDto {
-  @ApiProperty({ description: '用户名', example: 'admin' })
+  @ApiProperty({ example: 'admin' })
   @IsString()
-  @IsNotEmpty({ message: '用户名不能为空' })
+  @IsNotEmpty()
   username: string;
 
-  @ApiProperty({ description: '密码', example: '123456' })
+  @ApiProperty({ example: '123456' })
   @IsString()
-  @IsNotEmpty({ message: '密码不能为空' })
-  @MinLength(6, { message: '密码长度不能少于6位' })
+  @IsNotEmpty()
+  @MinLength(6)
   password: string;
 }
-
-export class ChangePasswordDto {
-  @ApiProperty({ description: '旧密码' })
-  @IsString()
-  @IsNotEmpty({ message: '旧密码不能为空' })
-  oldPassword: string;
-
-  @ApiProperty({ description: '新密码' })
-  @IsString()
-  @IsNotEmpty({ message: '新密码不能为空' })
-  @MinLength(6, { message: '密码长度不能少于6位' })
-  newPassword: string;
-
-  @ApiProperty({ description: '确认密码' })
-  @IsString()
-  @IsNotEmpty({ message: '确认密码不能为空' })
-  confirmPassword: string;
-}
-
-export class ResetPasswordDto {
-  @ApiProperty({ description: '邮箱' })
-  @IsString()
-  @IsNotEmpty({ message: '邮箱不能为空' })
-  email: string;
-}
-

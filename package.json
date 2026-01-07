@@ -1,26 +1,29 @@
 {
   "name": "nova-admin",
+  "version": "2.0.0",
   "private": true,
-  "version": "1.0.0",
-  "description": "NovaAdmin - Monorepo 后台管理系统",
+  "description": "开箱即用的后台管理平台",
   "scripts": {
-    "dev": "pnpm -r --parallel run dev",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules",
     "dev:web": "pnpm --filter @nova-admin/web dev",
-    "dev:server": "pnpm --filter @nova-admin/server dev",
     "dev:gateway": "pnpm --filter @nova-admin/gateway dev",
     "dev:auth": "pnpm --filter @nova-admin/auth-service dev",
     "dev:rbac": "pnpm --filter @nova-admin/rbac-service dev",
-    "dev:i18n": "pnpm --filter @nova-admin/i18n-service dev",
-    "dev:services": "pnpm --parallel --filter './apps/*-service' run dev",
-    "build": "pnpm -r run build",
+    "dev:system": "pnpm --filter @nova-admin/system-service dev",
     "build:web": "pnpm --filter @nova-admin/web build",
-    "build:server": "pnpm --filter @nova-admin/server build",
-    "lint": "pnpm -r run lint",
-    "check": "pnpm -r run check",
-    "generate:api": "pnpm --filter @nova-admin/web run generate:api"
+    "docker:up": "docker-compose -f docker/docker-compose.yml up -d",
+    "docker:down": "docker-compose -f docker/docker-compose.yml down"
   },
-  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd",
-  "dependencies": {
-    "@hey-api/openapi-ts": "^0.89.2"
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
   }
 }

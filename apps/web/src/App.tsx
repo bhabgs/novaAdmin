@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { useAppSelector, useAppDispatch } from './hooks/redux';
 import { fetchMenus } from './store/slices/menuSlice';
 import { generateRoutesFromMenus } from './utils/dynamicRoutes';
+import { NProgressBar } from './components/nprogress';
 import MainLayout from './layouts/MainLayout';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -34,6 +35,7 @@ export default function App() {
 
   return (
     <>
+      <NProgressBar />
       <Toaster position="top-center" richColors closeButton />
       <Routes>
         <Route path="/login" element={<Login />} />

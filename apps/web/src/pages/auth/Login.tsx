@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Mail } from 'lucide-react';
+import { Mail, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -17,16 +17,27 @@ export default function Login() {
   const { loading } = useAppSelector((state) => state.auth);
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('123456');
+  const [redirecting, setRedirecting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await dispatch(login({ username, password })).unwrap();
-      navigate('/dashboard');
+      setRedirecting(true);
+      setTimeout(() => navigate('/dashboard'), 500);
     } catch (error) {
       console.error('Login failed:', error);
     }
   };
+
+  if (redirecting) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">正在进入系统...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">

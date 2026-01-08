@@ -62,7 +62,7 @@ export function TabsNav() {
   };
 
   return (
-    <div className="flex items-end h-9 bg-muted/50 px-2 pt-2 overflow-x-auto">
+    <div className="flex items-end h-9 bg-muted px-2 pt-2 overflow-x-auto border-b">
       {tabs.map((tab, index) => (
         <ContextMenu key={tab.key}>
           <ContextMenuTrigger>
@@ -71,22 +71,19 @@ export function TabsNav() {
               className={cn(
                 'group relative flex items-center gap-2 px-4 py-1.5 text-sm cursor-pointer transition-all min-w-[120px] max-w-[200px]',
                 activeKey === tab.key
-                  ? 'bg-background text-foreground rounded-t-lg z-10 shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-t-md',
-                index > 0 && activeKey !== tab.key && 'border-l border-border/50'
+                  ? 'bg-background text-foreground rounded-t-lg z-10 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] border border-b-0 border-border -mb-px'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10 rounded-t-md',
+                index > 0 && activeKey !== tab.key && 'border-l border-border/30'
               )}
             >
               <span className="truncate flex-1">{tab.label}</span>
               {tab.closable !== false && (
                 <span
-                  className="flex items-center justify-center h-4 w-4 rounded-sm opacity-0 group-hover:opacity-100 hover:bg-muted transition-all"
+                  className="flex items-center justify-center h-4 w-4 rounded-sm opacity-0 group-hover:opacity-100 hover:bg-muted-foreground/20 transition-all"
                   onClick={(e) => handleTabClose(e, tab.key)}
                 >
                   <X className="h-3 w-3 hover:text-destructive" />
                 </span>
-              )}
-              {activeKey === tab.key && (
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-background" />
               )}
             </div>
           </ContextMenuTrigger>

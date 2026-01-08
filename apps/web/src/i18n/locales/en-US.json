@@ -54,5 +54,27 @@
     "code": "Department Code",
     "leader": "Leader",
     "parent": "Parent Department"
+  },
+  "setting": {
+    "title": "System Settings",
+    "description": "Manage system appearance and behavior",
+    "appearance": "Appearance",
+    "appearanceDesc": "Choose light, dark, or system theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "primaryColor": "Primary Color",
+    "primaryColorDesc": "Choose the main color of the interface",
+    "radius": "Border Radius",
+    "radiusDesc": "Adjust the roundness of interface elements",
+    "radiusNone": "None",
+    "radiusSmall": "Small",
+    "radiusMedium": "Medium",
+    "radiusLarge": "Large",
+    "radiusRound": "Round",
+    "preview": "Preview",
+    "button": "Button",
+    "language": "Language",
+    "languageDesc": "Choose the display language"
   }
 }

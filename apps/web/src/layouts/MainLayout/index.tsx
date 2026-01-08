@@ -34,7 +34,7 @@ export default function MainLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="flex flex-col h-svh overflow-hidden">
         {/* 顶部导航栏 */}
         <header className="flex h-12 shrink-0 items-center justify-between border-b px-4">
           <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ export default function MainLayout() {
         {/* 标签页 */}
         <TabsNav />
 
-        {/* 主内容区 */}
+        {/* 主内容区 - 滚动只在这里发生 */}
         <main className="flex-1 overflow-auto p-6">
           <Outlet key={refreshKey} />
         </main>

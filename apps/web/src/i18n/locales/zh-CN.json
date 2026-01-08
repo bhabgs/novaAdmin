@@ -54,5 +54,27 @@
     "code": "部门编码",
     "leader": "负责人",
     "parent": "上级部门"
+  },
+  "setting": {
+    "title": "系统设置",
+    "description": "管理系统的外观和行为设置",
+    "appearance": "外观模式",
+    "appearanceDesc": "选择浅色、深色或跟随系统",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统",
+    "primaryColor": "主色调",
+    "primaryColorDesc": "选择界面的主要颜色",
+    "radius": "圆角大小",
+    "radiusDesc": "调整界面元素的圆角程度",
+    "radiusNone": "无",
+    "radiusSmall": "小",
+    "radiusMedium": "中",
+    "radiusLarge": "大",
+    "radiusRound": "圆",
+    "preview": "预览",
+    "button": "按钮",
+    "language": "语言设置",
+    "languageDesc": "选择界面显示语言"
   }
 }

@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Table,
   TableBody,
@@ -34,7 +36,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -62,12 +63,18 @@ const menuTypeLabels: Record<number, string> = {
 
 interface MenuFormData {
   name: string;
+  type: number;
+  parentId?: string;
+  icon?: string;
   path: string;
   component: string;
-  type: number;
   permission: string;
-  parentId?: string;
+  sort: number;
   status: number;
+  visible: boolean;
+  keepAlive: boolean;
+  description: string;
+  remark: string;
 }
 
 function TreeNode({
@@ -156,9 +163,15 @@ export default function MenuList() {
   const [formData, setFormData] = useState<MenuFormData>({
     name: '',
     path: '',
+    component: '',
     type: 2,
     permission: '',
+    sort: 0,
     status: 1,
+    visible: true,
+    keepAlive: false,
+    description: '',
+    remark: '',
   });
 
   // 获取可作为父级的菜单（只有目录类型可以作为父级）
@@ -207,7 +220,12 @@ export default function MenuList() {
       component: '',
       type: 2,
       permission: '',
+      sort: 0,
       status: 1,
+      visible: true,
+      keepAlive: false,
+      description: '',
+      remark: '',
     });
     setDialogOpen(true);
   };
@@ -221,7 +239,13 @@ export default function MenuList() {
       type: menu.type,
       permission: menu.permission || '',
       parentId: menu.parentId,
+      icon: menu.icon,
+      sort: menu.sort || 0,
       status: menu.status,
+      visible: menu.visible !== false,
+      keepAlive: menu.keepAlive || false,
+      description: menu.description || '',
+      remark: menu.remark || '',
     });
     setDialogOpen(true);
   };
@@ -229,16 +253,21 @@ export default function MenuList() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 过滤掉空字符串字段
     const submitData: any = {
       name: formData.name,
       type: formData.type,
       status: formData.status,
+      sort: formData.sort,
+      visible: formData.visible,
     };
     if (formData.path) submitData.path = formData.path;
     if (formData.component) submitData.component = formData.component;
     if (formData.permission) submitData.permission = formData.permission;
     if (formData.parentId) submitData.parentId = formData.parentId;
+    if (formData.icon) submitData.icon = formData.icon;
+    if (formData.keepAlive) submitData.keepAlive = formData.keepAlive;
+    if (formData.description) submitData.description = formData.description;
+    if (formData.remark) submitData.remark = formData.remark;
 
     try {
       if (editingMenu) {
@@ -322,112 +351,225 @@ export default function MenuList() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle>{editingMenu ? '编辑菜单' : '新增菜单'}</DialogTitle>
-            <DialogDescription>
-              {editingMenu ? '修改菜单信息' : '填写菜单信息'}
-            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="parentId">父级菜单</Label>
-                <Select
-                  value={formData.parentId || 'none'}
-                  onValueChange={(value) => setFormData({ ...formData, parentId: value === 'none' ? undefined : value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="选择父级菜单" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">无（顶级菜单）</SelectItem>
-                    {parentMenuOptions.map((menu: any) => (
-                      <SelectItem key={menu.id} value={menu.id}>
-                        {menu.name}
+              {/* Row 1: 菜单名称 | 菜单类型 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name" className="flex items-center">
+                    <span className="text-destructive mr-1">*</span>菜单名称
+                  </Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="请输入菜单名称"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="type" className="flex items-center">
+                    <span className="text-destructive mr-1">*</span>菜单类型
+                  </Label>
+                  <Select
+                    value={formData.type.toString()}
+                    onValueChange={(value) => setFormData({ ...formData, type: parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">
+                        <div className="flex items-center gap-2">
+                          <Folder className="h-4 w-4" />目录
+                        </div>
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      <SelectItem value="2">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />页面
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="3">
+                        <div className="flex items-center gap-2">
+                          <MousePointer className="h-4 w-4" />按钮
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+
+              {/* Row 2: 父级菜单 | 菜单图标 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="parentId">父级菜单</Label>
+                  <Select
+                    value={formData.parentId || 'none'}
+                    onValueChange={(value) => setFormData({ ...formData, parentId: value === 'none' ? undefined : value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="请选择父级菜单" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">无（顶级菜单）</SelectItem>
+                      {parentMenuOptions.map((menu: any) => (
+                        <SelectItem key={menu.id} value={menu.id}>
+                          {menu.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="icon">菜单图标</Label>
+                  <Select
+                    value={formData.icon || 'none'}
+                    onValueChange={(value) => setFormData({ ...formData, icon: value === 'none' ? undefined : value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="请选择菜单图标" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">无</SelectItem>
+                      <SelectItem value="folder">Folder</SelectItem>
+                      <SelectItem value="file">File</SelectItem>
+                      <SelectItem value="settings">Settings</SelectItem>
+                      <SelectItem value="users">Users</SelectItem>
+                      <SelectItem value="home">Home</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Row 3: 菜单路径 | 组件路径 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="path" className="flex items-center">
+                    <span className="text-destructive mr-1">*</span>菜单路径
+                  </Label>
+                  <Input
+                    id="path"
+                    value={formData.path}
+                    onChange={(e) => setFormData({ ...formData, path: e.target.value })}
+                    placeholder="页面路径，如 /user/list"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="component" className="flex items-center">
+                    <span className="text-destructive mr-1">*</span>组件路径
+                  </Label>
+                  <Input
+                    id="component"
+                    value={formData.component}
+                    onChange={(e) => setFormData({ ...formData, component: e.target.value })}
+                    placeholder="请输入组件路径，如 pages/User/UserList"
+                  />
+                </div>
+              </div>
+
+              {/* Row 4: 权限标识 | 排序 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="permission" className="flex items-center">
+                    <span className="text-destructive mr-1">*</span>权限标识
+                  </Label>
+                  <Input
+                    id="permission"
+                    value={formData.permission}
+                    onChange={(e) => setFormData({ ...formData, permission: e.target.value })}
+                    placeholder="请输入权限标识"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="sort">排序</Label>
+                  <Input
+                    id="sort"
+                    type="number"
+                    value={formData.sort}
+                    onChange={(e) => setFormData({ ...formData, sort: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+              </div>
+
+              {/* Row 5: 状态 | 隐藏菜单 | 缓存页面 */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="grid gap-2">
+                  <Label>状态</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.status === 1}
+                      onCheckedChange={(checked) => setFormData({ ...formData, status: checked ? 1 : 0 })}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {formData.status === 1 ? '启用' : '禁用'}
+                    </span>
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>隐藏菜单</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={!formData.visible}
+                      onCheckedChange={(checked) => setFormData({ ...formData, visible: !checked })}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {formData.visible ? '否' : '是'}
+                    </span>
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>缓存页面</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={formData.keepAlive}
+                      onCheckedChange={(checked) => setFormData({ ...formData, keepAlive: checked })}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {formData.keepAlive ? '是' : '否'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 6: 描述 */}
               <div className="grid gap-2">
-                <Label htmlFor="name">菜单名称</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
+                <Label htmlFor="description">描述</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value.slice(0, 200) })}
+                  placeholder="请输入描述信息"
+                  rows={3}
                 />
+                <div className="text-xs text-muted-foreground text-right">
+                  {formData.description.length} / 200
+                </div>
               </div>
+
+              {/* Row 7: 备注 */}
               <div className="grid gap-2">
-                <Label htmlFor="type">菜单类型</Label>
-                <Select
-                  value={formData.type.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, type: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">目录</SelectItem>
-                    <SelectItem value="2">菜单</SelectItem>
-                    <SelectItem value="3">按钮</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="path">路径</Label>
-                <Input
-                  id="path"
-                  value={formData.path}
-                  onChange={(e) => setFormData({ ...formData, path: e.target.value })}
-                  placeholder="/example"
+                <Label htmlFor="remark">备注</Label>
+                <Textarea
+                  id="remark"
+                  value={formData.remark}
+                  onChange={(e) => setFormData({ ...formData, remark: e.target.value.slice(0, 100) })}
+                  placeholder="请输入备注信息"
+                  rows={2}
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="component">组件路径</Label>
-                <Input
-                  id="component"
-                  value={formData.component}
-                  onChange={(e) => setFormData({ ...formData, component: e.target.value })}
-                  placeholder="system/setting/index"
-                />
-                <p className="text-xs text-muted-foreground">
-                  相对于 pages 目录的路径，例如: system/setting/index
-                </p>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="permission">权限标识</Label>
-                <Input
-                  id="permission"
-                  value={formData.permission}
-                  onChange={(e) => setFormData({ ...formData, permission: e.target.value })}
-                  placeholder="system:menu:list"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="status">状态</Label>
-                <Select
-                  value={formData.status.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, status: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">启用</SelectItem>
-                    <SelectItem value="0">禁用</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="text-xs text-muted-foreground text-right">
+                  {formData.remark.length} / 100
+                </div>
               </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 取消
               </Button>
-              <Button type="submit">
-                {editingMenu ? '更新' : '创建'}
-              </Button>
+              <Button type="submit">保存</Button>
             </DialogFooter>
           </form>
         </DialogContent>

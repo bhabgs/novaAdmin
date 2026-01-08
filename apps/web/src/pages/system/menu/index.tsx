@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchMenus, deleteMenu, createMenu, updateMenu } from '@/store/slices/menuSlice';
@@ -63,6 +63,7 @@ const menuTypeLabels: Record<number, string> = {
 interface MenuFormData {
   name: string;
   path: string;
+  component: string;
   type: number;
   permission: string;
   parentId?: string;
@@ -160,6 +161,23 @@ export default function MenuList() {
     status: 1,
   });
 
+  // 获取可作为父级的菜单（只有目录类型可以作为父级）
+  const parentMenuOptions = useMemo(() => {
+    const findDirectories = (menus: any[]): any[] => {
+      const result: any[] = [];
+      menus.forEach((m) => {
+        if (m.type === 1 && m.status === 1) {
+          result.push(m);
+        }
+        if (m.children?.length > 0) {
+          result.push(...findDirectories(m.children));
+        }
+      });
+      return result;
+    };
+    return findDirectories(tree);
+  }, [tree]);
+
   useEffect(() => {
     dispatch(fetchMenus());
   }, [dispatch]);
@@ -186,6 +204,7 @@ export default function MenuList() {
     setFormData({
       name: '',
       path: '',
+      component: '',
       type: 2,
       permission: '',
       status: 1,
@@ -198,6 +217,7 @@ export default function MenuList() {
     setFormData({
       name: menu.name,
       path: menu.path || '',
+      component: menu.component || '',
       type: menu.type,
       permission: menu.permission || '',
       parentId: menu.parentId,
@@ -209,12 +229,23 @@ export default function MenuList() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 过滤掉空字符串字段
+    const submitData: any = {
+      name: formData.name,
+      type: formData.type,
+      status: formData.status,
+    };
+    if (formData.path) submitData.path = formData.path;
+    if (formData.component) submitData.component = formData.component;
+    if (formData.permission) submitData.permission = formData.permission;
+    if (formData.parentId) submitData.parentId = formData.parentId;
+
     try {
       if (editingMenu) {
-        await dispatch(updateMenu({ id: editingMenu.id, data: formData })).unwrap();
+        await dispatch(updateMenu({ id: editingMenu.id, data: submitData })).unwrap();
         toast.success('更新成功');
       } else {
-        await dispatch(createMenu(formData)).unwrap();
+        await dispatch(createMenu(submitData)).unwrap();
         toast.success('创建成功');
       }
       setDialogOpen(false);
@@ -301,6 +332,25 @@ export default function MenuList() {
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
+                <Label htmlFor="parentId">父级菜单</Label>
+                <Select
+                  value={formData.parentId || 'none'}
+                  onValueChange={(value) => setFormData({ ...formData, parentId: value === 'none' ? undefined : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="选择父级菜单" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">无（顶级菜单）</SelectItem>
+                    {parentMenuOptions.map((menu: any) => (
+                      <SelectItem key={menu.id} value={menu.id}>
+                        {menu.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
                 <Label htmlFor="name">菜单名称</Label>
                 <Input
                   id="name"
@@ -333,6 +383,18 @@ export default function MenuList() {
                   onChange={(e) => setFormData({ ...formData, path: e.target.value })}
                   placeholder="/example"
                 />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="component">组件路径</Label>
+                <Input
+                  id="component"
+                  value={formData.component}
+                  onChange={(e) => setFormData({ ...formData, component: e.target.value })}
+                  placeholder="system/setting/index"
+                />
+                <p className="text-xs text-muted-foreground">
+                  相对于 pages 目录的路径，例如: system/setting/index
+                </p>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="permission">权限标识</Label>

@@ -13,7 +13,7 @@ export class CreateMenuDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsUUID()
+  @IsUUID('all')
   parentId?: string;
 
   @ApiPropertyOptional()

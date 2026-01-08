@@ -1,15 +1,13 @@
+import { useEffect, useMemo } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { useAppSelector } from './hooks/redux';
+import { useAppSelector, useAppDispatch } from './hooks/redux';
+import { fetchMenus } from './store/slices/menuSlice';
+import { generateRoutesFromMenus } from './utils/dynamicRoutes';
 import MainLayout from './layouts/MainLayout';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
-import Dashboard from './pages/dashboard';
-import UserList from './pages/system/user';
-import RoleList from './pages/system/role';
-import DepartmentList from './pages/system/department';
-import MenuList from './pages/system/menu';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { token } = useAppSelector((state) => state.auth);
@@ -18,6 +16,22 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const dispatch = useAppDispatch();
+  const { tree: menus } = useAppSelector((state) => state.menu);
+  const { token } = useAppSelector((state) => state.auth);
+
+  // 登录后加载菜单
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchMenus());
+    }
+  }, [token, dispatch]);
+
+  // 根据菜单生成动态路由
+  const dynamicRoutes = useMemo(() => {
+    return generateRoutesFromMenus(menus);
+  }, [menus]);
+
   return (
     <>
       <Toaster position="top-center" richColors closeButton />
@@ -34,11 +48,10 @@ export default function App() {
           }
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="system/user" element={<UserList />} />
-          <Route path="system/role" element={<RoleList />} />
-          <Route path="system/department" element={<DepartmentList />} />
-          <Route path="system/menu" element={<MenuList />} />
+          {/* 动态路由 */}
+          {dynamicRoutes.map((route) => (
+            <Route key={route.path} path={route.path} element={route.element} />
+          ))}
         </Route>
       </Routes>
     </>

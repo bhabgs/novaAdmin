@@ -4,6 +4,7 @@ import userReducer from './slices/userSlice';
 import roleReducer from './slices/roleSlice';
 import departmentReducer from './slices/departmentSlice';
 import menuReducer from './slices/menuSlice';
+import tabsReducer from './slices/tabsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     role: roleReducer,
     department: departmentReducer,
     menu: menuReducer,
+    tabs: tabsReducer,
   },
 });
 

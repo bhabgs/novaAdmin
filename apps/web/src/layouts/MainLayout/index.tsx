@@ -1,137 +1,85 @@
-import { useState } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
+import { Outlet, useLocation, Link } from 'react-router-dom';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/app-sidebar';
+import { TabsNav } from '@/components/tabs-nav';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { logout } from '@/store/slices/authSlice';
-import { cn } from '@/lib/utils';
-import {
-  LayoutDashboard,
-  Users,
-  Shield,
-  Building2,
-  Menu as MenuIcon,
-  LogOut,
-  ChevronLeft,
-  Settings,
-} from 'lucide-react';
-
-const menuItems = [
-  { path: '/dashboard', icon: LayoutDashboard, label: 'menu.dashboard' },
-  {
-    label: 'menu.system',
-    icon: Settings,
-    children: [
-      { path: '/system/user', icon: Users, label: 'menu.user' },
-      { path: '/system/role', icon: Shield, label: 'menu.role' },
-      { path: '/system/department', icon: Building2, label: 'menu.department' },
-      { path: '/system/menu', icon: MenuIcon, label: 'menu.menu' },
-    ],
-  },
-];
+import { addTab } from '@/store/slices/tabsSlice';
+import { findMenuByPath } from '@/utils/dynamicRoutes';
+import { Bell, Home } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 export default function MainLayout() {
-  const { t } = useTranslation();
   const location = useLocation();
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { tree: menus } = useAppSelector((state) => state.menu);
   const { user } = useAppSelector((state) => state.auth);
-  const [collapsed, setCollapsed] = useState(false);
-  const [openMenus, setOpenMenus] = useState<string[]>(['menu.system']);
+  const { refreshKey } = useAppSelector((state) => state.tabs);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
-  };
+  useEffect(() => {
+    const menu = findMenuByPath(menus, location.pathname);
+    if (menu) {
+      dispatch(addTab({
+        key: location.pathname,
+        label: menu.name,
+        path: location.pathname,
+        closable: location.pathname !== '/dashboard',
+      }));
+    }
+  }, [location.pathname, menus, dispatch]);
 
-  const toggleMenu = (label: string) => {
-    setOpenMenus((prev) =>
-      prev.includes(label) ? prev.filter((m) => m !== label) : [...prev, label],
-    );
-  };
+  const currentMenu = findMenuByPath(menus, location.pathname);
 
   return (
-    <div className="flex h-screen bg-background">
-      <aside
-        className={cn(
-          'flex flex-col border-r bg-card transition-all duration-300',
-          collapsed ? 'w-16' : 'w-64',
-        )}
-      >
-        <div className="flex h-14 items-center justify-between border-b px-4">
-          {!collapsed && <span className="font-semibold">Nova Admin</span>}
-          <button onClick={() => setCollapsed(!collapsed)} className="p-1 hover:bg-accent rounded">
-            <ChevronLeft className={cn('h-5 w-5 transition-transform', collapsed && 'rotate-180')} />
-          </button>
-        </div>
-
-        <nav className="flex-1 overflow-y-auto p-2">
-          {menuItems.map((item) =>
-            item.children ? (
-              <div key={item.label}>
-                <button
-                  onClick={() => toggleMenu(item.label)}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent',
-                    collapsed && 'justify-center',
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {!collapsed && <span className="flex-1 text-left">{t(item.label)}</span>}
-                </button>
-                {!collapsed && openMenus.includes(item.label) && (
-                  <div className="ml-4 mt-1 space-y-1">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.path}
-                        to={child.path}
-                        className={cn(
-                          'flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent',
-                          location.pathname === child.path && 'bg-accent',
-                        )}
-                      >
-                        <child.icon className="h-4 w-4" />
-                        <span>{t(child.label)}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                key={item.path}
-                to={item.path!}
-                className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent',
-                  location.pathname === item.path && 'bg-accent',
-                  collapsed && 'justify-center',
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {!collapsed && <span>{t(item.label)}</span>}
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        {/* 顶部导航栏 */}
+        <header className="flex h-12 shrink-0 items-center justify-between border-b px-4">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger />
+            <Separator orientation="vertical" className="h-4" />
+            {/* 面包屑 */}
+            <nav className="flex items-center gap-1 text-sm">
+              <Link to="/dashboard" className="flex items-center gap-1 text-muted-foreground hover:text-foreground">
+                <Home className="h-4 w-4" />
+                <span>首页</span>
               </Link>
-            ),
-          )}
-        </nav>
+              {currentMenu && (
+                <>
+                  <span className="text-muted-foreground">/</span>
+                  <span>{currentMenu.name}</span>
+                </>
+              )}
+            </nav>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="relative">
+              <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] text-white flex items-center justify-center">
+                5
+              </span>
+            </button>
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                  {user?.username?.charAt(0).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm">{user?.username || '用户'}</span>
+            </div>
+          </div>
+        </header>
 
-        <div className="border-t p-2">
-          <button
-            onClick={handleLogout}
-            className={cn(
-              'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-destructive hover:bg-accent',
-              collapsed && 'justify-center',
-            )}
-          >
-            <LogOut className="h-5 w-5" />
-            {!collapsed && <span>{user?.username}</span>}
-          </button>
-        </div>
-      </aside>
+        {/* 标签页 */}
+        <TabsNav />
 
-      <main className="flex-1 overflow-auto">
-        <div className="p-6">
-          <Outlet />
-        </div>
-      </main>
-    </div>
+        {/* 主内容区 */}
+        <main className="flex-1 overflow-auto p-6">
+          <Outlet key={refreshKey} />
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

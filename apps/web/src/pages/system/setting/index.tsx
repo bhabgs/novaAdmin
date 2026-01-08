@@ -36,6 +36,7 @@ const radiusOptions = [
 const languages = [
   { value: 'zh-CN', label: '简体中文', flag: '🇨🇳' },
   { value: 'en-US', label: 'English', flag: '🇺🇸' },
+  { value: 'ar-SA', label: 'العربية', flag: '🇸🇦' },
 ];
 
 const PRIMARY_KEY = 'nova-admin-primary';

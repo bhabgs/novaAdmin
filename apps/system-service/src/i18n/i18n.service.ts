@@ -3,36 +3,50 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { I18n } from './i18n.entity';
 
+type LocaleField = 'zhCN' | 'enUS' | 'arSA';
+
+const LOCALE_MAP: Record<string, LocaleField> = {
+  'zh-CN': 'zhCN',
+  'en-US': 'enUS',
+  'ar-SA': 'arSA',
+};
+
 @Injectable()
 export class I18nService {
   constructor(@InjectRepository(I18n) private i18nRepository: Repository<I18n>) {}
 
-  async findAll(locale?: string, module?: string) {
+  async findAll(module?: string) {
     const qb = this.i18nRepository.createQueryBuilder('i18n');
-    if (locale) qb.andWhere('i18n.locale = :locale', { locale });
     if (module) qb.andWhere('i18n.module = :module', { module });
     return qb.getMany();
   }
 
   async findByLocale(locale: string) {
-    const items = await this.i18nRepository.find({ where: { locale } });
-    return items.reduce((acc, item) => ({ ...acc, [item.key]: item.value }), {});
+    const field = LOCALE_MAP[locale];
+    if (!field) return {};
+    const items = await this.i18nRepository.find();
+    return items.reduce((acc, item) => ({ ...acc, [item.key]: item[field] }), {});
   }
 
-  async set(key: string, locale: string, value: string, module?: string) {
-    let item = await this.i18nRepository.findOne({ where: { key, locale } });
+  async set(key: string, zhCN?: string, enUS?: string, arSA?: string, module?: string) {
+    let item = await this.i18nRepository.findOne({ where: { key } });
     if (item) {
-      item.value = value;
-      if (module) item.module = module;
+      if (zhCN !== undefined) item.zhCN = zhCN;
+      if (enUS !== undefined) item.enUS = enUS;
+      if (arSA !== undefined) item.arSA = arSA;
+      if (module !== undefined) item.module = module;
     } else {
-      item = this.i18nRepository.create({ key, locale, value, module });
+      item = this.i18nRepository.create({ key, zhCN, enUS, arSA, module });
     }
     return this.i18nRepository.save(item);
   }
 
-  async batchSet(items: { key: string; locale: string; value: string; module?: string }[]) {
-    const entities = items.map((item) => this.i18nRepository.create(item));
-    return this.i18nRepository.save(entities);
+  async batchSet(items: { key: string; zhCN?: string; enUS?: string; arSA?: string; module?: string }[]) {
+    const results = [];
+    for (const item of items) {
+      results.push(await this.set(item.key, item.zhCN, item.enUS, item.arSA, item.module));
+    }
+    return results;
   }
 
   async remove(id: string) {

@@ -90,8 +90,10 @@ INSERT INTO sys_config (id, key, value, type, description, created_at, updated_a
 ('40000000-0000-0000-0000-000000000003', 'user.defaultPassword', '123456', 'string', '用户默认密码', NOW(), NOW());
 
 -- 国际化数据
-INSERT INTO sys_i18n (id, key, locale, value, module, created_at, updated_at) VALUES
-('50000000-0000-0000-0000-000000000001', 'menu.dashboard', 'zh-CN', '仪表盘', 'menu', NOW(), NOW()),
-('50000000-0000-0000-0000-000000000002', 'menu.dashboard', 'en-US', 'Dashboard', 'menu', NOW(), NOW()),
-('50000000-0000-0000-0000-000000000003', 'menu.system', 'zh-CN', '系统管理', 'menu', NOW(), NOW()),
-('50000000-0000-0000-0000-000000000004', 'menu.system', 'en-US', 'System', 'menu', NOW(), NOW());
+INSERT INTO sys_i18n (id, key, zh_CN, en_US, ar_SA, module, created_at, updated_at) VALUES
+('50000000-0000-0000-0000-000000000001', 'menu.dashboard', '仪表盘', 'Dashboard', 'لوحة القيادة', 'menu', NOW(), NOW()),
+('50000000-0000-0000-0000-000000000002', 'menu.system', '系统管理', 'System', 'النظام', 'menu', NOW(), NOW()),
+('50000000-0000-0000-0000-000000000003', 'menu.user', '用户管理', 'Users', 'المستخدمون', 'menu', NOW(), NOW()),
+('50000000-0000-0000-0000-000000000004', 'menu.role', '角色管理', 'Roles', 'الأدوار', 'menu', NOW(), NOW()),
+('50000000-0000-0000-0000-000000000005', 'menu.department', '部门管理', 'Departments', 'الأقسام', 'menu', NOW(), NOW()),
+('50000000-0000-0000-0000-000000000006', 'menu.menu', '菜单管理', 'Menus', 'القوائم', 'menu', NOW(), NOW());

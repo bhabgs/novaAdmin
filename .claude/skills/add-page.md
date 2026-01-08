@@ -1,5 +1,9 @@
 # 添加新页面
 
+## 路由机制
+
+前端使用**动态路由**，路由配置从后端菜单数据自动生成，无需手动配置路由文件。
+
 ## 步骤
 
 1. **创建页面组件**
@@ -7,20 +11,16 @@
    - 路径: `apps/web/src/pages/{module}/{PageName}/index.tsx`
    - 使用 shadcn/ui 组件构建 UI
    - 遵循现有页面结构
+   - 组件必须使用 `export default` 导出
 
-2. **添加路由配置**
+2. **添加菜单数据**
 
-   - 文件: `apps/web/src/router/routes.tsx`
-   - 添加 lazy 导入和路由配置
+   - 人为添加菜单，不需要智能体创建
 
-3. **添加菜单数据**（如需显示在侧边栏）
-
-   - 通过系统管理 > 菜单管理添加
-   - 或直接操作数据库 `sys_menu` 表
-
-4. **添加国际化**
+3. **添加国际化**（可选）
    - `apps/web/src/i18n/locales/zh-CN.json`
    - `apps/web/src/i18n/locales/en-US.json`
+   - `apps/web/src/i18n/locales/ar-SA.json`
 
 ## 示例
 

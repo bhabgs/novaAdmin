@@ -10,8 +10,8 @@ export class I18nController {
 
   @Get()
   @ApiOperation({ summary: 'Get all i18n items' })
-  findAll(@Query('locale') locale?: string, @Query('module') module?: string) {
-    return this.i18nService.findAll(locale, module);
+  findAll(@Query('module') module?: string) {
+    return this.i18nService.findAll(module);
   }
 
   @Get('locale/:locale')
@@ -22,13 +22,13 @@ export class I18nController {
 
   @Post()
   @ApiOperation({ summary: 'Set i18n item' })
-  set(@Body() body: { key: string; locale: string; value: string; module?: string }) {
-    return this.i18nService.set(body.key, body.locale, body.value, body.module);
+  set(@Body() body: { key: string; zhCN?: string; enUS?: string; arSA?: string; module?: string }) {
+    return this.i18nService.set(body.key, body.zhCN, body.enUS, body.arSA, body.module);
   }
 
   @Post('batch')
   @ApiOperation({ summary: 'Batch set i18n items' })
-  batchSet(@Body() items: { key: string; locale: string; value: string; module?: string }[]) {
+  batchSet(@Body() items: { key: string; zhCN?: string; enUS?: string; arSA?: string; module?: string }[]) {
     return this.i18nService.batchSet(items);
   }
 

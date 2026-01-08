@@ -109,16 +109,16 @@ CREATE TABLE IF NOT EXISTS sys_role_menu (
 -- 国际化表
 CREATE TABLE IF NOT EXISTS sys_i18n (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    key VARCHAR(255) NOT NULL,
-    locale VARCHAR(10) NOT NULL,
-    value TEXT NOT NULL,
+    key VARCHAR(255) NOT NULL UNIQUE,
+    zh_CN TEXT,
+    en_US TEXT,
+    ar_SA TEXT,
     module VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,
     created_by UUID,
-    updated_by UUID,
-    UNIQUE(key, locale)
+    updated_by UUID
 );
 
 -- 系统配置表

@@ -1,9 +1,34 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchDepartments, deleteDepartment } from '@/store/slices/departmentSlice';
-import { Pencil, Trash2, Plus, ChevronRight, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { MoreHorizontal, Pencil, Trash2, Plus, ChevronRight, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 function TreeNode({ node, level = 0, onDelete }: { node: any; level?: number; onDelete: (id: string) => void }) {
   const { t } = useTranslation();
@@ -12,41 +37,54 @@ function TreeNode({ node, level = 0, onDelete }: { node: any; level?: number; on
 
   return (
     <>
-      <tr className="border-b last:border-0">
-        <td className="px-4 py-3 text-sm">
+      <TableRow>
+        <TableCell>
           <div className="flex items-center" style={{ paddingLeft: `${level * 20}px` }}>
             {hasChildren ? (
-              <button onClick={() => setExpanded(!expanded)} className="p-1 mr-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 mr-1"
+                onClick={() => setExpanded(!expanded)}
+              >
                 {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-              </button>
+              </Button>
             ) : (
-              <span className="w-6" />
+              <span className="w-7" />
             )}
-            {node.name}
+            <span className="font-medium">{node.name}</span>
           </div>
-        </td>
-        <td className="px-4 py-3 text-sm">{node.code || '-'}</td>
-        <td className="px-4 py-3 text-sm">{node.leader || '-'}</td>
-        <td className="px-4 py-3 text-sm">
-          <span
-            className={`inline-flex rounded-full px-2 py-1 text-xs ${
-              node.status === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-            }`}
-          >
+        </TableCell>
+        <TableCell>{node.code || '-'}</TableCell>
+        <TableCell>{node.leader || '-'}</TableCell>
+        <TableCell>
+          <Badge variant={node.status === 1 ? 'default' : 'destructive'}>
             {node.status === 1 ? t('common.enabled') : t('common.disabled')}
-          </span>
-        </td>
-        <td className="px-4 py-3 text-sm">
-          <div className="flex items-center gap-2">
-            <button className="p-1 hover:bg-accent rounded">
-              <Pencil className="h-4 w-4" />
-            </button>
-            <button className="p-1 hover:bg-accent rounded text-destructive" onClick={() => onDelete(node.id)}>
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        </td>
-      </tr>
+          </Badge>
+        </TableCell>
+        <TableCell className="text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>
+                <Pencil className="h-4 w-4 mr-2" />
+                {t('common.edit')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => onDelete(node.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t('common.delete')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
       {expanded && hasChildren && node.children.map((child: any) => (
         <TreeNode key={child.id} node={child} level={level + 1} onDelete={onDelete} />
       ))}
@@ -58,14 +96,20 @@ export default function DepartmentList() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { tree, loading } = useAppSelector((state) => state.department);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchDepartments());
   }, [dispatch]);
 
-  const handleDelete = (id: string) => {
-    if (confirm('确定删除该部门吗？')) {
-      dispatch(deleteDepartment(id));
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const handleDelete = () => {
+    if (deleteId) {
+      dispatch(deleteDepartment(deleteId));
+      setDeleteId(null);
     }
   };
 
@@ -73,42 +117,57 @@ export default function DepartmentList() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">{t('menu.department')}</h1>
-        <button className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90">
+        <Button>
           <Plus className="h-4 w-4" />
           {t('common.add')}
-        </button>
+        </Button>
       </div>
 
-      <div className="rounded-lg border bg-card">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b">
-              <th className="px-4 py-3 text-left text-sm font-medium">{t('department.name')}</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">{t('department.code')}</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">{t('department.leader')}</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">{t('common.status')}</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">{t('common.actions')}</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('department.name')}</TableHead>
+              <TableHead>{t('department.code')}</TableHead>
+              <TableHead>{t('department.leader')}</TableHead>
+              <TableHead>{t('common.status')}</TableHead>
+              <TableHead className="text-right">{t('common.actions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {loading ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={5} className="text-center h-32">
                   {t('common.loading')}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : tree.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+              <TableRow>
+                <TableCell colSpan={5} className="text-center h-32 text-muted-foreground">
                   No data
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
-              tree.map((node: any) => <TreeNode key={node.id} node={node} onDelete={handleDelete} />)
+              tree.map((node: any) => <TreeNode key={node.id} node={node} onDelete={handleDeleteClick} />)
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
+
+      <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('common.confirm')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定删除该部门吗？此操作无法撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>{t('common.confirm')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

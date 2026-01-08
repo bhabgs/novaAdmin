@@ -53,10 +53,10 @@ axiosInstance.interceptors.response.use(
     if (response.config.responseType === 'blob') {
       return response;
     }
-
+    console.log(data, 'data');
     // 检查业务状态码
     if (data.code !== undefined) {
-      if (data.code === 200 || data.success) {
+      if (data.code <= 0) {
         return data;
       } else {
         // 业务错误

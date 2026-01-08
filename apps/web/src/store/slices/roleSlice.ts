@@ -1,5 +1,23 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import request from '@/utils/request';
+import { rolesApi } from '@/api/services';
+
+interface CreateRoleDto {
+  name: string;
+  code: string;
+  description?: string;
+  status?: number;
+  sort?: number;
+  menuIds?: string[];
+}
+
+interface UpdateRoleDto {
+  name?: string;
+  code?: string;
+  description?: string;
+  status?: number;
+  sort?: number;
+  menuIds?: string[];
+}
 
 interface RoleState {
   list: any[];
@@ -15,23 +33,26 @@ const initialState: RoleState = {
   pagination: { page: 1, pageSize: 10, total: 0 },
 };
 
-export const fetchRoles = createAsyncThunk('role/fetchList', async (params: any) => {
-  const response = await request.get('/api/rbac/roles', { params });
+export const fetchRoles = createAsyncThunk('role/fetchList', async (params?: any) => {
+  const response = await rolesApi.findAll(params);
   return response.data;
 });
 
-export const createRole = createAsyncThunk('role/create', async (data: any) => {
-  const response = await request.post('/api/rbac/roles', data);
+export const createRole = createAsyncThunk('role/create', async (data: CreateRoleDto) => {
+  const response = await rolesApi.create(data);
   return response.data;
 });
 
-export const updateRole = createAsyncThunk('role/update', async ({ id, data }: { id: string; data: any }) => {
-  const response = await request.put(`/api/rbac/roles/${id}`, data);
-  return response.data;
-});
+export const updateRole = createAsyncThunk(
+  'role/update',
+  async ({ id, data }: { id: string; data: UpdateRoleDto }) => {
+    const response = await rolesApi.update(id, data);
+    return response.data;
+  },
+);
 
 export const deleteRole = createAsyncThunk('role/delete', async (id: string) => {
-  await request.delete(`/api/rbac/roles/${id}`);
+  await rolesApi.remove(id);
   return id;
 });
 
@@ -39,17 +60,23 @@ const roleSlice = createSlice({
   name: 'role',
   initialState,
   reducers: {
-    setCurrent: (state, action) => { state.current = action.payload; },
+    setCurrent: (state, action) => {
+      state.current = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchRoles.pending, (state) => { state.loading = true; })
+      .addCase(fetchRoles.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(fetchRoles.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload.list;
         state.pagination.total = action.payload.total;
       })
-      .addCase(fetchRoles.rejected, (state) => { state.loading = false; });
+      .addCase(fetchRoles.rejected, (state) => {
+        state.loading = false;
+      });
   },
 });
 

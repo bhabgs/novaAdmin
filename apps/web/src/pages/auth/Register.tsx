@@ -1,42 +1,61 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { login } from '@/store/slices/authSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Mail } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 
-export default function Login() {
-  const { t } = useTranslation();
+export default function Register() {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const { loading } = useAppSelector((state) => state.auth);
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('123456');
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await dispatch(login({ username, password })).unwrap();
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Login failed:', error);
+
+    if (formData.password !== formData.confirmPassword) {
+      alert('密码不匹配');
+      return;
     }
+
+    setLoading(true);
+    try {
+      // TODO: 实现注册逻辑
+      console.log('Register:', formData);
+      // 注册成功后跳转到登录页
+      navigate('/login');
+    } catch (error) {
+      console.error('Registration failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
   };
 
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
-        {/* Left Side - Login Form */}
+        {/* Left Side - Register Form */}
         <Card className="w-full max-w-md mx-auto shadow-lg">
           <CardContent className="pt-12 pb-8 px-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-center mb-2">欢迎回来到 NovaAdmin</h1>
-              <p className="text-center text-muted-foreground">登录到您的管理账户</p>
+              <h1 className="text-3xl font-bold text-center mb-2">创建账户</h1>
+              <p className="text-center text-muted-foreground">
+                注册 NovaAdmin 管理账户
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -48,30 +67,53 @@ export default function Login() {
                   id="username"
                   type="text"
                   placeholder="请输入用户名"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={formData.username}
+                  onChange={handleChange}
                   required
                   className="h-11"
                 />
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-sm font-medium">
-                    Password
-                  </Label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
+                <Label htmlFor="email" className="text-sm font-medium">
+                  邮箱
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="h-11"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  密码
+                </Label>
                 <Input
                   id="password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="请输入密码"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="h-11"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                  确认密码
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="请再次输入密码"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
                   required
                   className="h-11"
                 />
@@ -82,7 +124,7 @@ export default function Login() {
                 className="w-full h-11 bg-black hover:bg-black/90 text-white"
                 disabled={loading}
               >
-                {loading ? 'Loading...' : 'Login'}
+                {loading ? '注册中...' : '注册'}
               </Button>
 
               <div className="relative my-6">
@@ -90,7 +132,9 @@ export default function Login() {
                   <Separator />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-card px-2 text-muted-foreground">
+                    或继续使用
+                  </span>
                 </div>
               </div>
 
@@ -99,7 +143,7 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   className="h-11"
-                  onClick={() => console.log('Apple login')}
+                  onClick={() => console.log('Apple signup')}
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
@@ -109,7 +153,7 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   className="h-11"
-                  onClick={() => console.log('Google login')}
+                  onClick={() => console.log('Google signup')}
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path
@@ -134,7 +178,7 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   className="h-11"
-                  onClick={() => console.log('Meta login')}
+                  onClick={() => console.log('Meta signup')}
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 3.667h-3.533v7.98H9.101z" />
@@ -143,9 +187,9 @@ export default function Login() {
               </div>
 
               <p className="text-center text-sm text-muted-foreground mt-6">
-                Don't have an account?{' '}
-                <Link to="/register" className="text-foreground hover:underline font-medium">
-                  Sign up
+                已有账户？{' '}
+                <Link to="/login" className="text-foreground hover:underline font-medium">
+                  立即登录
                 </Link>
               </p>
             </form>
@@ -164,7 +208,7 @@ export default function Login() {
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-20 h-20 rounded-full bg-white border-2 border-neutral-200 flex items-center justify-center shadow-lg">
-                <Mail className="h-8 w-8 text-neutral-400" />
+                <UserPlus className="h-8 w-8 text-neutral-400" />
               </div>
             </div>
           </div>
@@ -173,15 +217,15 @@ export default function Login() {
 
       {/* Footer */}
       <div className="fixed bottom-4 left-0 right-0 text-center text-sm text-muted-foreground">
-        By clicking continue, you agree to our{' '}
+        点击注册即表示您同意我们的{' '}
         <Link to="/terms" className="underline hover:text-foreground">
-          Terms of Service
+          服务条款
         </Link>{' '}
-        and{' '}
+        和{' '}
         <Link to="/privacy" className="underline hover:text-foreground">
-          Privacy Policy
+          隐私政策
         </Link>
-        .
+        。
       </div>
     </div>
   );

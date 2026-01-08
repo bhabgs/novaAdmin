@@ -38,8 +38,8 @@ INSERT INTO sys_role (id, name, code, description, status, sort, created_at, upd
 
 -- 用户数据 (密码: 123456, bcrypt加密)
 INSERT INTO sys_user (id, username, password, nickname, email, phone, status, department_id, created_at, updated_at) VALUES
-('20000000-0000-0000-0000-000000000001', 'admin', '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', '超级管理员', 'admin@nova.com', '13800000000', 1, '00000000-0000-0000-0000-000000000001', NOW(), NOW()),
-('20000000-0000-0000-0000-000000000002', 'test', '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', '测试用户', 'test@nova.com', '13800000001', 1, '00000000-0000-0000-0000-000000000002', NOW(), NOW());
+('20000000-0000-0000-0000-000000000001', 'admin', '$2b$10$ItH0diwka2ytGAc.qPWrfuQ3c6bNzO8bjXHPIqNqmJWmk6JFIutHi', '超级管理员', 'admin@nova.com', '13800000000', 1, '00000000-0000-0000-0000-000000000001', NOW(), NOW()),
+('20000000-0000-0000-0000-000000000002', 'test', '$2b$10$ItH0diwka2ytGAc.qPWrfuQ3c6bNzO8bjXHPIqNqmJWmk6JFIutHi', '测试用户', 'test@nova.com', '13800000001', 1, '00000000-0000-0000-0000-000000000002', NOW(), NOW());
 
 -- 用户角色关联
 INSERT INTO sys_user_role (user_id, role_id) VALUES

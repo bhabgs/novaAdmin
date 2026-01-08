@@ -1,5 +1,27 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import request from '@/utils/request';
+import { usersApi } from '@/api/services';
+
+interface CreateUserDto {
+  username: string;
+  password: string;
+  nickname?: string;
+  email?: string;
+  phone?: string;
+  status?: number;
+  departmentId?: string;
+  roleIds?: string[];
+}
+
+interface UpdateUserDto {
+  username?: string;
+  password?: string;
+  nickname?: string;
+  email?: string;
+  phone?: string;
+  status?: number;
+  departmentId?: string;
+  roleIds?: string[];
+}
 
 interface UserState {
   list: any[];
@@ -15,23 +37,26 @@ const initialState: UserState = {
   pagination: { page: 1, pageSize: 10, total: 0 },
 };
 
-export const fetchUsers = createAsyncThunk('user/fetchList', async (params: any) => {
-  const response = await request.get('/api/rbac/users', { params });
+export const fetchUsers = createAsyncThunk('user/fetchList', async (params?: any) => {
+  const response = await usersApi.findAll(params);
   return response.data;
 });
 
-export const createUser = createAsyncThunk('user/create', async (data: any) => {
-  const response = await request.post('/api/rbac/users', data);
+export const createUser = createAsyncThunk('user/create', async (data: CreateUserDto) => {
+  const response = await usersApi.create(data);
   return response.data;
 });
 
-export const updateUser = createAsyncThunk('user/update', async ({ id, data }: { id: string; data: any }) => {
-  const response = await request.put(`/api/rbac/users/${id}`, data);
-  return response.data;
-});
+export const updateUser = createAsyncThunk(
+  'user/update',
+  async ({ id, data }: { id: string; data: UpdateUserDto }) => {
+    const response = await usersApi.update(id, data);
+    return response.data;
+  },
+);
 
 export const deleteUser = createAsyncThunk('user/delete', async (id: string) => {
-  await request.delete(`/api/rbac/users/${id}`);
+  await usersApi.remove(id);
   return id;
 });
 
@@ -39,17 +64,23 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setCurrent: (state, action) => { state.current = action.payload; },
+    setCurrent: (state, action) => {
+      state.current = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchUsers.pending, (state) => { state.loading = true; })
+      .addCase(fetchUsers.pending, (state) => {
+        state.loading = true;
+      })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload.list;
         state.pagination.total = action.payload.total;
       })
-      .addCase(fetchUsers.rejected, (state) => { state.loading = false; });
+      .addCase(fetchUsers.rejected, (state) => {
+        state.loading = false;
+      });
   },
 });
 

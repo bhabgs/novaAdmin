@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import request from '@/utils/request';
+import { authApi } from '@/api/services';
+
+interface LoginCredentials {
+  username: string;
+  password: string;
+}
 
 interface AuthState {
   token: string | null;
@@ -18,13 +23,11 @@ const initialState: AuthState = {
   loading: false,
 };
 
-export const login = createAsyncThunk(
-  'auth/login',
-  async (credentials: { username: string; password: string }) => {
-    const response = await request.post('/api/auth/auth/login', credentials);
-    return response.data;
-  },
-);
+export const login = createAsyncThunk('auth/login', async (credentials: LoginCredentials) => {
+  const response = await authApi.login(credentials);
+  console.log(response);
+  return response.data;
+});
 
 const authSlice = createSlice({
   name: 'auth',

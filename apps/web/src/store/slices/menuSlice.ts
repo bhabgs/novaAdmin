@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { menusApi } from '@/api/services';
+import {
+  menusControllerFindAll,
+  menusControllerCreate,
+  menusControllerUpdate,
+  menusControllerRemove,
+} from '@/api/services.gen';
 
 interface CreateMenuDto {
   name: string;
@@ -44,25 +49,25 @@ const initialState: MenuState = {
 };
 
 export const fetchMenus = createAsyncThunk('menu/fetchTree', async () => {
-  const response = await menusApi.findAll();
-  return response.data;
+  const response = await menusControllerFindAll();
+  return response.data?.data || response.data;
 });
 
 export const createMenu = createAsyncThunk('menu/create', async (data: CreateMenuDto) => {
-  const response = await menusApi.create(data);
-  return response.data;
+  const response = await menusControllerCreate({ body: data });
+  return response.data?.data || response.data;
 });
 
 export const updateMenu = createAsyncThunk(
   'menu/update',
   async ({ id, data }: { id: string; data: UpdateMenuDto }) => {
-    const response = await menusApi.update(id, data);
-    return response.data;
+    const response = await menusControllerUpdate({ path: { id }, body: data });
+    return response.data?.data || response.data;
   },
 );
 
 export const deleteMenu = createAsyncThunk('menu/delete', async (id: string) => {
-  await menusApi.remove(id);
+  await menusControllerRemove({ path: { id } });
   return id;
 });
 

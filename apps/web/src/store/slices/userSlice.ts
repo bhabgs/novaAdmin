@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { usersApi } from '@/api/services';
+import {
+  usersControllerFindAll,
+  usersControllerCreate,
+  usersControllerUpdate,
+  usersControllerRemove,
+} from '@/api/services.gen';
 
 interface CreateUserDto {
   username: string;
@@ -38,25 +43,25 @@ const initialState: UserState = {
 };
 
 export const fetchUsers = createAsyncThunk('user/fetchList', async (params?: any) => {
-  const response = await usersApi.findAll(params);
-  return response.data;
+  const response = await usersControllerFindAll({ query: params });
+  return response.data?.data || response.data;
 });
 
 export const createUser = createAsyncThunk('user/create', async (data: CreateUserDto) => {
-  const response = await usersApi.create(data);
-  return response.data;
+  const response = await usersControllerCreate({ body: data });
+  return response.data?.data || response.data;
 });
 
 export const updateUser = createAsyncThunk(
   'user/update',
   async ({ id, data }: { id: string; data: UpdateUserDto }) => {
-    const response = await usersApi.update(id, data);
-    return response.data;
+    const response = await usersControllerUpdate({ path: { id }, body: data });
+    return response.data?.data || response.data;
   },
 );
 
 export const deleteUser = createAsyncThunk('user/delete', async (id: string) => {
-  await usersApi.remove(id);
+  await usersControllerRemove({ path: { id } });
   return id;
 });
 

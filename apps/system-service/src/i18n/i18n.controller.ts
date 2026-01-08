@@ -8,16 +8,22 @@ import { I18nService } from './i18n.service';
 export class I18nController {
   constructor(private i18nService: I18nService) {}
 
-  @Get()
-  @ApiOperation({ summary: 'Get all i18n items' })
-  findAll(@Query('module') module?: string) {
-    return this.i18nService.findAll(module);
+  @Get('modules')
+  @ApiOperation({ summary: 'Get all modules' })
+  getModules() {
+    return this.i18nService.getModules();
   }
 
   @Get('locale/:locale')
   @ApiOperation({ summary: 'Get i18n by locale' })
   findByLocale(@Param('locale') locale: string) {
     return this.i18nService.findByLocale(locale);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all i18n items' })
+  findAll(@Query('module') module?: string) {
+    return this.i18nService.findAll(module);
   }
 
   @Post()

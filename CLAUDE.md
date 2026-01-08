@@ -57,14 +57,18 @@ pnpm generate-api     # 生成 API 客户端代码
 ## 前端目录结构 (apps/web/src)
 
 ```
-├── api/              # OpenAPI 生成的客户端代码 (勿手动修改)
+├── api/              # OpenAPI 生成的客户端代码
+│   ├── services.gen.ts  # API 函数（自动生成，使用此文件）
+│   ├── types.gen.ts     # TypeScript 类型定义（自动生成）
+│   ├── schemas.gen.ts   # JSON Schema（自动生成）
+│   └── index.ts         # 导出入口（自动生成）
 ├── components/
 │   └── ui/           # shadcn/ui 组件
 ├── pages/            # 页面组件
 ├── store/slices/     # Redux slices
 ├── layouts/          # 布局组件
 ├── hooks/            # 自定义 Hooks
-├── i18n/locales/     # 国际化文件 (zh-CN, en-US)
+├── i18n/locales/     # 国际化文件 (zh-CN, en-US, ar-SA)
 └── utils/            # 工具函数
 ```
 
@@ -72,7 +76,9 @@ pnpm generate-api     # 生成 API 客户端代码
 
 ### 强制要求
 
-1. **API 文件禁止手动修改** - `src/api/` 目录由 OpenAPI 自动生成，修改后会被覆盖
+1. **API 文件禁止手动修改** - `src/api/` 目录中的 `.gen.ts` 文件由 OpenAPI 自动生成，任何手动修改都会被覆盖
+   - ✅ 使用：从 `@/api/services.gen` 导入 API 函数
+   - ❌ 禁止：修改 `services.gen.ts`、`types.gen.ts` 等自动生成文件
 2. **优先使用 shadcn/ui 组件** - 不存在的组件先反馈确认，可通过 `npx shadcn@latest add <component>` 添加
 3. **路径别名** - 使用 `@/` 代替相对路径，如 `@/components/ui/button`
 4. **启动服务前先确认** - 不要随便启动服务，启动前先检查服务是否已运行，避免端口冲突
@@ -105,13 +111,40 @@ pnpm generate-api     # 生成 API 客户端代码
 
 ## API 交互
 
-```typescript
-// 使用 src/api/services.ts 中的 API
-import { usersApi, rolesApi, menusApi } from '@/api/services';
+### 使用 OpenAPI 自动生成的 API
 
-// 示例
-const response = await usersApi.findAll({ page: 1, pageSize: 10 });
+```typescript
+// 从 services.gen.ts 导入生成的 API 函数
+import {
+  usersControllerFindAll,
+  usersControllerCreate,
+  usersControllerUpdate,
+  usersControllerRemove,
+} from '@/api/services.gen';
+
+// 查询列表
+const response = await usersControllerFindAll({ query: { page: 1, pageSize: 10 } });
+const data = response.data?.data || response.data;
+
+// 创建
+await usersControllerCreate({ body: { username: 'test', password: '123456' } });
+
+// 更新
+await usersControllerUpdate({ path: { id: '123' }, body: { username: 'updated' } });
+
+// 删除
+await usersControllerRemove({ path: { id: '123' } });
 ```
+
+### API 生成工作流
+
+1. 修改后端 Controller，添加/修改接口
+2. 等待服务热重载或手动重启
+3. 触发网关重新聚合文档：`touch apps/gateway/src/main.ts`
+4. 运行 `pnpm generate-api` 生成前端代码
+5. 在前端使用生成的类型安全 API
+
+**注意：** `apps/web/src/api/` 目录中的 `.gen.ts` 文件由 OpenAPI 自动生成，禁止手动修改！
 
 ## 数据库
 

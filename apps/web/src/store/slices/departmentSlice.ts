@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { departmentsApi } from '@/api/services';
+import {
+  departmentsControllerFindAll,
+  departmentsControllerCreate,
+  departmentsControllerUpdate,
+  departmentsControllerRemove,
+} from '@/api/services.gen';
 
 interface CreateDepartmentDto {
   name: string;
@@ -36,28 +41,28 @@ const initialState: DepartmentState = {
 };
 
 export const fetchDepartments = createAsyncThunk('department/fetchTree', async () => {
-  const response = await departmentsApi.findAll();
-  return response.data;
+  const response = await departmentsControllerFindAll();
+  return response.data?.data || response.data;
 });
 
 export const createDepartment = createAsyncThunk(
   'department/create',
   async (data: CreateDepartmentDto) => {
-    const response = await departmentsApi.create(data);
-    return response.data;
+    const response = await departmentsControllerCreate({ body: data });
+    return response.data?.data || response.data;
   },
 );
 
 export const updateDepartment = createAsyncThunk(
   'department/update',
   async ({ id, data }: { id: string; data: UpdateDepartmentDto }) => {
-    const response = await departmentsApi.update(id, data);
-    return response.data;
+    const response = await departmentsControllerUpdate({ path: { id }, body: data });
+    return response.data?.data || response.data;
   },
 );
 
 export const deleteDepartment = createAsyncThunk('department/delete', async (id: string) => {
-  await departmentsApi.remove(id);
+  await departmentsControllerRemove({ path: { id } });
   return id;
 });
 

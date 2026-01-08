@@ -5,6 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -30,7 +37,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import request from '@/utils/request';
+import {
+  i18nControllerFindAll,
+  i18nControllerSet,
+  i18nControllerRemove,
+  dictControllerFindItemsByTypeCode,
+} from '@/api/services.gen';
 
 interface I18nItem {
   id: string;
@@ -46,8 +58,10 @@ const defaultForm = { key: '', zhCN: '', enUS: '', arSA: '', module: '' };
 export default function I18nPage() {
   const { t } = useTranslation();
   const [list, setList] = useState<I18nItem[]>([]);
+  const [modules, setModules] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchKey, setSearchKey] = useState('');
+  const [moduleFilter, setModuleFilter] = useState<string>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
@@ -56,24 +70,49 @@ export default function I18nPage() {
   const fetchList = async () => {
     setLoading(true);
     try {
-      const res = await request.get<I18nItem[]>('/system/i18n');
-      setList(Array.isArray(res) ? res : []);
+      const res = await i18nControllerFindAll({ query: {} });
+      const items = res.data?.data || res.data;
+      setList(Array.isArray(items) ? items : []);
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchModules = async () => {
+    try {
+      const res = await dictControllerFindItemsByTypeCode({
+        query: { dictTypeCode: 'i18n' },
+      });
+      const dictItems = res.data?.data || res.data;
+      if (Array.isArray(dictItems)) {
+        // 从字典项中提取 value 作为模块名
+        const moduleValues = dictItems.map((item: any) => item.value);
+        setModules(moduleValues);
+      }
+    } catch (error) {
+      console.error('Failed to fetch modules:', error);
+    }
+  };
+
   useEffect(() => {
     fetchList();
+    fetchModules();
   }, []);
 
   const filteredList = Array.isArray(list)
-    ? list.filter(
-        (item) =>
+    ? list.filter((item) => {
+        // 搜索筛选
+        const matchSearch =
+          !searchKey ||
           item.key.toLowerCase().includes(searchKey.toLowerCase()) ||
           item.zhCN?.toLowerCase().includes(searchKey.toLowerCase()) ||
-          item.enUS?.toLowerCase().includes(searchKey.toLowerCase())
-      )
+          item.enUS?.toLowerCase().includes(searchKey.toLowerCase());
+
+        // 模块筛选
+        const matchModule = moduleFilter === 'all' || item.module === moduleFilter;
+
+        return matchSearch && matchModule;
+      })
     : [];
 
   const handleAdd = () => {
@@ -100,10 +139,11 @@ export default function I18nPage() {
       return;
     }
     try {
-      await request.post('/system/i18n', form);
+      await i18nControllerSet({ body: form });
       toast.success(editId ? '更新成功' : '添加成功');
       setDialogOpen(false);
       fetchList();
+      fetchModules(); // 重新获取模块列表，以便新模块出现在选项中
     } catch {
       toast.error('操作失败');
     }
@@ -112,7 +152,7 @@ export default function I18nPage() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      await request.delete(`/system/i18n/${deleteId}`);
+      await i18nControllerRemove({ path: { id: deleteId } });
       toast.success('删除成功');
       setDeleteId(null);
       fetchList();
@@ -126,6 +166,19 @@ export default function I18nPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">{t('menu.i18n')}</h1>
         <div className="flex gap-2">
+          <Select value={moduleFilter} onValueChange={setModuleFilter}>
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="选择模块" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">全部模块</SelectItem>
+              {modules.map((module) => (
+                <SelectItem key={module} value={module}>
+                  {module}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -210,7 +263,14 @@ export default function I18nPage() {
                 <Input
                   value={form.module}
                   onChange={(e) => setForm({ ...form, module: e.target.value })}
+                  list="modules-list"
+                  placeholder="选择或输入模块"
                 />
+                <datalist id="modules-list">
+                  {modules.map((module) => (
+                    <option key={module} value={module} />
+                  ))}
+                </datalist>
               </div>
             </div>
             <div className="space-y-2">

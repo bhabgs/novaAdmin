@@ -97,3 +97,31 @@ INSERT INTO sys_i18n (id, key, zh_CN, en_US, ar_SA, module, created_at, updated_
 ('50000000-0000-0000-0000-000000000004', 'menu.role', '角色管理', 'Roles', 'الأدوار', 'menu', NOW(), NOW()),
 ('50000000-0000-0000-0000-000000000005', 'menu.department', '部门管理', 'Departments', 'الأقسام', 'menu', NOW(), NOW()),
 ('50000000-0000-0000-0000-000000000006', 'menu.menu', '菜单管理', 'Menus', 'القوائم', 'menu', NOW(), NOW());
+
+-- 字典类型数据
+INSERT INTO sys_dict_type (id, name, code, description, status, sort, created_at, updated_at) VALUES
+('60000000-0000-0000-0000-000000000001', '国际化模块', 'i18n_module', '国际化配置的模块分类', 1, 1, NOW(), NOW()),
+('60000000-0000-0000-0000-000000000002', '用户状态', 'user_status', '用户启用禁用状态', 1, 2, NOW(), NOW()),
+('60000000-0000-0000-0000-000000000003', '菜单类型', 'menu_type', '菜单类型：目录、菜单、按钮', 1, 3, NOW(), NOW());
+
+-- 字典项数据 - 国际化模块
+INSERT INTO sys_dict_item (id, dict_type_code, label, value, description, status, sort, created_at, updated_at) VALUES
+('61000000-0000-0000-0000-000000000001', 'i18n_module', '基础模块', 'common', '通用基础翻译', 1, 1, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000002', 'i18n_module', '菜单模块', 'menu', '菜单相关翻译', 1, 2, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000003', 'i18n_module', '用户模块', 'user', '用户管理翻译', 1, 3, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000004', 'i18n_module', '角色模块', 'role', '角色管理翻译', 1, 4, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000005', 'i18n_module', '部门模块', 'department', '部门管理翻译', 1, 5, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000006', 'i18n_module', '权限模块', 'rbac', '权限管理翻译', 1, 6, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000007', 'i18n_module', '系统模块', 'system', '系统设置翻译', 1, 7, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000008', 'i18n_module', '认证模块', 'auth', '登录认证翻译', 1, 8, NOW(), NOW());
+
+-- 字典项数据 - 用户状态
+INSERT INTO sys_dict_item (id, dict_type_code, label, value, description, status, sort, created_at, updated_at) VALUES
+('61000000-0000-0000-0000-000000000011', 'user_status', '禁用', '0', '用户禁用状态', 1, 1, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000012', 'user_status', '启用', '1', '用户启用状态', 1, 2, NOW(), NOW());
+
+-- 字典项数据 - 菜单类型
+INSERT INTO sys_dict_item (id, dict_type_code, label, value, description, status, sort, created_at, updated_at) VALUES
+('61000000-0000-0000-0000-000000000021', 'menu_type', '目录', '0', '菜单目录', 1, 1, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000022', 'menu_type', '菜单', '1', '菜单项', 1, 2, NOW(), NOW()),
+('61000000-0000-0000-0000-000000000023', 'menu_type', '按钮', '2', '操作按钮', 1, 3, NOW(), NOW());

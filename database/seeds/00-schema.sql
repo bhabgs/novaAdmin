@@ -152,3 +152,39 @@ CREATE TABLE IF NOT EXISTS sys_operation_log (
     duration INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 字典类型表
+CREATE TABLE IF NOT EXISTS sys_dict_type (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    description VARCHAR(255),
+    status SMALLINT DEFAULT 1,
+    sort INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    created_by UUID,
+    updated_by UUID
+);
+
+-- 字典项表
+CREATE TABLE IF NOT EXISTS sys_dict_item (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    dict_type_code VARCHAR(50) NOT NULL,
+    label VARCHAR(100) NOT NULL,
+    value VARCHAR(100) NOT NULL,
+    description VARCHAR(255),
+    status SMALLINT DEFAULT 1,
+    sort INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP,
+    created_by UUID,
+    updated_by UUID,
+    FOREIGN KEY (dict_type_code) REFERENCES sys_dict_type(code) ON DELETE CASCADE
+);
+
+-- 字典项索引
+CREATE INDEX IF NOT EXISTS idx_dict_item_type_code ON sys_dict_item(dict_type_code);
+CREATE INDEX IF NOT EXISTS idx_dict_item_value ON sys_dict_item(value);

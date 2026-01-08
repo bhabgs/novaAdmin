@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { rolesApi } from '@/api/services';
+import {
+  rolesControllerFindAll,
+  rolesControllerCreate,
+  rolesControllerUpdate,
+  rolesControllerRemove,
+} from '@/api/services.gen';
 
 interface CreateRoleDto {
   name: string;
@@ -34,25 +39,25 @@ const initialState: RoleState = {
 };
 
 export const fetchRoles = createAsyncThunk('role/fetchList', async (params?: any) => {
-  const response = await rolesApi.findAll(params);
-  return response.data;
+  const response = await rolesControllerFindAll({ query: params });
+  return response.data?.data || response.data;
 });
 
 export const createRole = createAsyncThunk('role/create', async (data: CreateRoleDto) => {
-  const response = await rolesApi.create(data);
-  return response.data;
+  const response = await rolesControllerCreate({ body: data });
+  return response.data?.data || response.data;
 });
 
 export const updateRole = createAsyncThunk(
   'role/update',
   async ({ id, data }: { id: string; data: UpdateRoleDto }) => {
-    const response = await rolesApi.update(id, data);
-    return response.data;
+    const response = await rolesControllerUpdate({ path: { id }, body: data });
+    return response.data?.data || response.data;
   },
 );
 
 export const deleteRole = createAsyncThunk('role/delete', async (id: string) => {
-  await rolesApi.remove(id);
+  await rolesControllerRemove({ path: { id } });
   return id;
 });
 

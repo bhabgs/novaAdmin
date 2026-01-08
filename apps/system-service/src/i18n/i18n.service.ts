@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { I18n } from './i18n.entity';
+import { DictItem } from '../dict/dict-item.entity';
 
 type LocaleField = 'zhCN' | 'enUS' | 'arSA';
 
@@ -13,7 +14,10 @@ const LOCALE_MAP: Record<string, LocaleField> = {
 
 @Injectable()
 export class I18nService {
-  constructor(@InjectRepository(I18n) private i18nRepository: Repository<I18n>) {}
+  constructor(
+    @InjectRepository(I18n) private i18nRepository: Repository<I18n>,
+    @InjectRepository(DictItem) private dictItemRepository: Repository<DictItem>,
+  ) {}
 
   async findAll(module?: string) {
     const qb = this.i18nRepository.createQueryBuilder('i18n');
@@ -51,5 +55,14 @@ export class I18nService {
 
   async remove(id: string) {
     await this.i18nRepository.delete(id);
+  }
+
+  async getModules() {
+    // 从字典表获取 i18n_module 类型的所有字典项
+    const items = await this.dictItemRepository.find({
+      where: { dictTypeCode: 'i18n_module', status: 1 },
+      order: { sort: 'ASC' },
+    });
+    return items.map((item) => item.value);
   }
 }

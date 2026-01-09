@@ -84,7 +84,6 @@ export function AppSidebar() {
                 {item.children.map((child: any) => {
                   const ChildIcon = child.icon ? iconMap[child.icon] || Folder : Folder;
                   const childDisplayName = child.nameI18n ? t(child.nameI18n) : child.name;
-                  console.log(child.nameI18n, child, '');
 
                   return (
                     <SidebarMenuSubItem key={child.id}>

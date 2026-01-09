@@ -16,7 +16,30 @@
     "status": "Status",
     "enabled": "Enabled",
     "disabled": "Disabled",
-    "actions": "Actions"
+    "actions": "Actions",
+    "goBack": "Go Back",
+    "backToHome": "Back to Home",
+    "refresh": "Refresh",
+    "noData": "No Data",
+    "selectAll": "Select All",
+    "create": "Create",
+    "update": "Update",
+    "view": "View",
+    "copy": "Copy",
+    "export": "Export",
+    "import": "Import"
+  },
+  "error": {
+    "pageNotFound": "Page Not Found",
+    "pageNotFoundDesc": "Sorry, the page you visited does not exist",
+    "pageError": "Something Went Wrong",
+    "pageErrorDesc": "Sorry, there was an issue with the page",
+    "networkError": "Network Error",
+    "networkErrorDesc": "Please check your network connection and try again",
+    "unauthorized": "Unauthorized",
+    "unauthorizedDesc": "You do not have permission to access this page",
+    "forbidden": "Forbidden",
+    "forbiddenDesc": "You do not have permission to perform this action"
   },
   "login": {
     "title": "Nova Admin",

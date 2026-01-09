@@ -25,7 +25,6 @@ const initialState: AuthState = {
 
 export const login = createAsyncThunk('auth/login', async (credentials: LoginCredentials) => {
   const response = await authControllerLogin({ body: credentials });
-  console.log(response);
   return response.data?.data || response.data;
 });
 

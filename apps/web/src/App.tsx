@@ -9,6 +9,7 @@ import MainLayout from './layouts/MainLayout';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import NotFound from './pages/404';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { token } = useAppSelector((state) => state.auth);
@@ -54,7 +55,11 @@ export default function App() {
           {dynamicRoutes.map((route) => (
             <Route key={route.path} path={route.path} element={route.element} />
           ))}
+          {/* 404 路由 */}
+          <Route path="*" element={<NotFound />} />
         </Route>
+        {/* 全局 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

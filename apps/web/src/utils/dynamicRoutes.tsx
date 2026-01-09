@@ -46,7 +46,6 @@ function loadComponentByPath(
 
     for (const modulePath of possiblePaths) {
       if (pageModules[modulePath]) {
-        console.log(`[loadComponent] ✓ Found module: ${modulePath}`);
         return lazy(() =>
           pageModules[modulePath]().then((m) => ({
             default: m.default,
@@ -55,11 +54,6 @@ function loadComponentByPath(
       }
     }
 
-    console.error(`[loadComponent] ✗ Component not found for path: ${componentPath}`);
-    console.log(
-      '[loadComponent] Available modules:',
-      Object.keys(pageModules).filter((key) => key.includes(normalizedPath)),
-    );
     return null;
   } catch (error) {
     console.error(`[loadComponent] Failed to load component: ${componentPath}`, error);
@@ -84,7 +78,6 @@ export const generateRoutesFromMenus = (menus: any[]): RouteObject[] => {
       const Component = loadComponentByPath(menu.component);
       if (Component) {
         const path = menu.path.startsWith('/') ? menu.path.slice(1) : menu.path;
-        console.log(`[generateRoutes] ✓ Generating route: ${path} -> ${menu.component}`);
         routes.push({
           path,
           element: (

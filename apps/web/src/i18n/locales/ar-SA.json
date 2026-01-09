@@ -16,7 +16,30 @@
     "status": "الحالة",
     "enabled": "مفعل",
     "disabled": "معطل",
-    "actions": "الإجراءات"
+    "actions": "الإجراءات",
+    "goBack": "رجوع",
+    "backToHome": "العودة للرئيسية",
+    "refresh": "تحديث",
+    "noData": "لا توجد بيانات",
+    "selectAll": "تحديد الكل",
+    "create": "إنشاء",
+    "update": "تحديث",
+    "view": "عرض",
+    "copy": "نسخ",
+    "export": "تصدير",
+    "import": "استيراد"
+  },
+  "error": {
+    "pageNotFound": "الصفحة غير موجودة",
+    "pageNotFoundDesc": "عذراً، الصفحة التي تبحث عنها غير موجودة",
+    "pageError": "حدث خطأ",
+    "pageErrorDesc": "عذراً، حدث خطأ في الصفحة",
+    "networkError": "خطأ في الشبكة",
+    "networkErrorDesc": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى",
+    "unauthorized": "غير مصرح",
+    "unauthorizedDesc": "ليس لديك صلاحية الوصول لهذه الصفحة",
+    "forbidden": "محظور",
+    "forbiddenDesc": "ليس لديك صلاحية تنفيذ هذا الإجراء"
   },
   "login": {
     "title": "Nova Admin",

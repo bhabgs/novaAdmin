@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { DataTable, Column, DataTableProps } from './data-table';
 import { CrudDialog, DeleteDialog, FormField } from './crud-dialog';
@@ -69,6 +69,11 @@ export function CrudPage<T extends Record<string, any>>({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingRecord, setEditingRecord] = useState<T | null>(null);
+
+  // 页面加载时自动获取数据
+  useEffect(() => {
+    onRefresh?.();
+  }, []);
 
   const handleAdd = () => {
     setEditingRecord(null);

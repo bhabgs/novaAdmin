@@ -16,7 +16,30 @@
     "status": "状态",
     "enabled": "启用",
     "disabled": "禁用",
-    "actions": "操作"
+    "actions": "操作",
+    "goBack": "返回上页",
+    "backToHome": "返回首页",
+    "refresh": "刷新",
+    "noData": "暂无数据",
+    "selectAll": "全选",
+    "create": "创建",
+    "update": "更新",
+    "view": "查看",
+    "copy": "复制",
+    "export": "导出",
+    "import": "导入"
+  },
+  "error": {
+    "pageNotFound": "页面未找到",
+    "pageNotFoundDesc": "抱歉，您访问的页面不存在或已被移除",
+    "pageError": "页面出错了",
+    "pageErrorDesc": "抱歉，页面遇到了一些问题",
+    "networkError": "网络错误",
+    "networkErrorDesc": "请检查您的网络连接后重试",
+    "unauthorized": "未授权",
+    "unauthorizedDesc": "您没有权限访问此页面",
+    "forbidden": "禁止访问",
+    "forbiddenDesc": "您没有权限执行此操作"
   },
   "login": {
     "title": "Nova Admin",

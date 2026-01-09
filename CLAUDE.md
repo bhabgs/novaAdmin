@@ -152,8 +152,69 @@ await usersControllerRemove({ path: { id: '123' } });
 - 进入数据库: `pnpm psq`
 - 初始化: `pnpm db:init`
 
+## 新增功能特性
+
+### 字典管理系统
+- 路径: `/system/dict`
+- 用于管理系统枚举值和配置项
+- 支持字典类型和字典项的增删改查
+- 已集成到 i18n 模块管理中
+
+### 国际化配置
+- 路径: `/system/i18n`
+- 支持数据库动态加载翻译
+- 支持模块化管理（通过字典）
+- 支持自动翻译功能（MyMemory API）
+- 支持复制国际化 key（带模块前缀）
+
+### 菜单国际化
+- 菜单支持 `nameI18n` 字段
+- 优先使用国际化翻译，fallback 到 name 字段
+- 侧边栏、面包屑、标签页自动使用翻译
+
+### 系统设置增强
+- 布局设置：固定头部、侧边栏宽度、内容区域宽度
+- 标签页设置：显示/隐藏、持久化、最大数量
+- 动画设置：页面切换动画、加载动画、速度
+- 通知设置：位置、时长、声音提示
+
+## 最佳实践
+
+### 安全性
+- Token 存储在 localStorage（生产环境建议使用 httpOnly cookie）
+- 所有 API 请求自动携带 Authorization header
+- 敏感操作需要二次确认
+
+### 性能优化
+- 页面组件懒加载
+- 使用 Redux Toolkit 管理状态
+- API 响应数据统一处理
+- 合理使用 useMemo 和 useCallback
+
+### 代码规范
+- 使用 TypeScript 严格模式
+- 组件使用函数式组件 + Hooks
+- 优先使用 shadcn/ui 组件
+- API 调用统一使用 OpenAPI 生成的函数
+- 遵循 RESTful API 设计规范
+
+## 常见问题
+
+### 前端问题
+- **页面白屏**: 检查菜单配置和组件路径是否匹配
+- **API 调用失败**: 检查 token 是否过期，服务是否运行
+- **路由不工作**: 确保组件使用 `export default` 导出
+
+### 后端问题
+- **路由冲突**: 具体路由必须放在通用路由之前
+- **Swagger 不更新**: 触发网关重新聚合 `touch apps/gateway/src/main.ts`
+- **数据库连接失败**: 检查 Docker 容器是否运行
+
+详细排查指南请参考: `.claude/skills/troubleshooting.md`
+
 ## 注意事项
 
 - 前端代理配置在 `vite.config.ts`，`/api` 请求代理到 `localhost:3000`
 - 后端 Swagger 文档: `http://localhost:3000/api/docs`
 - OpenAPI JSON: `http://localhost:3000/api/docs-json`
+- 数据库管理: `docker exec -it nova-postgres psql -U postgres -d nova_admin`

@@ -1,146 +1,99 @@
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { fetchRoles, deleteRole } from '@/store/slices/roleSlice';
-import { MoreHorizontal, Pencil, Trash2, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { fetchRoles, deleteRole, createRole, updateRole } from '@/store/slices/roleSlice';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { Switch } from '@/components/ui/switch';
+import { CrudPage, Column, FormField } from '@/components/crud-page';
 
 export default function RoleList() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { list, loading, pagination } = useAppSelector((state) => state.role);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  useEffect(() => {
-    dispatch(fetchRoles({ page: 1, pageSize: 10 }));
-  }, [dispatch]);
+  const columns: Column[] = [
+    { key: 'name', title: t('role.name') },
+    { key: 'code', title: t('role.code') },
+    { key: 'description', title: t('role.description') },
+    {
+      key: 'status',
+      title: t('common.status'),
+      render: (value) => (
+        <Badge variant={value === 1 ? 'default' : 'destructive'}>
+          {value === 1 ? t('common.enabled') : t('common.disabled')}
+        </Badge>
+      ),
+    },
+  ];
 
-  const handleDelete = () => {
-    if (deleteId) {
-      dispatch(deleteRole(deleteId));
-      setDeleteId(null);
-    }
-  };
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">{t('menu.role')}</h1>
-        <Button>
-          <Plus className="h-4 w-4" />
-          {t('common.add')}
-        </Button>
-      </div>
-
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('role.name')}</TableHead>
-              <TableHead>{t('role.code')}</TableHead>
-              <TableHead>{t('role.description')}</TableHead>
-              <TableHead>{t('common.status')}</TableHead>
-              <TableHead className="text-right">{t('common.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center h-32">
-                  {t('common.loading')}
-                </TableCell>
-              </TableRow>
-            ) : list.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center h-32 text-muted-foreground">
-                  No data
-                </TableCell>
-              </TableRow>
-            ) : (
-              list.map((role: any) => (
-                <TableRow key={role.id}>
-                  <TableCell className="font-medium">{role.name}</TableCell>
-                  <TableCell>{role.code}</TableCell>
-                  <TableCell>{role.description || '-'}</TableCell>
-                  <TableCell>
-                    <Badge variant={role.status === 1 ? 'default' : 'destructive'}>
-                      {role.status === 1 ? t('common.enabled') : t('common.disabled')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Pencil className="h-4 w-4 mr-2" />
-                          {t('common.edit')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => setDeleteId(role.id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          {t('common.delete')}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-
-        <div className="flex items-center justify-between px-4 py-3 border-t">
+  const formFields: FormField[] = [
+    {
+      name: 'name',
+      label: '角色名称',
+      required: true,
+      placeholder: '请输入角色名称',
+    },
+    {
+      name: 'code',
+      label: '角色编码',
+      required: true,
+      placeholder: '请输入角色编码，如 admin',
+      disabled: (isEdit) => isEdit,
+    },
+    {
+      name: 'description',
+      label: '描述',
+      type: 'textarea',
+      placeholder: '请输入角色描述',
+      rows: 3,
+    },
+    {
+      name: 'sort',
+      label: '排序',
+      type: 'number',
+    },
+    {
+      name: 'status',
+      label: '状态',
+      type: 'custom',
+      render: (value, onChange) => (
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={value === 1}
+            onCheckedChange={(checked) => onChange(checked ? 1 : 0)}
+          />
           <span className="text-sm text-muted-foreground">
-            Total: {pagination.total}
+            {value === 1 ? '启用' : '禁用'}
           </span>
         </div>
-      </div>
+      ),
+    },
+  ];
 
-      <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('common.confirm')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              确定删除该角色吗？此操作无法撤销。
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>{t('common.confirm')}</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+  return (
+    <CrudPage
+      title={t('menu.role')}
+      columns={columns}
+      formFields={formFields}
+      data={list}
+      loading={loading}
+      pagination={pagination}
+      onAdd={async (data) => {
+        await dispatch(createRole({ ...data, status: data.status ?? 1, sort: data.sort ?? 0 })).unwrap();
+      }}
+      onEdit={async (id, data) => {
+        await dispatch(updateRole({ id, data })).unwrap();
+      }}
+      onDelete={async (id) => {
+        await dispatch(deleteRole(id)).unwrap();
+      }}
+      onRefresh={() => {
+        dispatch(fetchRoles({ page: 1, pageSize: 10 }));
+      }}
+      addButtonText={t('common.add')}
+      editTitle="编辑角色"
+      addTitle="新增角色"
+      deleteConfirmTitle={t('common.confirm')}
+      deleteConfirmDescription="确定删除该角色吗？此操作无法撤销。"
+    />
   );
 }

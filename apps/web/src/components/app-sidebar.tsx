@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { logout } from '@/store/slices/authSlice';
 import { generateMenuItemsFromMenus } from '@/utils/dynamicRoutes';
@@ -62,6 +63,7 @@ const iconMap: Record<string, any> = {
 };
 
 export function AppSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -80,15 +82,16 @@ export function AppSidebar() {
     const Icon = item.icon ? iconMap[item.icon] || Folder : Folder;
     const hasChildren = item.children && item.children.length > 0;
     const isActive = location.pathname === item.path;
+    const displayName = item.nameI18n ? t(item.nameI18n) : item.name;
 
     if (item.type === 1 && hasChildren) {
       return (
         <Collapsible key={item.id} asChild defaultOpen className="group/collapsible">
           <SidebarMenuItem>
             <CollapsibleTrigger asChild>
-              <SidebarMenuButton tooltip={item.name}>
+              <SidebarMenuButton tooltip={displayName}>
                 <Icon />
-                <span>{item.name}</span>
+                <span>{displayName}</span>
                 <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
               </SidebarMenuButton>
             </CollapsibleTrigger>
@@ -96,12 +99,13 @@ export function AppSidebar() {
               <SidebarMenuSub>
                 {item.children.map((child: any) => {
                   const ChildIcon = child.icon ? iconMap[child.icon] || Folder : Folder;
+                  const childDisplayName = child.nameI18n ? t(child.nameI18n) : child.name;
                   return (
                     <SidebarMenuSubItem key={child.id}>
                       <SidebarMenuSubButton asChild isActive={location.pathname === child.path}>
                         <Link to={child.path}>
                           <ChildIcon className="h-4 w-4" />
-                          <span>{child.name}</span>
+                          <span>{childDisplayName}</span>
                         </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
@@ -117,10 +121,10 @@ export function AppSidebar() {
     if (item.type === 2 && item.path) {
       return (
         <SidebarMenuItem key={item.id}>
-          <SidebarMenuButton asChild isActive={isActive} tooltip={item.name}>
+          <SidebarMenuButton asChild isActive={isActive} tooltip={displayName}>
             <Link to={item.path}>
               <Icon />
-              <span>{item.name}</span>
+              <span>{displayName}</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

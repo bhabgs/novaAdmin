@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
 import { TabsNav } from '@/components/tabs-nav';
@@ -11,6 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
 export default function MainLayout() {
+  const { t } = useTranslation();
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { tree: menus } = useAppSelector((state) => state.menu);
@@ -20,16 +22,18 @@ export default function MainLayout() {
   useEffect(() => {
     const menu = findMenuByPath(menus, location.pathname);
     if (menu) {
+      const displayName = menu.nameI18n ? t(menu.nameI18n) : menu.name;
       dispatch(addTab({
         key: location.pathname,
-        label: menu.name,
+        label: displayName,
         path: location.pathname,
         closable: location.pathname !== '/dashboard',
       }));
     }
-  }, [location.pathname, menus, dispatch]);
+  }, [location.pathname, menus, dispatch, t]);
 
   const currentMenu = findMenuByPath(menus, location.pathname);
+  const currentMenuName = currentMenu?.nameI18n ? t(currentMenu.nameI18n) : currentMenu?.name;
 
   return (
     <SidebarProvider>
@@ -49,7 +53,7 @@ export default function MainLayout() {
               {currentMenu && (
                 <>
                   <span className="text-muted-foreground">/</span>
-                  <span>{currentMenu.name}</span>
+                  <span>{currentMenuName}</span>
                 </>
               )}
             </nav>

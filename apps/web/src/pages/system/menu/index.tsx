@@ -63,6 +63,7 @@ const menuTypeLabels: Record<number, string> = {
 
 interface MenuFormData {
   name: string;
+  nameI18n?: string;
   type: number;
   parentId?: string;
   icon?: string;
@@ -110,7 +111,9 @@ function TreeNode({
               <span className="w-7" />
             )}
             {menuTypeIcons[node.type]}
-            <span className="ml-2 font-medium">{node.name}</span>
+            <span className="ml-2 font-medium">
+              {node.nameI18n ? t(node.nameI18n) : node.name}
+            </span>
           </div>
         </TableCell>
         <TableCell>{node.path || '-'}</TableCell>
@@ -162,6 +165,7 @@ export default function MenuList() {
   const [editingMenu, setEditingMenu] = useState<any>(null);
   const [formData, setFormData] = useState<MenuFormData>({
     name: '',
+    nameI18n: '',
     path: '',
     component: '',
     type: 2,
@@ -216,6 +220,7 @@ export default function MenuList() {
     setEditingMenu(null);
     setFormData({
       name: '',
+      nameI18n: '',
       path: '',
       component: '',
       type: 2,
@@ -234,6 +239,7 @@ export default function MenuList() {
     setEditingMenu(menu);
     setFormData({
       name: menu.name,
+      nameI18n: menu.nameI18n || '',
       path: menu.path || '',
       component: menu.component || '',
       type: menu.type,
@@ -260,6 +266,7 @@ export default function MenuList() {
       sort: formData.sort,
       visible: formData.visible,
     };
+    if (formData.nameI18n) submitData.nameI18n = formData.nameI18n;
     if (formData.path) submitData.path = formData.path;
     if (formData.component) submitData.component = formData.component;
     if (formData.permission) submitData.permission = formData.permission;
@@ -357,7 +364,7 @@ export default function MenuList() {
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
-              {/* Row 1: 菜单名称 | 菜单类型 */}
+              {/* Row 1: 菜单名称 | 国际化Key */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="name" className="flex items-center">
@@ -372,38 +379,52 @@ export default function MenuList() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="type" className="flex items-center">
-                    <span className="text-destructive mr-1">*</span>菜单类型
-                  </Label>
-                  <Select
-                    value={formData.type.toString()}
-                    onValueChange={(value) => setFormData({ ...formData, type: parseInt(value) })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">
-                        <div className="flex items-center gap-2">
-                          <Folder className="h-4 w-4" />目录
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="2">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />页面
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="3">
-                        <div className="flex items-center gap-2">
-                          <MousePointer className="h-4 w-4" />按钮
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="nameI18n">国际化Key</Label>
+                  <Input
+                    id="nameI18n"
+                    value={formData.nameI18n}
+                    onChange={(e) => setFormData({ ...formData, nameI18n: e.target.value })}
+                    placeholder="如：menu.user (选填，优先使用)"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    填写后菜单名称将从国际化配置读取
+                  </p>
                 </div>
               </div>
 
-              {/* Row 2: 父级菜单 | 菜单图标 */}
+              {/* Row 2: 菜单类型 */}
+              <div className="grid gap-2">
+                <Label htmlFor="type" className="flex items-center">
+                  <span className="text-destructive mr-1">*</span>菜单类型
+                </Label>
+                <Select
+                  value={formData.type.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, type: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">
+                      <div className="flex items-center gap-2">
+                        <Folder className="h-4 w-4" />目录
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="2">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />页面
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="3">
+                      <div className="flex items-center gap-2">
+                        <MousePointer className="h-4 w-4" />按钮
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Row 3: 父级菜单 | 菜单图标 */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="parentId">父级菜单</Label>
@@ -445,7 +466,7 @@ export default function MenuList() {
                 </div>
               </div>
 
-              {/* Row 3: 菜单路径 | 组件路径 */}
+              {/* Row 4: 菜单路径 | 组件路径 */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="path" className="flex items-center">
@@ -471,7 +492,7 @@ export default function MenuList() {
                 </div>
               </div>
 
-              {/* Row 4: 权限标识 | 排序 */}
+              {/* Row 5: 权限标识 | 排序 */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="permission" className="flex items-center">
@@ -495,7 +516,7 @@ export default function MenuList() {
                 </div>
               </div>
 
-              {/* Row 5: 状态 | 隐藏菜单 | 缓存页面 */}
+              {/* Row 6: 状态 | 隐藏菜单 | 缓存页面 */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="grid gap-2">
                   <Label>状态</Label>
@@ -535,7 +556,7 @@ export default function MenuList() {
                 </div>
               </div>
 
-              {/* Row 6: 描述 */}
+              {/* Row 7: 描述 */}
               <div className="grid gap-2">
                 <Label htmlFor="description">描述</Label>
                 <Textarea
@@ -550,7 +571,7 @@ export default function MenuList() {
                 </div>
               </div>
 
-              {/* Row 7: 备注 */}
+              {/* Row 8: 备注 */}
               <div className="grid gap-2">
                 <Label htmlFor="remark">备注</Label>
                 <Textarea

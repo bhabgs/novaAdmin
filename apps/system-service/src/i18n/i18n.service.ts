@@ -29,7 +29,11 @@ export class I18nService {
     const field = LOCALE_MAP[locale];
     if (!field) return {};
     const items = await this.i18nRepository.find();
-    return items.reduce((acc, item) => ({ ...acc, [item.key]: item[field] }), {});
+    return items.reduce((acc, item) => {
+      // 如果有模块，使用 module.key 格式；否则直接使用 key
+      const fullKey = item.module ? `${item.module}.${item.key}` : item.key;
+      return { ...acc, [fullKey]: item[field] };
+    }, {});
   }
 
   async set(key: string, zhCN?: string, enUS?: string, arSA?: string, module?: string) {

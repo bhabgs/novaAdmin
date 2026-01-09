@@ -118,11 +118,13 @@ export function DataTable<T extends Record<string, any>>({
                     <button
                       onClick={() => toggleExpand(rowKey)}
                       className="mr-1 hover:bg-accent rounded p-0.5"
+                      aria-expanded={isExpanded}
+                      aria-label={isExpanded ? '收起' : '展开'}
                     >
                       {isExpanded ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-4 w-4" aria-hidden="true" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-4 w-4" aria-hidden="true" />
                       )}
                     </button>
                   )}
@@ -142,15 +144,15 @@ export function DataTable<T extends Record<string, any>>({
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label="操作菜单">
+                      <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {extraRowActions && extraRowActions(record)}
                     {onEdit && canEdit(record) && (
                       <DropdownMenuItem onClick={() => onEdit(record)}>
-                        <Pencil className="h-4 w-4 mr-2" />
+                        <Pencil className="h-4 w-4 mr-2" aria-hidden="true" />
                         编辑
                       </DropdownMenuItem>
                     )}
@@ -159,7 +161,7 @@ export function DataTable<T extends Record<string, any>>({
                         className="text-destructive"
                         onClick={() => onDelete(record)}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
                         删除
                       </DropdownMenuItem>
                     )}
@@ -197,15 +199,15 @@ export function DataTable<T extends Record<string, any>>({
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label="操作菜单">
+                      <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {extraRowActions && extraRowActions(record)}
                     {onEdit && canEdit(record) && (
                       <DropdownMenuItem onClick={() => onEdit(record)}>
-                        <Pencil className="h-4 w-4 mr-2" />
+                        <Pencil className="h-4 w-4 mr-2" aria-hidden="true" />
                         编辑
                       </DropdownMenuItem>
                     )}
@@ -214,7 +216,7 @@ export function DataTable<T extends Record<string, any>>({
                         className="text-destructive"
                         onClick={() => onDelete(record)}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
                         删除
                       </DropdownMenuItem>
                     )}
@@ -230,22 +232,27 @@ export function DataTable<T extends Record<string, any>>({
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="rounded-md border" role="region" aria-label="数据表格">
       <Table>
         <TableHeader>
           <TableRow>
             {columns.map((col) => (
-              <TableHead key={col.key} style={{ width: col.width }}>
+              <TableHead key={col.key} style={{ width: col.width }} scope="col">
                 {col.title}
               </TableHead>
             ))}
-            {hasActions && <TableHead className="text-right">操作</TableHead>}
+            {hasActions && <TableHead className="text-right" scope="col">操作</TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
           {loading ? (
             <TableRow>
-              <TableCell colSpan={columns.length + (hasActions ? 1 : 0)} className="text-center h-32">
+              <TableCell
+                colSpan={columns.length + (hasActions ? 1 : 0)}
+                className="text-center h-32"
+                aria-live="polite"
+                aria-busy="true"
+              >
                 {loadingText}
               </TableCell>
             </TableRow>
@@ -254,6 +261,7 @@ export function DataTable<T extends Record<string, any>>({
               <TableCell
                 colSpan={columns.length + (hasActions ? 1 : 0)}
                 className="text-center h-32 text-muted-foreground"
+                aria-live="polite"
               >
                 {emptyText}
               </TableCell>

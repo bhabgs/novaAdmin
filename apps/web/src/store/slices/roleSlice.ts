@@ -1,10 +1,11 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import {
   rolesControllerFindAll,
   rolesControllerCreate,
   rolesControllerUpdate,
   rolesControllerRemove,
 } from '@/api/services.gen';
+import type { Role, ListQueryParams } from '@/types';
 
 interface CreateRoleDto {
   name: string;
@@ -25,9 +26,10 @@ interface UpdateRoleDto {
 }
 
 interface RoleState {
-  list: any[];
-  current: any | null;
+  list: Role[];
+  current: Role | null;
   loading: boolean;
+  error: string | null;
   pagination: { page: number; pageSize: number; total: number };
 }
 
@@ -35,10 +37,11 @@ const initialState: RoleState = {
   list: [],
   current: null,
   loading: false,
+  error: null,
   pagination: { page: 1, pageSize: 10, total: 0 },
 };
 
-export const fetchRoles = createAsyncThunk('role/fetchList', async (params?: any) => {
+export const fetchRoles = createAsyncThunk('role/fetchList', async (params?: ListQueryParams) => {
   const response = await rolesControllerFindAll({ query: params });
   return response.data?.data || response.data;
 });
@@ -65,25 +68,39 @@ const roleSlice = createSlice({
   name: 'role',
   initialState,
   reducers: {
-    setCurrent: (state, action) => {
+    setCurrent: (state, action: PayloadAction<Role | null>) => {
       state.current = action.payload;
+    },
+    clearError: (state) => {
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchRoles.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchRoles.fulfilled, (state, action) => {
         state.loading = false;
         state.list = action.payload.list;
         state.pagination.total = action.payload.total;
       })
-      .addCase(fetchRoles.rejected, (state) => {
+      .addCase(fetchRoles.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.error.message || '获取角色列表失败';
+      })
+      .addCase(createRole.rejected, (state, action) => {
+        state.error = action.error.message || '创建角色失败';
+      })
+      .addCase(updateRole.rejected, (state, action) => {
+        state.error = action.error.message || '更新角色失败';
+      })
+      .addCase(deleteRole.rejected, (state, action) => {
+        state.error = action.error.message || '删除角色失败';
       });
   },
 });
 
-export const { setCurrent } = roleSlice.actions;
+export const { setCurrent, clearError } = roleSlice.actions;
 export default roleSlice.reducer;

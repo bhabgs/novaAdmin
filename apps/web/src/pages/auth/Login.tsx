@@ -15,8 +15,8 @@ export default function Login() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.auth);
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('123456');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [redirecting, setRedirecting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,8 +25,8 @@ export default function Login() {
       await dispatch(login({ username, password })).unwrap();
       setRedirecting(true);
       setTimeout(() => navigate('/dashboard'), 500);
-    } catch (error) {
-      console.error('Login failed:', error);
+    } catch {
+      // 错误已由 Redux 和 request 拦截器处理
     }
   };
 
@@ -110,7 +110,8 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   className="h-11"
-                  onClick={() => console.log('Apple login')}
+                  aria-label="使用 Apple 登录"
+                  disabled
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
@@ -120,7 +121,8 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   className="h-11"
-                  onClick={() => console.log('Google login')}
+                  aria-label="使用 Google 登录"
+                  disabled
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path
@@ -145,7 +147,8 @@ export default function Login() {
                   type="button"
                   variant="outline"
                   className="h-11"
-                  onClick={() => console.log('Meta login')}
+                  aria-label="使用 Meta 登录"
+                  disabled
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 3.667h-3.533v7.98H9.101z" />

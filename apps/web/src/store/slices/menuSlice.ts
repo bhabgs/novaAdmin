@@ -1,10 +1,11 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import {
   menusControllerFindAll,
   menusControllerCreate,
   menusControllerUpdate,
   menusControllerRemove,
 } from '@/api/services.gen';
+import type { Menu } from '@/types';
 
 interface CreateMenuDto {
   name: string;
@@ -37,19 +38,21 @@ interface UpdateMenuDto {
 }
 
 interface MenuState {
-  tree: any[];
-  current: any | null;
+  tree: Menu[];
+  current: Menu | null;
   loading: boolean;
+  error: string | null;
 }
 
 const initialState: MenuState = {
   tree: [],
   current: null,
   loading: false,
+  error: null,
 };
 
 // 递归排序菜单树（按 sort 字段升序）
-const sortMenuTree = (menus: any[]): any[] => {
+const sortMenuTree = (menus: Menu[]): Menu[] => {
   if (!Array.isArray(menus)) return menus;
 
   return menus
@@ -88,24 +91,38 @@ const menuSlice = createSlice({
   name: 'menu',
   initialState,
   reducers: {
-    setCurrent: (state, action) => {
+    setCurrent: (state, action: PayloadAction<Menu | null>) => {
       state.current = action.payload;
+    },
+    clearError: (state) => {
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchMenus.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchMenus.fulfilled, (state, action) => {
         state.loading = false;
         state.tree = action.payload;
       })
-      .addCase(fetchMenus.rejected, (state) => {
+      .addCase(fetchMenus.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.error.message || '获取菜单列表失败';
+      })
+      .addCase(createMenu.rejected, (state, action) => {
+        state.error = action.error.message || '创建菜单失败';
+      })
+      .addCase(updateMenu.rejected, (state, action) => {
+        state.error = action.error.message || '更新菜单失败';
+      })
+      .addCase(deleteMenu.rejected, (state, action) => {
+        state.error = action.error.message || '删除菜单失败';
       });
   },
 });
 
-export const { setCurrent } = menuSlice.actions;
+export const { setCurrent, clearError } = menuSlice.actions;
 export default menuSlice.reducer;

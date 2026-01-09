@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { X, RotateCw } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { removeTab, setActiveTab, refreshTab, removeOtherTabs, removeRightTabs, removeLeftTabs, clearTabs, TabItem } from '@/store/slices/tabsSlice';
@@ -12,13 +14,28 @@ import {
 } from '@/components/ui/context-menu';
 
 export function TabsNav() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { tabs, activeKey } = useAppSelector((state) => state.tabs);
 
-  const handleTabClick = (tab: TabItem) => {
-    dispatch(setActiveTab(tab.key));
-    navigate(tab.path);
+  // 当语言变化时，重新计算标签显示名称
+  const translatedTabs = useMemo(() => {
+    return tabs.map((tab) => {
+      let displayLabel = tab.label;
+      if (tab.nameI18n) {
+        const translated = t(tab.nameI18n);
+        if (translated && translated !== tab.nameI18n) {
+          displayLabel = translated;
+        }
+      }
+      return { ...tab, displayLabel };
+    });
+  }, [tabs, t, i18n.language]); // 显式依赖 i18n.language 确保语言切换时更新
+
+  const handleTabClick = (key: string, path: string) => {
+    dispatch(setActiveTab(key));
+    navigate(path);
   };
 
   const handleTabClose = (e: React.MouseEvent, key: string) => {
@@ -35,10 +52,10 @@ export function TabsNav() {
     }
   };
 
-  const handleRefresh = (tab: TabItem) => {
-    if (tab.key !== activeKey) {
-      dispatch(setActiveTab(tab.key));
-      navigate(tab.path);
+  const handleRefresh = (key: string, path: string) => {
+    if (key !== activeKey) {
+      dispatch(setActiveTab(key));
+      navigate(path);
     }
     dispatch(refreshTab());
   };
@@ -63,11 +80,11 @@ export function TabsNav() {
 
   return (
     <div className="flex items-end h-9 bg-muted px-2 pt-2 overflow-x-auto border-b">
-      {tabs.map((tab, index) => (
+      {translatedTabs.map((tab, index) => (
         <ContextMenu key={tab.key}>
           <ContextMenuTrigger>
             <div
-              onClick={() => handleTabClick(tab)}
+              onClick={() => handleTabClick(tab.key, tab.path)}
               className={cn(
                 'group relative flex items-center gap-2 px-4 py-1.5 text-sm cursor-pointer transition-all min-w-[120px] max-w-[200px]',
                 activeKey === tab.key
@@ -76,7 +93,7 @@ export function TabsNav() {
                 index > 0 && activeKey !== tab.key && 'border-l border-border/30'
               )}
             >
-              <span className="truncate flex-1">{tab.label}</span>
+              <span className="truncate flex-1">{tab.displayLabel}</span>
               {tab.closable !== false && (
                 <span
                   className="flex items-center justify-center h-4 w-4 rounded-sm opacity-0 group-hover:opacity-100 hover:bg-muted-foreground/20 transition-all"
@@ -88,28 +105,28 @@ export function TabsNav() {
             </div>
           </ContextMenuTrigger>
           <ContextMenuContent>
-            <ContextMenuItem onClick={() => handleRefresh(tab)}>
+            <ContextMenuItem onClick={() => handleRefresh(tab.key, tab.path)}>
               <RotateCw className="h-4 w-4 mr-2" />
-              刷新
+              {t('tabs.refresh')}
             </ContextMenuItem>
             <ContextMenuSeparator />
             {tab.closable !== false && (
               <ContextMenuItem onClick={() => dispatch(removeTab(tab.key))}>
-                关闭当前
+                {t('tabs.closeCurrent')}
               </ContextMenuItem>
             )}
             <ContextMenuItem onClick={() => handleCloseOthers(tab.key)}>
-              关闭其他
+              {t('tabs.closeOthers')}
             </ContextMenuItem>
             <ContextMenuItem onClick={() => handleCloseLeft(tab.key)}>
-              关闭左侧
+              {t('tabs.closeLeft')}
             </ContextMenuItem>
             <ContextMenuItem onClick={() => handleCloseRight(tab.key)}>
-              关闭右侧
+              {t('tabs.closeRight')}
             </ContextMenuItem>
             <ContextMenuSeparator />
             <ContextMenuItem onClick={handleCloseAll}>
-              关闭所有
+              {t('tabs.closeAll')}
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>

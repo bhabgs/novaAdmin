@@ -48,9 +48,22 @@ const initialState: MenuState = {
   loading: false,
 };
 
+// 递归排序菜单树（按 sort 字段升序）
+const sortMenuTree = (menus: any[]): any[] => {
+  if (!Array.isArray(menus)) return menus;
+
+  return menus
+    .sort((a, b) => (a.sort || 0) - (b.sort || 0))
+    .map((menu) => ({
+      ...menu,
+      children: menu.children ? sortMenuTree(menu.children) : undefined,
+    }));
+};
+
 export const fetchMenus = createAsyncThunk('menu/fetchTree', async () => {
   const response = await menusControllerFindAll();
-  return response.data?.data || response.data;
+  const data = response.data?.data || response.data;
+  return sortMenuTree(data);
 });
 
 export const createMenu = createAsyncThunk('menu/create', async (data: CreateMenuDto) => {

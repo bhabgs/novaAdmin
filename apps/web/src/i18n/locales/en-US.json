@@ -76,5 +76,13 @@
     "button": "Button",
     "language": "Language",
     "languageDesc": "Choose the display language"
+  },
+  "tabs": {
+    "refresh": "Refresh",
+    "closeCurrent": "Close Current",
+    "closeOthers": "Close Others",
+    "closeLeft": "Close Left",
+    "closeRight": "Close Right",
+    "closeAll": "Close All"
   }
 }

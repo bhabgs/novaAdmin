@@ -76,5 +76,13 @@
     "button": "زر",
     "language": "اللغة",
     "languageDesc": "اختر لغة العرض"
+  },
+  "tabs": {
+    "refresh": "تحديث",
+    "closeCurrent": "إغلاق الحالي",
+    "closeOthers": "إغلاق الآخرين",
+    "closeLeft": "إغلاق اليسار",
+    "closeRight": "إغلاق اليمين",
+    "closeAll": "إغلاق الكل"
   }
 }

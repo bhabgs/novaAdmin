@@ -29,6 +29,7 @@ export default function MainLayout() {
         label: displayName,
         path: location.pathname,
         closable: location.pathname !== '/dashboard',
+        nameI18n: menu.nameI18n, // 传入国际化 key
       }));
     }
   }, [location.pathname, menus, dispatch, t]);

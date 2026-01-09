@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchMenus, deleteMenu, createMenu, updateMenu } from '@/store/slices/menuSlice';
 import { Folder, FileText, MousePointer } from 'lucide-react';
+import { iconMap } from '@/config/icons';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,7 @@ import { toast } from 'sonner';
 import { DataTable, Column } from '@/components/data-table';
 import { CrudDialog, DeleteDialog, FormField } from '@/components/crud-dialog';
 import { PageContainer } from '@/components/page-container';
+import { IconPicker } from '@/components/icon-picker';
 import { i18nControllerFindAll } from '@/api/services.gen';
 
 interface I18nItem {
@@ -88,12 +90,16 @@ export default function MenuList() {
     {
       key: 'name',
       title: '菜单名称',
-      render: (_, record) => (
-        <div className="flex items-center gap-2">
-          {menuTypeIcons[record.type]}
-          <span>{record.nameI18n ? t(record.nameI18n) : record.name}</span>
-        </div>
-      ),
+      render: (_, record) => {
+        // 优先使用菜单配置的图标，否则使用类型默认图标
+        const MenuIcon = record.icon && iconMap[record.icon] ? iconMap[record.icon] : null;
+        return (
+          <div className="flex items-center gap-2">
+            {MenuIcon ? <MenuIcon className="h-4 w-4 text-primary" /> : menuTypeIcons[record.type]}
+            <span>{record.nameI18n ? t(record.nameI18n) : record.name}</span>
+          </div>
+        );
+      },
     },
     { key: 'path', title: '路径' },
     {
@@ -131,6 +137,14 @@ export default function MenuList() {
             ))}
           </SelectContent>
         </Select>
+      ),
+    },
+    {
+      name: 'icon',
+      label: '菜单图标',
+      type: 'custom',
+      render: (value, onChange) => (
+        <IconPicker value={value} onChange={onChange} placeholder="选择图标" />
       ),
     },
     {
@@ -213,6 +227,7 @@ export default function MenuList() {
       visible: formData.visible !== false,
     };
     if (formData.nameI18n) submitData.nameI18n = formData.nameI18n;
+    if (formData.icon) submitData.icon = formData.icon;
     if (formData.path) submitData.path = formData.path;
     if (formData.component) submitData.component = formData.component;
     if (formData.permission) submitData.permission = formData.permission;
@@ -250,6 +265,7 @@ export default function MenuList() {
   const getInitialData = (record?: any) => ({
     name: record?.name || '',
     nameI18n: record?.nameI18n || '',
+    icon: record?.icon || '',
     type: record?.type || 2,
     parentId: record?.parentId || undefined,
     path: record?.path || '',

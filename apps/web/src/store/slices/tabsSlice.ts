@@ -5,6 +5,7 @@ export interface TabItem {
   label: string;
   path: string;
   closable?: boolean;
+  nameI18n?: string; // 国际化 key，如果存在则优先使用
 }
 
 interface TabsState {
@@ -21,7 +22,7 @@ const getInitialState = (): TabsState => {
     if (saved) {
       const parsed = JSON.parse(saved);
       return {
-        tabs: parsed.tabs || [{ key: '/dashboard', label: '仪表盘', path: '/dashboard', closable: false }],
+        tabs: parsed.tabs || [{ key: '/dashboard', label: '仪表盘', path: '/dashboard', closable: false, nameI18n: 'menu.dashboard' }],
         activeKey: parsed.activeKey || '/dashboard',
         refreshKey: 0,
       };
@@ -30,7 +31,7 @@ const getInitialState = (): TabsState => {
     console.error('Failed to load tabs from localStorage:', e);
   }
   return {
-    tabs: [{ key: '/dashboard', label: '仪表盘', path: '/dashboard', closable: false }],
+    tabs: [{ key: '/dashboard', label: '仪表盘', path: '/dashboard', closable: false, nameI18n: 'menu.dashboard' }],
     activeKey: '/dashboard',
     refreshKey: 0,
   };
@@ -56,7 +57,15 @@ const tabsSlice = createSlice({
     addTab: (state, action: PayloadAction<TabItem>) => {
       const exists = state.tabs.find((tab) => tab.key === action.payload.key);
       if (!exists) {
-        state.tabs.push({ ...action.payload, closable: action.payload.closable ?? true });
+        state.tabs.push({
+          ...action.payload,
+          closable: action.payload.closable ?? true,
+          nameI18n: action.payload.nameI18n,
+        });
+      } else if (action.payload.nameI18n && !exists.nameI18n) {
+        // 如果已存在的标签没有 nameI18n，但新传入的有，则更新
+        exists.nameI18n = action.payload.nameI18n;
+        exists.label = action.payload.label;
       }
       state.activeKey = action.payload.key;
       saveTabs(state);
@@ -107,7 +116,7 @@ const tabsSlice = createSlice({
       saveTabs(state);
     },
     resetTabs: (state) => {
-      state.tabs = [{ key: '/dashboard', label: '仪表盘', path: '/dashboard', closable: false }];
+      state.tabs = [{ key: '/dashboard', label: '仪表盘', path: '/dashboard', closable: false, nameI18n: 'menu.dashboard' }];
       state.activeKey = '/dashboard';
       state.refreshKey = 0;
       localStorage.removeItem(TABS_STORAGE_KEY);

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { logout } from '@/store/slices/authSlice';
+import { resetTabs } from '@/store/slices/tabsSlice';
 import { generateMenuItemsFromMenus } from '@/utils/dynamicRoutes';
 import {
   ChevronRight,
@@ -73,16 +74,21 @@ export function AppSidebar() {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(resetTabs());
     navigate('/login');
   };
 
-  const menuItems = useMemo(() => generateMenuItemsFromMenus(menus), [menus]);
+  const menuItems = useMemo(() => {
+    console.log(menus, '');
+    return generateMenuItemsFromMenus(menus);
+  }, [menus]);
 
   const renderMenuItem = (item: any) => {
     const Icon = item.icon ? iconMap[item.icon] || Folder : Folder;
     const hasChildren = item.children && item.children.length > 0;
     const isActive = location.pathname === item.path;
-    const displayName = item.nameI18n ? t(item.nameI18n) : item.name;
+    const translated = item.nameI18n ? t(item.nameI18n) : '';
+    const displayName = (translated && translated !== item.nameI18n) ? translated : item.name;
 
     if (item.type === 1 && hasChildren) {
       return (
@@ -99,7 +105,9 @@ export function AppSidebar() {
               <SidebarMenuSub>
                 {item.children.map((child: any) => {
                   const ChildIcon = child.icon ? iconMap[child.icon] || Folder : Folder;
-                  const childDisplayName = child.nameI18n ? t(child.nameI18n) : child.name;
+                  const childTranslated = child.nameI18n ? t(child.nameI18n) : '';
+                  const childDisplayName = (childTranslated && childTranslated !== child.nameI18n) ? childTranslated : child.name;
+
                   return (
                     <SidebarMenuSubItem key={child.id}>
                       <SidebarMenuSubButton asChild isActive={location.pathname === child.path}>

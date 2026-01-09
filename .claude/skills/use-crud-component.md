@@ -89,6 +89,12 @@ export default function MyPage() {
 | addButtonText | string | 否 | 新增按钮文本，默认"新增" |
 | editTitle | string | 否 | 编辑对话框标题，默认"编辑" |
 | addTitle | string | 否 | 新增对话框标题，默认"新增" |
+| treeMode | boolean | 否 | 启用树形模式 |
+| childrenKey | string | 否 | 子节点字段名，默认 'children' |
+| defaultExpandAll | boolean | 否 | 默认展开所有节点 |
+| toolbarExtra | ReactNode | 否 | 工具栏额外内容（标题和按钮之间） |
+| renderRow | (record, defaultRow) => ReactNode | 否 | 自定义行渲染 |
+| extraRowActions | (record) => ReactNode | 否 | 额外的行操作按钮 |
 
 ### Column 配置
 
@@ -183,6 +189,101 @@ const formFields: FormField[] = [
 />
 ```
 
+## 新功能示例
+
+### 树形结构
+
+```tsx
+<CrudPage
+  title="菜单管理"
+  treeMode={true}
+  childrenKey="children"
+  defaultExpandAll={true}
+  columns={columns}
+  formFields={formFields}
+  data={treeData}
+  onAdd={handleAdd}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+/>
+```
+
+### 工具栏扩展
+
+```tsx
+<CrudPage
+  title="用户管理"
+  toolbarExtra={
+    <div className="flex gap-2">
+      <Input
+        placeholder="搜索用户..."
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        className="w-64"
+      />
+      <Select value={status} onValueChange={setStatus}>
+        <SelectTrigger className="w-32">
+          <SelectValue placeholder="状态" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">全部</SelectItem>
+          <SelectItem value="active">启用</SelectItem>
+          <SelectItem value="inactive">禁用</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  }
+  columns={columns}
+  formFields={formFields}
+  data={filteredData}
+/>
+```
+
+### 额外行操作
+
+```tsx
+<CrudPage
+  title="用户管理"
+  extraRowActions={(record) => (
+    <>
+      <DropdownMenuItem onClick={() => handleResetPassword(record)}>
+        <Key className="h-4 w-4 mr-2" />
+        重置密码
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={() => handleViewDetails(record)}>
+        <Eye className="h-4 w-4 mr-2" />
+        查看详情
+      </DropdownMenuItem>
+    </>
+  )}
+  columns={columns}
+  formFields={formFields}
+  data={data}
+/>
+```
+
+### 自定义行渲染
+
+```tsx
+<CrudPage
+  title="订单管理"
+  renderRow={(record, defaultRow) => {
+    // 根据状态添加不同的行样式
+    if (record.status === 'urgent') {
+      return (
+        <div className="bg-red-50">
+          {defaultRow}
+        </div>
+      );
+    }
+    return defaultRow;
+  }}
+  columns={columns}
+  formFields={formFields}
+  data={data}
+/>
+```
+
 ## 完整示例
 
 参考以下页面的实现：
@@ -197,3 +298,6 @@ const formFields: FormField[] = [
 - 成功/失败提示会自动显示
 - 编辑时会自动填充现有数据
 - 删除操作会显示确认对话框
+- 树形模式下，展开/折叠状态会自动管理
+- `extraRowActions` 会在编辑和删除按钮之前显示
+- `toolbarExtra` 内容会显示在标题和新增按钮之间

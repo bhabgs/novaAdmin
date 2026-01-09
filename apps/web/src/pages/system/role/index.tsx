@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { fetchRoles, deleteRole, createRole, updateRole } from '@/store/slices/roleSlice';
@@ -9,6 +10,10 @@ export default function RoleList() {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { list, loading, pagination } = useAppSelector((state) => state.role);
+
+  useEffect(() => {
+    dispatch(fetchRoles({ page: 1, pageSize: 10 }));
+  }, [dispatch]);
 
   const columns: Column[] = [
     { key: 'name', title: t('role.name') },
@@ -69,6 +74,9 @@ export default function RoleList() {
     },
   ];
 
+  // 超级管理员不能编辑和删除
+  const isSuperAdmin = (record: any) => record.code === 'super_admin';
+
   return (
     <CrudPage
       title={t('menu.role')}
@@ -89,6 +97,8 @@ export default function RoleList() {
       onRefresh={() => {
         dispatch(fetchRoles({ page: 1, pageSize: 10 }));
       }}
+      canEdit={(record) => !isSuperAdmin(record)}
+      canDelete={(record) => !isSuperAdmin(record)}
       addButtonText={t('common.add')}
       editTitle="编辑角色"
       addTitle="新增角色"

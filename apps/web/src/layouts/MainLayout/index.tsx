@@ -22,7 +22,8 @@ export default function MainLayout() {
   useEffect(() => {
     const menu = findMenuByPath(menus, location.pathname);
     if (menu) {
-      const displayName = menu.nameI18n ? t(menu.nameI18n) : menu.name;
+      const translated = menu.nameI18n ? t(menu.nameI18n) : '';
+      const displayName = (translated && translated !== menu.nameI18n) ? translated : menu.name;
       dispatch(addTab({
         key: location.pathname,
         label: displayName,
@@ -33,7 +34,8 @@ export default function MainLayout() {
   }, [location.pathname, menus, dispatch, t]);
 
   const currentMenu = findMenuByPath(menus, location.pathname);
-  const currentMenuName = currentMenu?.nameI18n ? t(currentMenu.nameI18n) : currentMenu?.name;
+  const currentTranslated = currentMenu?.nameI18n ? t(currentMenu.nameI18n) : '';
+  const currentMenuName = (currentTranslated && currentTranslated !== currentMenu?.nameI18n) ? currentTranslated : currentMenu?.name;
 
   return (
     <SidebarProvider>

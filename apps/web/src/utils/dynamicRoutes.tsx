@@ -5,10 +5,9 @@ import { RouteObject } from 'react-router-dom';
  * 使用 Vite 的 import.meta.glob 预加载所有页面组件
  * 支持 .tsx 和 .ts 文件，包括 index 文件
  */
-const pageModules = import.meta.glob<{ default: ComponentType<any> }>(
-  '/src/pages/**/*.{tsx,ts}',
-  { eager: false }
-);
+const pageModules = import.meta.glob<{ default: ComponentType<any> }>('/src/pages/**/*.{tsx,ts}', {
+  eager: false,
+});
 
 // 加载中组件
 const RouteLoading: React.FC = () => (
@@ -28,7 +27,7 @@ const RouteLoading: React.FC = () => (
  * @returns 懒加载的组件或 null
  */
 function loadComponentByPath(
-  componentPath: string
+  componentPath: string,
 ): LazyExoticComponent<ComponentType<any>> | null {
   try {
     // 如果路径以 pages/ 开头，去掉这个前缀
@@ -51,7 +50,7 @@ function loadComponentByPath(
         return lazy(() =>
           pageModules[modulePath]().then((m) => ({
             default: m.default,
-          }))
+          })),
         );
       }
     }
@@ -59,7 +58,7 @@ function loadComponentByPath(
     console.error(`[loadComponent] ✗ Component not found for path: ${componentPath}`);
     console.log(
       '[loadComponent] Available modules:',
-      Object.keys(pageModules).filter((key) => key.includes(normalizedPath))
+      Object.keys(pageModules).filter((key) => key.includes(normalizedPath)),
     );
     return null;
   } catch (error) {
@@ -95,7 +94,9 @@ export const generateRoutesFromMenus = (menus: any[]): RouteObject[] => {
           ),
         });
       } else {
-        console.warn(`[generateRoutes] ✗ Component "${menu.component}" not found for menu: ${menu.name}`);
+        console.warn(
+          `[generateRoutes] ✗ Component "${menu.component}" not found for menu: ${menu.name}`,
+        );
       }
     }
 
@@ -120,9 +121,8 @@ export const generateMenuItemsFromMenus = (menus: any[]): any[] => {
   const mapMenu = (menu: any): any | null => {
     if (menu.status !== 1 || menu.visible === false) return null;
 
-    const children = menu.children?.length > 0
-      ? menu.children.map(mapMenu).filter(Boolean)
-      : undefined;
+    const children =
+      menu.children?.length > 0 ? menu.children.map(mapMenu).filter(Boolean) : undefined;
 
     return {
       id: menu.id,
@@ -130,6 +130,7 @@ export const generateMenuItemsFromMenus = (menus: any[]): any[] => {
       name: menu.name,
       icon: menu.icon,
       type: menu.type,
+      nameI18n: menu.nameI18n,
       children: children?.length > 0 ? children : undefined,
     };
   };

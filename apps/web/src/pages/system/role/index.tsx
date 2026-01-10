@@ -5,6 +5,10 @@ import { fetchRoles, deleteRole, createRole, updateRole } from '@/store/slices/r
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { CrudPage, Column, FormField } from '@/components/crud-page';
+import type { Role } from '@/types';
+
+// 判断是否为超级管理员角色
+const isSuperAdmin = (record: Role) => record.code === 'super_admin';
 
 export default function RoleList() {
   const { t } = useTranslation();
@@ -74,9 +78,6 @@ export default function RoleList() {
     },
   ];
 
-  // 超级管理员不能编辑和删除
-  const isSuperAdmin = (record: any) => record.code === 'super_admin';
-
   return (
     <CrudPage
       title={t('menu.role')}
@@ -97,8 +98,8 @@ export default function RoleList() {
       onRefresh={() => {
         dispatch(fetchRoles({ page: 1, pageSize: 10 }));
       }}
-      canEdit={(record) => !isSuperAdmin(record)}
-      canDelete={(record) => !isSuperAdmin(record)}
+      canEdit={(record) => !isSuperAdmin(record as Role)}
+      canDelete={(record) => !isSuperAdmin(record as Role)}
       addButtonText={t('common.add')}
       editTitle="编辑角色"
       addTitle="新增角色"

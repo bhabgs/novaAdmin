@@ -5,6 +5,10 @@ import { fetchDepartments, deleteDepartment, createDepartment, updateDepartment 
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { CrudPage, Column, FormField } from '@/components/crud-page';
+import type { Department } from '@/types';
+
+// 判断是否为根部门（不能删除根部门）
+const isRootDepartment = (record: Department) => !record.parentId;
 
 export default function DepartmentList() {
   const { t } = useTranslation();
@@ -91,6 +95,7 @@ export default function DepartmentList() {
       onRefresh={() => {
         dispatch(fetchDepartments());
       }}
+      canDelete={(record) => !isRootDepartment(record as Department)}
       addButtonText={t('common.add')}
       editTitle="编辑部门"
       addTitle="新增部门"

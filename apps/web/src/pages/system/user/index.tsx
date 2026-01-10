@@ -4,6 +4,15 @@ import { fetchUsers, deleteUser, createUser, updateUser } from '@/store/slices/u
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { CrudPage, Column, FormField } from '@/components/crud-page';
+import type { User } from '@/types';
+
+// 判断是否为超级管理员用户
+const isSuperAdmin = (record: User) => {
+  // 用户名为 admin 或拥有 super_admin 角色
+  if (record.username === 'admin') return true;
+  if (record.roles?.some((role) => role.code === 'super_admin')) return true;
+  return false;
+};
 
 export default function UserList() {
   const { t } = useTranslation();
@@ -92,6 +101,8 @@ export default function UserList() {
       onRefresh={() => {
         dispatch(fetchUsers({ page: 1, pageSize: 10 }));
       }}
+      canEdit={(record) => !isSuperAdmin(record as User)}
+      canDelete={(record) => !isSuperAdmin(record as User)}
       addButtonText={t('common.add')}
       editTitle="编辑用户"
       addTitle="新增用户"

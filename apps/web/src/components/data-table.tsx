@@ -150,16 +150,20 @@ export function DataTable<T extends Record<string, any>>({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {extraRowActions && extraRowActions(record)}
-                    {onEdit && canEdit(record) && (
-                      <DropdownMenuItem onClick={() => onEdit(record)}>
+                    {onEdit && (
+                      <DropdownMenuItem
+                        onClick={() => canEdit(record) && onEdit(record)}
+                        disabled={!canEdit(record)}
+                      >
                         <Pencil className="h-4 w-4 mr-2" aria-hidden="true" />
                         编辑
                       </DropdownMenuItem>
                     )}
-                    {onDelete && canDelete(record) && (
+                    {onDelete && (
                       <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => onDelete(record)}
+                        className={canDelete(record) ? 'text-destructive' : ''}
+                        onClick={() => canDelete(record) && onDelete(record)}
+                        disabled={!canDelete(record)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
                         删除
@@ -205,16 +209,20 @@ export function DataTable<T extends Record<string, any>>({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {extraRowActions && extraRowActions(record)}
-                    {onEdit && canEdit(record) && (
-                      <DropdownMenuItem onClick={() => onEdit(record)}>
+                    {onEdit && (
+                      <DropdownMenuItem
+                        onClick={() => canEdit(record) && onEdit(record)}
+                        disabled={!canEdit(record)}
+                      >
                         <Pencil className="h-4 w-4 mr-2" aria-hidden="true" />
                         编辑
                       </DropdownMenuItem>
                     )}
-                    {onDelete && canDelete(record) && (
+                    {onDelete && (
                       <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => onDelete(record)}
+                        className={canDelete(record) ? 'text-destructive' : ''}
+                        onClick={() => canDelete(record) && onDelete(record)}
+                        disabled={!canDelete(record)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
                         删除

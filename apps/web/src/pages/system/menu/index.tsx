@@ -5,10 +5,7 @@ import { fetchMenus, deleteMenu, createMenu, updateMenu } from '@/store/slices/m
 import { Folder, FileText, MousePointer } from 'lucide-react';
 import { iconMap } from '@/config/icons';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -22,6 +19,16 @@ import { CrudDialog, DeleteDialog, FormField } from '@/components/crud-dialog';
 import { PageContainer } from '@/components/page-container';
 import { IconPicker } from '@/components/icon-picker';
 import { i18nControllerFindAll } from '@/api/services.gen';
+import type { Menu } from '@/types';
+
+// 判断是否为系统核心菜单（不能删除）
+const isSystemMenu = (record: Menu) => {
+  // Dashboard 菜单不能删除
+  if (record.path === '/dashboard') return true;
+  // 系统管理目录不能删除
+  if (record.path === '/system' || record.name === '系统管理') return true;
+  return false;
+};
 
 interface I18nItem {
   id: string;
@@ -287,6 +294,7 @@ export default function MenuList() {
         defaultExpandAll
         onEdit={handleEdit}
         onDelete={(record) => setDeleteId(record.id)}
+        canDelete={(record) => !isSystemMenu(record as Menu)}
       />
 
       <CrudDialog

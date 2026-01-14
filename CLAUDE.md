@@ -45,7 +45,7 @@ pnpm dev:web          # 仅启动前端 (端口 5173)
 pnpm dev:gateway      # 仅启动网关 (端口 3000)
 
 # 基础设施
-pnpm docker:up        # 启动 Docker (PostgreSQL, Redis, Nacos)
+pnpm docker:up        # 启动 Docker (PostgreSQL, Redis)
 pnpm docker:down      # 停止 Docker
 pnpm db:init          # 初始化数据库
 

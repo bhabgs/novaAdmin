@@ -18,8 +18,9 @@
     "docker:down": "docker-compose -f docker/docker-compose.yml down",
     "psq": "docker exec -it nova-postgres psql -U postgres -d nova_admin",
     "db:schema": "docker exec -i nova-postgres psql -U postgres -d nova_admin < database/seeds/00-schema.sql",
-    "db:seed": "docker exec -i nova-postgres psql -U postgres -d nova_admin < database/seeds/seed.sql",
-    "db:init": "pnpm db:schema && pnpm db:seed",
+    "db:seed": "docker exec -i nova-postgres psql -U postgres -d nova_admin < database/seeds/export-data.sql",
+    "db:init": "pnpm db:seed",
+    "db:export": "bash database/seeds/export-data.sh",
     "generate-api": "pnpm --filter @nova-admin/web generate-api"
   },
   "devDependencies": {

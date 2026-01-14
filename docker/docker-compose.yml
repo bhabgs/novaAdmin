@@ -29,13 +29,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  nacos:
-    image: nacos/nacos-server:2.0.2
-    container_name: nacos-quick
-    environment:
-      MODE: standalone
-    ports:
-      - "8848:8848"
 
 volumes:
   postgres_data:

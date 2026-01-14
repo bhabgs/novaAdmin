@@ -1,0 +1,40 @@
+# 通用微服务 Dockerfile
+# 使用方式: docker build --build-arg SERVICE=gateway -f docker/Dockerfile.service .
+
+FROM node:20-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+WORKDIR /app
+
+# 依赖安装阶段
+FROM base AS deps
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY apps/gateway/package.json ./apps/gateway/
+COPY apps/auth-service/package.json ./apps/auth-service/
+COPY apps/rbac-service/package.json ./apps/rbac-service/
+COPY apps/system-service/package.json ./apps/system-service/
+COPY libs/shared/package.json ./libs/shared/
+RUN pnpm install --frozen-lockfile
+
+# 构建阶段
+FROM base AS builder
+ARG SERVICE
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/*/node_modules ./apps/
+COPY --from=deps /app/libs/shared/node_modules ./libs/shared/node_modules
+COPY . .
+RUN pnpm --filter @nova-admin/shared build
+RUN pnpm --filter @nova-admin/${SERVICE} build
+
+# 生产阶段
+FROM node:20-alpine AS runner
+ARG SERVICE
+ENV NODE_ENV=production
+WORKDIR /app
+
+COPY --from=builder /app/apps/${SERVICE}/dist ./dist
+COPY --from=builder /app/apps/${SERVICE}/package.json ./
+COPY --from=builder /app/libs/shared/dist ./libs/shared/dist
+COPY --from=builder /app/libs/shared/package.json ./libs/shared/
+COPY --from=builder /app/node_modules ./node_modules
+
+CMD ["node", "dist/main"]

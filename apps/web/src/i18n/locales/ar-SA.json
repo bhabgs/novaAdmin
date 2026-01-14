@@ -1,0 +1,111 @@
+{
+  "common": {
+    "add": "إضافة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "batchDelete": "حذف متعدد",
+    "search": "بحث",
+    "reset": "إعادة تعيين",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "submit": "إرسال",
+    "loading": "جاري التحميل...",
+    "success": "نجاح",
+    "error": "خطأ",
+    "status": "الحالة",
+    "enabled": "مفعل",
+    "disabled": "معطل",
+    "actions": "الإجراءات",
+    "goBack": "رجوع",
+    "backToHome": "العودة للرئيسية",
+    "refresh": "تحديث",
+    "noData": "لا توجد بيانات",
+    "selectAll": "تحديد الكل",
+    "create": "إنشاء",
+    "update": "تحديث",
+    "view": "عرض",
+    "copy": "نسخ",
+    "export": "تصدير",
+    "import": "استيراد"
+  },
+  "error": {
+    "pageNotFound": "الصفحة غير موجودة",
+    "pageNotFoundDesc": "عذراً، الصفحة التي تبحث عنها غير موجودة",
+    "pageError": "حدث خطأ",
+    "pageErrorDesc": "عذراً، حدث خطأ في الصفحة",
+    "networkError": "خطأ في الشبكة",
+    "networkErrorDesc": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى",
+    "unauthorized": "غير مصرح",
+    "unauthorizedDesc": "ليس لديك صلاحية الوصول لهذه الصفحة",
+    "forbidden": "محظور",
+    "forbiddenDesc": "ليس لديك صلاحية تنفيذ هذا الإجراء"
+  },
+  "login": {
+    "title": "Nova Admin",
+    "subtitle": "لوحة التحكم",
+    "username": "اسم المستخدم",
+    "password": "كلمة المرور",
+    "login": "تسجيل الدخول",
+    "remember": "تذكرني"
+  },
+  "menu": {
+    "dashboard": "لوحة القيادة",
+    "system": "النظام",
+    "user": "المستخدمون",
+    "role": "الأدوار",
+    "department": "الأقسام",
+    "menu": "القوائم"
+  },
+  "user": {
+    "username": "اسم المستخدم",
+    "nickname": "الاسم المستعار",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "status": "الحالة",
+    "department": "القسم",
+    "roles": "الأدوار"
+  },
+  "role": {
+    "name": "اسم الدور",
+    "code": "رمز الدور",
+    "description": "الوصف",
+    "permissions": "الصلاحيات"
+  },
+  "department": {
+    "name": "اسم القسم",
+    "code": "رمز القسم",
+    "leader": "المسؤول",
+    "parent": "القسم الأب"
+  },
+  "setting": {
+    "title": "إعدادات النظام",
+    "description": "إدارة مظهر وسلوك النظام",
+    "appearance": "المظهر",
+    "appearanceDesc": "اختر المظهر الفاتح أو الداكن أو النظام",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام",
+    "primaryColor": "اللون الرئيسي",
+    "primaryColorDesc": "اختر اللون الرئيسي للواجهة",
+    "radius": "نصف قطر الحدود",
+    "radiusDesc": "ضبط استدارة عناصر الواجهة",
+    "radiusNone": "بدون",
+    "radiusSmall": "صغير",
+    "radiusMedium": "متوسط",
+    "radiusLarge": "كبير",
+    "radiusRound": "دائري",
+    "preview": "معاينة",
+    "button": "زر",
+    "language": "اللغة",
+    "languageDesc": "اختر لغة العرض"
+  },
+  "tabs": {
+    "refresh": "تحديث",
+    "closeCurrent": "إغلاق الحالي",
+    "closeOthers": "إغلاق الآخرين",
+    "closeLeft": "إغلاق اليسار",
+    "closeRight": "إغلاق اليمين",
+    "closeAll": "إغلاق الكل"
+  }
+}

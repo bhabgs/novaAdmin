@@ -2,274 +2,219 @@
 
 ## 项目概述
 
-React 18 + TypeScript + Ant Design 5 后台管理系统，支持动态路由、国际化、主题切换。
+NovaAdmin 是一个基于 pnpm + Turbo 的 monorepo 项目，包含 React 前端和 NestJS 微服务后端。
 
-**访问地址**：http://localhost:5173/（不需要启动服务，直接访问）
+## 项目结构
+
+```
+NovaAdmin/
+├── apps/
+│   ├── web/                # React 前端 (Vite + React 18 + TypeScript)
+│   ├── gateway/            # API 网关 (NestJS, 端口 3000)
+│   ├── auth-service/       # 认证服务 (NestJS)
+│   ├── rbac-service/       # 权限服务 (NestJS)
+│   └── system-service/     # 系统服务 (NestJS)
+├── libs/shared/            # 共享库 (DTOs, Entities, Decorators)
+├── database/               # 数据库脚本
+└── docker/                 # Docker 配置
+```
 
 ## 技术栈
 
-React 18.3 | TypeScript 5.8 | Vite 6.3 | Ant Design 5.22 | React Router 7.3 | Redux Toolkit 2.5 | Axios 1.7 | i18next 24.2 | MSW 2.11 | Less + Tailwind CSS
+**前端 (apps/web):**
+- React 18 + TypeScript + Vite
+- Redux Toolkit (状态管理)
+- React Router DOM 6 (路由)
+- shadcn/ui + Radix UI (组件库)
+- Tailwind CSS (样式)
+- i18next (国际化)
+- React Hook Form + Zod (表单验证)
+
+**后端:**
+- NestJS 10 + TypeORM
+- PostgreSQL 16 + Redis 7
+- JWT + Passport (认证)
+- Swagger (API 文档)
 
 ## 常用命令
 
 ```bash
-pnpm dev          # 开发服务器
-pnpm build        # 生产构建
-pnpm lint         # ESLint 检查
-pnpm check        # TypeScript 类型检查
+# 开发
+pnpm dev              # 启动所有服务
+pnpm dev:web          # 仅启动前端 (端口 5173)
+pnpm dev:gateway      # 仅启动网关 (端口 3000)
+
+# 基础设施
+pnpm docker:up        # 启动 Docker (PostgreSQL, Redis)
+pnpm docker:down      # 停止 Docker
+pnpm db:init          # 初始化数据库
+
+# 构建
+pnpm build            # 构建所有包
+pnpm generate-api     # 生成 API 客户端代码
 ```
 
-## 目录结构
+## 前端目录结构 (apps/web/src)
 
 ```
-src/
-├── api/              # API 请求 (request.ts, auth.ts, user.ts, role.ts, menu.ts, mock/)
-├── components/       # 通用组件 (CrudPage, PageContainer, CommonTable, CommonForm, CommonModal)
-├── pages/            # 业务页面
-│   ├── base/         # Dashboard, Home, Login, Profile, TemplateIntroduction
-│   ├── system/       # User, Role, Menu, Icons, Settings
-│   └── tools/        # Utils (RichTextEditor, PixiEditor), MarkdownViewer
-├── router/           # 动态路由 (componentMap.tsx, generateRoutes.tsx, DynamicRoutes.tsx)
-├── store/slices/     # Redux (auth, settings, menu, user, role, dashboard, tabs)
-├── i18n/locales/     # 语言文件 (zh-CN, en-US, ar-SA)
-├── types/            # TypeScript 类型
-├── utils/            # 工具函数
+├── api/              # OpenAPI 生成的客户端代码
+│   ├── services.gen.ts  # API 函数（自动生成，使用此文件）
+│   ├── types.gen.ts     # TypeScript 类型定义（自动生成）
+│   ├── schemas.gen.ts   # JSON Schema（自动生成）
+│   └── index.ts         # 导出入口（自动生成）
+├── components/
+│   └── ui/           # shadcn/ui 组件
+├── pages/            # 页面组件
+├── store/slices/     # Redux slices
+├── layouts/          # 布局组件
 ├── hooks/            # 自定义 Hooks
-└── layouts/          # 布局组件
+├── i18n/locales/     # 国际化文件 (zh-CN, en-US, ar-SA)
+└── utils/            # 工具函数
 ```
 
-## API 开发
+## 开发规范
 
-### 响应格式
-```typescript
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message: string;
-  code?: number;
-}
+### 强制要求
 
-// 分页
-interface ListResponse<T> {
-  list: T[];
-  pagination: { page: number; pageSize: number; total: number; };
-}
-```
+1. **API 文件禁止手动修改** - `src/api/` 目录中的 `.gen.ts` 文件由 OpenAPI 自动生成，任何手动修改都会被覆盖
+   - ✅ 使用：从 `@/api/services.gen` 导入 API 函数
+   - ❌ 禁止：修改 `services.gen.ts`、`types.gen.ts` 等自动生成文件
+2. **优先使用 shadcn/ui 组件** - 不存在的组件先反馈确认，可通过 `npx shadcn@latest add <component>` 添加
+3. **路径别名** - 使用 `@/` 代替相对路径，如 `@/components/ui/button`
+4. **启动服务前先确认** - 不要随便启动服务，启动前先检查服务是否已运行，避免端口冲突
+   - 检查前端: `lsof -i :5173`
+   - 检查网关: `lsof -i :3000`
+   - 检查 Docker: `docker ps`
 
-### 创建 API
-```typescript
-// src/api/example.ts
-import request from "./request";
+### 状态管理
 
-export const exampleApi = {
-  getList: (params?) => request.get<ListResponse<Example>>("/examples", { params }),
-  getById: (id: string) => request.get<Example>(`/examples/${id}`),
-  create: (data) => request.post<Example>("/examples", data),
-  update: (id, data) => request.put<Example>(`/examples/${id}`, data),
-  delete: (id: string) => request.del<void>(`/examples/${id}`),
-};
-```
+- 使用 Redux Toolkit，slices 位于 `store/slices/`
+- 已有 slices: auth, user, role, department, menu, tabs
+- 使用 `useAppDispatch` 和 `useAppSelector` hooks
 
-### Mock 数据
-```typescript
-// src/api/mock/example.ts
-import { http, HttpResponse } from "msw";
-import { delay, createSuccessResponse } from "./utils";
+### 路由
 
-export const exampleHandlers = [
-  http.get("/mock-api/examples", async () => {
-    await delay();
-    return HttpResponse.json(createSuccessResponse({ list: [], pagination: {} }));
-  }),
-];
-// 在 src/api/mock/index.ts 注册
-```
+- 动态路由从后端菜单数据生成
+- 路由生成逻辑在 `utils/dynamicRoutes.ts`
+- 认证保护通过 `ProtectedRoute` 组件实现
 
-**Mock 模式配置：**
-- `.env` 中设置 `VITE_USE_MOCK=true` 启用 Mock（默认配置）
-- 项目使用 `/mock-api` 前缀，避免被 Nginx 等服务器代理拦截，确保 MSW 能够正常工作
+### 样式
 
-## 动态路由
+- 使用 Tailwind CSS 工具类
+- 主题变量定义在 `index.css` 的 CSS 变量中
+- 支持 dark mode (通过 `.dark` class)
 
-### 添加新页面（2步）
+### 国际化
 
-**Step 1**: 创建组件 `src/pages/system/Example/index.tsx`
+- 翻译文件: `i18n/locales/zh-CN.json`, `i18n/locales/en-US.json`
+- 使用 `useTranslation` hook: `const { t } = useTranslation()`
 
-**Step 2**: 菜单管理中配置
-```typescript
-{
-  id: "new-id",
-  name: "示例页面",
-  i18nKey: "menu.example",
-  type: "page",           // directory | page | button | iframe
-  path: "/example",
-  component: "system/Example",  // pages/ 下的相对路径
-  icon: "AppstoreOutlined",
-  sortOrder: 10,
-  status: "active",
-  parentId: undefined,
-}
-```
+## API 交互
 
-路径格式：`"base/Dashboard"` → `src/pages/base/Dashboard.tsx`
-
-### Iframe 外部页面
-
-菜单支持 iframe 加载外部页面：
-```typescript
-{
-  id: "external-1",
-  name: "外部文档",
-  type: "iframe",
-  path: "/external/docs",
-  externalUrl: "https://ant.design/components/overview-cn",
-  icon: "LinkOutlined",
-  sortOrder: 20,
-  status: "active",
-}
-```
-
-- `type: "iframe"` - 标记为 iframe 类型
-- `externalUrl` - 外部页面 URL
-- 自动使用 `IframeContainer` 组件加载
-
-## 国际化
-
-支持：zh-CN (LTR) | en-US (LTR) | ar-SA (RTL)
+### 使用 OpenAPI 自动生成的 API
 
 ```typescript
-// 使用
-const { t } = useTranslation();
-<h1>{t("example.title")}</h1>
+// 从 services.gen.ts 导入生成的 API 函数
+import {
+  usersControllerFindAll,
+  usersControllerCreate,
+  usersControllerUpdate,
+  usersControllerRemove,
+} from '@/api/services.gen';
 
-// 切换语言
-import { changeLanguage } from "@/i18n";
-changeLanguage("en-US");
+// 查询列表
+const response = await usersControllerFindAll({ query: { page: 1, pageSize: 10 } });
+const data = response.data?.data || response.data;
+
+// 创建
+await usersControllerCreate({ body: { username: 'test', password: '123456' } });
+
+// 更新
+await usersControllerUpdate({ path: { id: '123' }, body: { username: 'updated' } });
+
+// 删除
+await usersControllerRemove({ path: { id: '123' } });
 ```
 
-翻译文件：`src/i18n/locales/{zh-CN,en-US,ar-SA}.json`
+### API 生成工作流
 
-## 状态管理
+1. 修改后端 Controller，添加/修改接口
+2. 等待服务热重载或手动重启
+3. 触发网关重新聚合文档：`touch apps/gateway/src/main.ts`
+4. 运行 `pnpm generate-api` 生成前端代码
+5. 在前端使用生成的类型安全 API
 
-### 创建 Slice
-```typescript
-// src/store/slices/exampleSlice.ts
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+**注意：** `apps/web/src/api/` 目录中的 `.gen.ts` 文件由 OpenAPI 自动生成，禁止手动修改！
 
-export const fetchExamples = createAsyncThunk("example/fetchList", async (_, { rejectWithValue }) => {
-  try {
-    const response = await exampleApi.getList();
-    return response.success ? response.data.list : rejectWithValue(response.message);
-  } catch (error: any) {
-    return rejectWithValue(error.message);
-  }
-});
+## 数据库
 
-const exampleSlice = createSlice({
-  name: "example",
-  initialState: { list: [], loading: false, error: null },
-  reducers: { clearError: (state) => { state.error = null; } },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchExamples.pending, (state) => { state.loading = true; })
-      .addCase(fetchExamples.fulfilled, (state, action) => { state.loading = false; state.list = action.payload; })
-      .addCase(fetchExamples.rejected, (state, action) => { state.loading = false; state.error = action.payload; });
-  },
-});
-```
+- PostgreSQL 连接: `localhost:5432`, 数据库 `nova_admin`, 用户 `postgres`
+- 进入数据库: `pnpm psq`
+- 初始化: `pnpm db:init`
 
-在 `src/store/index.ts` 注册 reducer。
+## 新增功能特性
 
-### 使用
-```typescript
-const dispatch = useAppDispatch();
-const { list, loading } = useAppSelector((state) => state.example);
-useEffect(() => { dispatch(fetchExamples()); }, [dispatch]);
-```
+### 字典管理系统
+- 路径: `/system/dict`
+- 用于管理系统枚举值和配置项
+- 支持字典类型和字典项的增删改查
+- 已集成到 i18n 模块管理中
 
-## CrudPage 组件
+### 国际化配置
+- 路径: `/system/i18n`
+- 支持数据库动态加载翻译
+- 支持模块化管理（通过字典）
+- 支持自动翻译功能（MyMemory API）
+- 支持复制国际化 key（带模块前缀）
 
-```typescript
-import CrudPage, { FilterConfig } from "@/components/CrudPage";
-import { useListManagement } from "@/hooks/useListManagement";
+### 菜单国际化
+- 菜单支持 `nameI18n` 字段
+- 优先使用国际化翻译，fallback 到 name 字段
+- 侧边栏、面包屑、标签页自动使用翻译
 
-const UserList: React.FC = () => {
-  const { users, loading, total } = useAppSelector((state) => state.user);
-  const listMgmt = useListManagement<User>({
-    dispatch, fetchAction: fetchUsers, deleteAction: deleteUser, loadingSelector: loading, totalSelector: total,
-  });
+### 系统设置增强
+- 布局设置：固定头部、侧边栏宽度、内容区域宽度
+- 标签页设置：显示/隐藏、持久化、最大数量
+- 动画设置：页面切换动画、加载动画、速度
+- 通知设置：位置、时长、声音提示
 
-  const columns = [{ title: t("user.name"), dataIndex: "name", key: "name" }];
-  const filters: FilterConfig[] = [{ key: "status", span: 4, component: <Select>...</Select> }];
+## 最佳实践
 
-  return (
-    <CrudPage<User>
-      title={t("user.title")} dataSource={users} columns={columns} loading={loading}
-      pagination={listMgmt.paginationConfig} rowSelection={listMgmt.rowSelection}
-      onSearch={listMgmt.handleSearch} filters={filters}
-      onAdd={listMgmt.handleAdd} onEdit={listMgmt.handleEdit}
-      onDelete={listMgmt.handleDelete} onBatchDelete={listMgmt.handleBatchDelete}
-    />
-  );
-};
-```
+### 安全性
+- Token 存储在 localStorage（生产环境建议使用 httpOnly cookie）
+- 所有 API 请求自动携带 Authorization header
+- 敏感操作需要二次确认
 
-## 图标使用
+### 性能优化
+- 页面组件懒加载
+- 使用 Redux Toolkit 管理状态
+- API 响应数据统一处理
+- 合理使用 useMemo 和 useCallback
 
-图标库页面：**系统管理 → 图标库**（点击复制图标名）
-
-```typescript
-// 按需导入
-import { UserOutlined, DeleteOutlined } from "@ant-design/icons";
-<UserOutlined style={{ fontSize: 24, color: "#1890ff" }} />
-
-// 动态图标（菜单等）
-import * as AntdIcons from "@ant-design/icons";
-const IconComponent = (AntdIcons as any)["UserOutlined"];
-```
-
-菜单配置使用图标名字符串：`icon: "UserOutlined"`
-
-主题：Outlined（线性）| Filled（实心）| TwoTone（双色）
-
-## 代码规范
-
-| 类型 | 规范 | 示例 |
-|------|------|------|
-| 组件文件 | PascalCase | `UserList.tsx` |
-| Hook/工具 | camelCase | `useTheme.ts` |
-| 常量 | UPPER_SNAKE | `API_BASE_URL` |
-
-```typescript
-// import 顺序：React → React hooks → 第三方库 → 内部模块 → 类型 → 样式
-
-// 事件处理用 useCallback
-const handleDelete = useCallback(async (id: string) => {
-  await dispatch(deleteUser(id)).unwrap();
-  message.success(t("common.deleteSuccess"));
-}, [dispatch, t]);
-
-// 避免：any、内联函数、硬编码文本
-// 使用：具体类型、useCallback、t() 国际化
-```
-
-## 环境变量
-
-| 变量 | 说明 | 默认值 |
-|------|------|--------|
-| VITE_USE_MOCK | 启用 Mock 模式 | true |
-| VITE_API_BASE_URL | API 前缀 | /mock-api |
-| VITE_APP_TITLE | 应用标题 | NovaAdmin |
-
-**API 前缀说明：**
-- 项目使用 `/mock-api` 前缀（而非 `/api`），避免被 Nginx 等服务器代理配置拦截
-- 这样部署后 MSW 仍能正常拦截请求，实现纯前端 Mock 演示
-
-配置文件：`.env.development` | `.env.preview` | `.env.production`
+### 代码规范
+- 使用 TypeScript 严格模式
+- 组件使用函数式组件 + Hooks
+- 优先使用 shadcn/ui 组件
+- API 调用统一使用 OpenAPI 生成的函数
+- 遵循 RESTful API 设计规范
 
 ## 常见问题
 
-1. **路由不生效**：点击菜单管理「刷新路由」或 `dispatch(fetchUserMenus())`
-2. **组件找不到**：检查 `componentMap.tsx` 注册，名称区分大小写
-3. **Mock 重置**：`localStorage.removeItem("mock_menus_data"); location.reload()`
-4. **类型检查**：`pnpm check`
+### 前端问题
+- **页面白屏**: 检查菜单配置和组件路径是否匹配
+- **API 调用失败**: 检查 token 是否过期，服务是否运行
+- **路由不工作**: 确保组件使用 `export default` 导出
+
+### 后端问题
+- **路由冲突**: 具体路由必须放在通用路由之前
+- **Swagger 不更新**: 触发网关重新聚合 `touch apps/gateway/src/main.ts`
+- **数据库连接失败**: 检查 Docker 容器是否运行
+
+详细排查指南请参考: `.claude/skills/troubleshooting.md`
+
+## 注意事项
+
+- 前端代理配置在 `vite.config.ts`，`/api` 请求代理到 `localhost:3000`
+- 后端 Swagger 文档: `http://localhost:3000/api/docs`
+- OpenAPI JSON: `http://localhost:3000/api/docs-json`
+- 数据库管理: `docker exec -it nova-postgres psql -U postgres -d nova_admin`

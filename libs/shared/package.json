@@ -1,0 +1,23 @@
+{
+  "name": "@nova-admin/shared",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.4.0",
+    "@nestjs/swagger": "^7.4.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "typeorm": "^0.3.20",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "typescript": "^5.5.0"
+  }
+}
